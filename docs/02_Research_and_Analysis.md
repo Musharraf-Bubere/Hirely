@@ -235,3 +235,64 @@ The software architecture will remain modular so that future versions can expand
 - Existing solutions are often fragmented across multiple platforms.
 - Hirely will provide an integrated AI-powered experience.
 - Future development should continue to align with the complete job application lifecycle.
+
+---
+
+# 2. Applicant Tracking Systems (ATS)
+
+## 2.1 What is an Applicant Tracking System?
+
+### Background
+
+As organizations receive hundreds or even thousands of job applications for a single position, manually reviewing every resume becomes inefficient and time-consuming. To streamline the recruitment process, companies use Applicant Tracking Systems (ATS), which automate many stages of candidate management and resume evaluation.
+
+Understanding how ATS platforms operate is essential for designing AI-powered career tools that help users create resumes optimized for modern recruitment systems.
+
+---
+
+### Research Findings
+
+An Applicant Tracking System (ATS) is recruitment software used by organizations to collect, organize, process, and manage job applications throughout the hiring process.
+
+An ATS serves as the first stage of candidate evaluation before resumes reach recruiters or hiring managers. Rather than replacing human decision-making, it assists recruiters by organizing applicant information, extracting relevant resume data, filtering candidates based on predefined criteria, and simplifying recruitment workflows.
+
+Modern ATS platforms commonly perform the following tasks:
+
+- Collect job applications
+- Parse resume content
+- Extract candidate information
+- Identify skills and qualifications
+- Organize applicant records
+- Rank or filter candidates
+- Support recruiter workflows
+- Track candidate progress throughout recruitment
+
+The level of automation varies between ATS platforms, but nearly all systems aim to reduce manual effort while improving recruitment efficiency.
+
+---
+
+### Analysis
+
+The research indicates that an ATS is significantly more than a keyword-matching tool. It functions as a recruitment management system responsible for processing candidate information before recruiters begin manual evaluation.
+
+This understanding changes how resume optimization should be approached. Instead of focusing solely on visual formatting or keyword density, resumes should be designed to maximize readability, accurate information extraction, and compatibility with automated recruitment systems.
+
+---
+
+### Decision for Hirely
+
+Hirely will treat ATS compatibility as an essential aspect of resume quality rather than as an independent feature.
+
+The Resume Checker and Resume Scorer modules will evaluate resumes with ATS compatibility in mind, helping users improve not only resume content but also the likelihood that their resumes are successfully processed by recruitment systems.
+
+Future versions of Hirely may include a dedicated ATS Optimization module that provides deeper analysis and recommendations based on ATS best practices.
+
+---
+
+### Key Takeaways
+
+- ATS is recruitment management software.
+- ATS assists recruiters rather than replacing them.
+- Resume processing involves more than keyword matching.
+- ATS compatibility should be considered during resume evaluation.
+- Hirely should incorporate ATS awareness into its core resume analysis features.
