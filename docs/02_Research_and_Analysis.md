@@ -405,3 +405,69 @@ This approach improves both recruiter experience and ATS compatibility.
 - Resume parsing is a critical step before recruiter review.
 - ATS converts resumes into structured candidate information.
 - Effective resumes should be understandable by both ATS software and human recruiters.
+
+---
+
+## 2.4 Resume Parsing
+
+### Background
+
+Resumes are typically submitted as PDF or Word documents containing unstructured text. Before a recruitment system or AI model can evaluate a resume, the document must be converted into structured information that represents the candidate's profile.
+
+This process is known as **resume parsing** and forms a critical step in modern recruitment systems.
+
+---
+
+### Research Findings
+
+Resume parsing is the process of extracting meaningful information from a resume and organizing it into structured data.
+
+A resume parser typically identifies and extracts information such as:
+
+- Personal information (Name, Email, Phone Number)
+- Professional Summary
+- Education
+- Work Experience
+- Technical Skills
+- Certifications
+- Projects
+- Languages
+- Achievements
+
+Once extracted, this information can be stored, searched, compared, and analyzed by recruitment systems or AI applications.
+
+---
+
+### Analysis
+
+Resume parsing transforms an unstructured document into structured candidate information that can be processed efficiently.
+
+Accurate parsing improves the quality of resume evaluation because downstream systems, including AI models, receive organized and meaningful data instead of raw document text.
+
+This separation also makes the overall system more modular and maintainable.
+
+---
+
+### Decision for Hirely
+
+Hirely will include a dedicated resume parsing stage before AI analysis.
+
+The processing pipeline will follow this sequence:
+
+1. Upload Resume
+2. Extract Text
+3. Parse Resume Sections
+4. Generate Structured Candidate Data
+5. AI-Based Resume Analysis
+6. Generate Personalized Feedback
+
+This modular pipeline will improve accuracy, maintainability, and future scalability.
+
+---
+
+### Key Takeaways
+
+- Resume parsing converts unstructured resumes into structured data.
+- Structured information improves AI analysis.
+- Resume parsing should occur before AI evaluation.
+- A modular processing pipeline improves system quality and scalability.
