@@ -584,3 +584,45 @@ Hirely's recommendations will balance ATS compatibility with recruiter expectati
 - Human recruiters remain an essential part of hiring.
 - Resume clarity is more important than attempting to manipulate ATS.
 - Hirely will promote ethical and practical resume optimization.
+
+---
+
+## 2.7 Final Decision for Hirely
+
+### Summary
+
+The research conducted on Applicant Tracking Systems demonstrates that modern recruitment is a combination of automated processing and human decision-making. ATS platforms improve recruitment efficiency by organizing candidate information, parsing resumes, supporting recruiter workflows, and assisting in candidate selection.
+
+However, ATS platforms also have technical limitations and should not be considered complete replacements for human recruiters.
+
+---
+
+### Final Decision for Hirely
+
+Based on the research findings, Hirely will adopt the following principles for resume evaluation:
+
+- Focus on both ATS compatibility and recruiter readability.
+- Encourage professional resume writing instead of keyword stuffing.
+- Use resume parsing before AI analysis.
+- Compare resumes against job descriptions to provide meaningful recommendations.
+- Generate AI-powered feedback using structured resume information.
+- Promote ethical resume optimization aligned with modern recruitment practices.
+
+The Resume Checker and Resume Scorer will therefore combine traditional ATS best practices with Artificial Intelligence to provide balanced, practical, and personalized recommendations.
+
+---
+
+### Impact on System Design
+
+The research establishes the following high-level processing pipeline for Hirely:
+
+1. Resume Upload
+2. Text Extraction
+3. Resume Parsing
+4. ATS Compatibility Analysis
+5. Job Description Comparison
+6. AI Resume Evaluation
+7. Resume Score Generation
+8. Personalized Improvement Suggestions
+
+This modular pipeline will serve as the foundation for future software architecture and implementation.
