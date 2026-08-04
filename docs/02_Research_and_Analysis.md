@@ -471,3 +471,62 @@ This modular pipeline will improve accuracy, maintainability, and future scalabi
 - Structured information improves AI analysis.
 - Resume parsing should occur before AI evaluation.
 - A modular processing pipeline improves system quality and scalability.
+
+---
+
+## 2.5 Keyword Matching
+
+### Background
+
+One of the primary functions of an Applicant Tracking System (ATS) is to compare the information contained in a candidate's resume with the requirements specified in a job description. This comparison helps recruiters quickly identify applicants whose qualifications align with the role.
+
+Keyword matching is a common technique used during this process.
+
+---
+
+### Research Findings
+
+Keyword matching involves identifying important words and phrases within both the job description and the candidate's resume.
+
+Common elements used for comparison include:
+
+- Technical skills
+- Programming languages
+- Tools and technologies
+- Job titles
+- Certifications
+- Educational qualifications
+- Years of experience
+
+The purpose of keyword matching is not to replace recruiter judgment but to assist in identifying candidates whose qualifications closely align with the job requirements.
+
+Modern recruitment systems may combine keyword matching with additional evaluation techniques such as semantic analysis and AI-assisted ranking.
+
+---
+
+### Analysis
+
+Effective keyword matching requires resumes to clearly describe relevant skills and experiences using professional and industry-recognized terminology.
+
+Simply inserting keywords without supporting experience or context does not improve resume quality and may reduce credibility during recruiter review.
+
+Keyword optimization should therefore focus on accurately representing a candidate's genuine qualifications while maintaining readability and professionalism.
+
+---
+
+### Decision for Hirely
+
+Hirely will compare resumes with job descriptions to identify relevant and missing keywords.
+
+Rather than encouraging keyword stuffing, the platform will recommend meaningful improvements that naturally align the resume with the target job description while preserving clarity and authenticity.
+
+Keyword analysis will become one component of the overall Resume Score instead of being treated as the only evaluation criterion.
+
+---
+
+### Key Takeaways
+
+- Keyword matching compares resume content with job requirements.
+- Skills, technologies, education, and experience are commonly evaluated.
+- Keyword optimization should improve clarity, not manipulate ATS systems.
+- Hirely will provide balanced keyword recommendations supported by AI analysis.
