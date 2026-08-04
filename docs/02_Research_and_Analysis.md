@@ -530,3 +530,57 @@ Keyword analysis will become one component of the overall Resume Score instead o
 - Skills, technologies, education, and experience are commonly evaluated.
 - Keyword optimization should improve clarity, not manipulate ATS systems.
 - Hirely will provide balanced keyword recommendations supported by AI analysis.
+
+---
+
+## 2.6 Limitations of Applicant Tracking Systems
+
+### Background
+
+Although Applicant Tracking Systems improve recruitment efficiency, they are not perfect. Their effectiveness depends on the quality of resume parsing, matching algorithms, and the information provided by candidates.
+
+Understanding these limitations helps developers design career tools that support both automated systems and human recruiters.
+
+---
+
+### Research Findings
+
+Common limitations of Applicant Tracking Systems include:
+
+- Difficulty interpreting complex resume layouts.
+- Inconsistent extraction of information from tables, graphics, and multi-column designs.
+- Limited understanding of context and real-world experience.
+- Dependence on clearly written and structured resume content.
+- Possible mismatches caused by different terminology or abbreviations.
+- Challenges processing scanned documents without OCR support.
+
+Modern ATS platforms continue to improve through Artificial Intelligence, but no system can fully replace human judgment during recruitment.
+
+---
+
+### Analysis
+
+ATS platforms provide valuable assistance during recruitment, but they should not be viewed as perfect evaluation systems.
+
+Candidates should focus on creating resumes that communicate their qualifications clearly instead of attempting to manipulate automated screening systems.
+
+Effective resume evaluation should combine ATS compatibility with human readability and professional presentation.
+
+---
+
+### Decision for Hirely
+
+Hirely will educate users about ATS limitations while encouraging best practices for professional resume writing.
+
+The platform will recommend improvements that enhance resume clarity, structured formatting, and content quality rather than promoting techniques intended to bypass recruitment systems.
+
+Hirely's recommendations will balance ATS compatibility with recruiter expectations.
+
+---
+
+### Key Takeaways
+
+- ATS has technical limitations.
+- Human recruiters remain an essential part of hiring.
+- Resume clarity is more important than attempting to manipulate ATS.
+- Hirely will promote ethical and practical resume optimization.
