@@ -296,3 +296,112 @@ Future versions of Hirely may include a dedicated ATS Optimization module that p
 - Resume processing involves more than keyword matching.
 - ATS compatibility should be considered during resume evaluation.
 - Hirely should incorporate ATS awareness into its core resume analysis features.
+
+---
+
+## 2.2 Why Do Companies Use Applicant Tracking Systems?
+
+### Background
+
+As organizations receive a growing number of job applications, managing the recruitment process manually becomes inefficient, time-consuming, and difficult to scale. Companies require a centralized system that streamlines recruitment activities, improves collaboration, and reduces administrative effort.
+
+Applicant Tracking Systems (ATS) were developed to address these challenges by automating repetitive recruitment tasks and providing recruiters with a structured hiring workflow.
+
+---
+
+### Research Findings
+
+Organizations use Applicant Tracking Systems for several important reasons:
+
+- Manage large volumes of job applications efficiently.
+- Organize candidate information in a centralized database.
+- Reduce the time required to review and process resumes.
+- Standardize recruitment workflows across hiring teams.
+- Enable collaboration between recruiters, HR professionals, and hiring managers.
+- Track candidate progress throughout different hiring stages.
+- Maintain recruitment records for reporting, compliance, and auditing purposes.
+
+Although resume filtering is one function of an ATS, its broader purpose is to improve the overall efficiency and consistency of the recruitment process.
+
+---
+
+### Analysis
+
+The research demonstrates that ATS platforms are designed primarily as recruitment management systems rather than simple resume filtering tools.
+
+Understanding this distinction is important because optimizing a resume is not solely about passing automated filters. A high-quality resume should also communicate skills, experience, and qualifications clearly to human recruiters after it has been processed by the ATS.
+
+---
+
+### Decision for Hirely
+
+Hirely will focus on helping users create resumes that are understandable by both Applicant Tracking Systems and human recruiters.
+
+The platform will prioritize resume clarity, structured formatting, relevant content, and ATS compatibility rather than attempting to exploit or bypass recruitment systems.
+
+This approach aligns Hirely with modern recruitment best practices while providing users with practical and ethical career guidance.
+
+---
+
+### Key Takeaways
+
+- ATS improves recruitment efficiency.
+- ATS supports the entire hiring workflow.
+- Resume filtering is only one component of an ATS.
+- Hirely should optimize resumes for both ATS systems and recruiters.
+
+---
+
+## 2.3 How Does an Applicant Tracking System Work?
+
+### Background
+
+Understanding the workflow of an Applicant Tracking System (ATS) is essential for developing career tools that generate resumes compatible with modern recruitment systems. Before a recruiter reviews a resume, the ATS typically processes, organizes, and evaluates candidate information.
+
+Studying this workflow helps identify where resumes may succeed or fail during the recruitment process.
+
+---
+
+### Research Findings
+
+A typical Applicant Tracking System processes resumes through the following stages:
+
+1. Candidate submits a job application.
+2. The resume is uploaded to the ATS.
+3. The ATS parses the resume and extracts structured information.
+4. Candidate details such as name, education, work experience, and skills are organized into a searchable profile.
+5. The ATS compares candidate information against job requirements and recruiter-defined criteria.
+6. Candidates are organized, filtered, or ranked for recruiter review.
+7. Recruiters evaluate shortlisted candidates and continue the hiring process.
+
+Although the exact implementation varies across ATS platforms, the overall workflow remains similar in most recruitment systems.
+
+---
+
+### Analysis
+
+The research indicates that ATS platforms do not evaluate resumes in the same way humans do. Instead, they first convert resume content into structured information that can be searched, filtered, and analyzed efficiently.
+
+This means that resumes should be written in a format that allows important information to be extracted accurately while remaining clear and readable for human recruiters.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate resumes from two perspectives:
+
+- Human readability
+- ATS readability
+
+The Resume Checker will assess not only writing quality but also whether important resume information can be effectively processed by Applicant Tracking Systems.
+
+This approach improves both recruiter experience and ATS compatibility.
+
+---
+
+### Key Takeaways
+
+- ATS follows a structured recruitment workflow.
+- Resume parsing is a critical step before recruiter review.
+- ATS converts resumes into structured candidate information.
+- Effective resumes should be understandable by both ATS software and human recruiters.
