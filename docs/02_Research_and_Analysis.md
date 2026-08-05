@@ -684,3 +684,59 @@ The Resume Checker will prioritize clarity, relevance, structure, and profession
 - The primary goal of a resume is to secure an interview.
 - A resume should communicate value clearly and efficiently.
 - Effective resumes balance ATS compatibility with recruiter readability.
+
+---
+
+## 3.2 Essential Sections of a Resume
+
+### Background
+
+A professional resume is organized into clearly defined sections that allow recruiters and Applicant Tracking Systems (ATS) to quickly locate important information. A consistent structure improves readability, simplifies resume evaluation, and increases the likelihood that key qualifications are identified correctly.
+
+Understanding the standard sections of a resume is essential for developing automated resume analysis tools.
+
+---
+
+### Research Findings
+
+Although resume formats vary across industries and experience levels, a professional resume commonly includes the following sections:
+
+- Contact Information
+- Professional Summary or Career Objective
+- Technical and Professional Skills
+- Work Experience
+- Projects
+- Education
+- Certifications
+- Achievements (Optional)
+- Languages (Optional)
+- Volunteer Experience (Optional)
+
+Each section provides specific information that helps recruiters evaluate a candidate's qualifications efficiently.
+
+---
+
+### Analysis
+
+A well-structured resume presents information in a logical sequence, allowing both ATS platforms and recruiters to locate relevant details quickly.
+
+Missing important sections may reduce the effectiveness of a resume by limiting the information available for evaluation. At the same time, unnecessary sections may distract from the candidate's most relevant qualifications.
+
+The appropriate resume structure should therefore balance completeness with relevance.
+
+---
+
+### Decision for Hirely
+
+Hirely will detect the presence and completeness of standard resume sections.
+
+The Resume Checker will identify missing sections, evaluate the organization of the resume, and provide personalized recommendations to improve overall structure based on industry best practices.
+
+---
+
+### Key Takeaways
+
+- Professional resumes follow a structured format.
+- Each section serves a specific purpose.
+- Missing sections may reduce resume effectiveness.
+- Hirely will automatically detect and evaluate resume sections.
