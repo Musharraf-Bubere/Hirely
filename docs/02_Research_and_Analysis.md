@@ -626,3 +626,61 @@ The research establishes the following high-level processing pipeline for Hirely
 8. Personalized Improvement Suggestions
 
 This modular pipeline will serve as the foundation for future software architecture and implementation.
+
+---
+
+# 3. Resume Analysis
+
+## 3.1 What is a Resume?
+
+### Background
+
+A resume is one of the most important documents in the job application process. It provides a structured summary of a candidate's education, skills, work experience, projects, certifications, and achievements.
+
+Recruiters use resumes to quickly evaluate whether a candidate is suitable for a particular role before deciding whether to proceed with interviews.
+
+Understanding the purpose of a resume is essential for designing AI systems that provide meaningful resume analysis and improvement suggestions.
+
+---
+
+### Research Findings
+
+A resume is a professional document that presents a candidate's qualifications in a clear, concise, and organized format.
+
+Its primary purpose is to communicate relevant information that demonstrates a candidate's suitability for a specific job opportunity.
+
+A well-written resume typically helps recruiters:
+
+- Understand the candidate's background.
+- Evaluate relevant skills and experience.
+- Compare applicants consistently.
+- Decide whether to invite the candidate for an interview.
+
+Rather than serving as a complete professional biography, a resume is designed to highlight the information most relevant to the target position.
+
+---
+
+### Analysis
+
+The research indicates that the objective of a resume is not simply to list qualifications but to communicate professional value effectively.
+
+A successful resume balances completeness with clarity, allowing both Applicant Tracking Systems and human recruiters to understand the candidate's qualifications efficiently.
+
+This highlights the importance of content quality, organization, and relevance rather than visual design alone.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate resumes based on how effectively they communicate a candidate's qualifications to both Applicant Tracking Systems and human recruiters.
+
+The Resume Checker will prioritize clarity, relevance, structure, and professional presentation while generating personalized recommendations for improvement.
+
+---
+
+### Key Takeaways
+
+- A resume is a professional summary of a candidate's qualifications.
+- The primary goal of a resume is to secure an interview.
+- A resume should communicate value clearly and efficiently.
+- Effective resumes balance ATS compatibility with recruiter readability.
