@@ -842,3 +842,56 @@ The platform will prioritize actionable recommendations that help users improve 
 - Resume quality depends on communication as much as qualifications.
 - AI should provide clear and actionable recommendations.
 - Hirely will detect and explain common resume issues.
+
+---
+
+## 3.5 Resume Evaluation Criteria
+
+### Background
+
+An AI-powered resume analysis system requires clear and consistent evaluation criteria to generate reliable feedback. Rather than relying on subjective judgment, resumes should be assessed using predefined quality dimensions that reflect modern recruitment practices.
+
+Establishing these evaluation criteria provides a foundation for objective resume scoring and personalized recommendations.
+
+---
+
+### Research Findings
+
+The following evaluation criteria were identified as the most important for assessing resume quality:
+
+- Resume Structure
+- Content Quality
+- ATS Compatibility
+- Relevance to the Target Job
+- Skills Presentation
+- Work Experience
+- Project Descriptions
+- Writing Quality
+- Overall Professional Presentation
+
+Each criterion represents a different aspect of resume quality and contributes to the overall effectiveness of the document.
+
+---
+
+### Analysis
+
+Resume quality cannot be measured using a single factor. A well-designed evaluation system should assess multiple dimensions independently before combining them into an overall assessment.
+
+This multi-dimensional approach produces more meaningful feedback and helps candidates understand both their strengths and areas for improvement.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate resumes using multiple independent evaluation criteria rather than relying on a single overall assessment.
+
+Each criterion will generate its own score and feedback before contributing to the final Resume Score. This approach will improve transparency and provide users with actionable recommendations.
+
+---
+
+### Key Takeaways
+
+- Resume evaluation should be multi-dimensional.
+- Independent criteria improve scoring accuracy.
+- Users benefit from detailed category-based feedback.
+- Hirely will combine multiple evaluation criteria into one comprehensive assessment.
