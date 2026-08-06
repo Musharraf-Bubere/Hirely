@@ -792,3 +792,53 @@ The Resume Checker will assess clarity, structure, relevance, professionalism, A
 - Clarity and relevance are more important than excessive detail.
 - ATS compatibility and recruiter readability should both be considered.
 - Hirely will evaluate multiple aspects of resume quality.
+
+---
+
+## 3.4 Common Resume Mistakes
+
+### Background
+
+Many resumes fail to achieve their purpose not because candidates lack qualifications, but because important information is presented poorly or omitted entirely. Understanding common resume mistakes helps define the validation rules and recommendations that an AI-powered resume analysis system should provide.
+
+---
+
+### Research Findings
+
+Common resume mistakes include:
+
+- Spelling and grammatical errors.
+- Generic resumes that are not tailored to the target role.
+- Poor organization and inconsistent formatting.
+- Missing or weak professional summaries.
+- Lack of measurable achievements.
+- Inclusion of irrelevant or outdated information.
+- ATS-unfriendly formatting such as tables, graphics, or complex layouts.
+- Missing important keywords related to the target job description.
+
+These issues can reduce both recruiter readability and ATS compatibility.
+
+---
+
+### Analysis
+
+Most resume mistakes are related to communication rather than technical ability. Even highly qualified candidates may reduce their chances of securing interviews if their resumes fail to present their experience clearly and professionally.
+
+An effective resume analysis system should identify these issues and provide actionable recommendations for improvement.
+
+---
+
+### Decision for Hirely
+
+Hirely will automatically detect common resume mistakes and categorize feedback into areas such as writing quality, structure, ATS compatibility, keyword relevance, and content effectiveness.
+
+The platform will prioritize actionable recommendations that help users improve their resumes rather than simply identifying problems.
+
+---
+
+### Key Takeaways
+
+- Common resume mistakes reduce interview opportunities.
+- Resume quality depends on communication as much as qualifications.
+- AI should provide clear and actionable recommendations.
+- Hirely will detect and explain common resume issues.
