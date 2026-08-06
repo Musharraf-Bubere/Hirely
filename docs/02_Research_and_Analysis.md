@@ -1000,3 +1000,63 @@ The Resume Checker module will follow the following processing pipeline:
 10. Personalized Improvement Suggestions
 
 This modular workflow establishes the foundation for the Resume Checker and Resume Scorer components that will be implemented during the development phase.
+
+---
+
+# 4. Large Language Models (LLMs)
+
+## 4.1 What is a Large Language Model (LLM)?
+
+### Background
+
+Large Language Models (LLMs) are advanced Artificial Intelligence models designed to understand, generate, summarize, and analyze human language. They have become a fundamental technology behind modern AI assistants, document analysis systems, and intelligent software applications.
+
+Understanding how LLMs work at a high level is essential before integrating them into Hirely.
+
+---
+
+### Research Findings
+
+A Large Language Model (LLM) is an AI model trained on massive collections of text to learn language patterns, relationships, and context.
+
+Rather than storing predefined answers, LLMs predict the most appropriate sequence of words based on the information they receive.
+
+Modern LLMs are capable of performing tasks such as:
+
+- Question Answering
+- Text Summarization
+- Content Generation
+- Language Translation
+- Code Generation
+- Document Analysis
+- Information Extraction
+- Text Classification
+
+These capabilities make LLMs valuable components in AI-powered software systems.
+
+---
+
+### Analysis
+
+LLMs excel at understanding and generating natural language but should not replace deterministic software components responsible for business logic, data validation, or structured processing.
+
+The most effective AI systems combine traditional software engineering with LLM capabilities, allowing each component to perform tasks suited to its strengths.
+
+---
+
+### Decision for Hirely
+
+Hirely will use Large Language Models as intelligent assistants rather than as complete decision-making systems.
+
+Traditional software components will perform tasks such as resume parsing, ATS analysis, and score calculation, while the LLM will generate explanations, personalized recommendations, and natural language feedback.
+
+This separation improves reliability, transparency, and maintainability.
+
+---
+
+### Key Takeaways
+
+- LLMs understand and generate natural language.
+- LLMs are powerful but should not replace traditional software logic.
+- AI systems are strongest when combining software engineering with LLM capabilities.
+- Hirely will use LLMs for explanation and guidance rather than core business logic.
