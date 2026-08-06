@@ -955,3 +955,48 @@ The scoring engine will remain configurable so that category weights can be adju
 - Category-based scoring improves explainability.
 - Weighted evaluation supports future scalability.
 - Hirely will implement a configurable scoring engine.
+
+---
+
+## 3.7 Final Decision for Hirely
+
+### Summary
+
+The research conducted on resume analysis demonstrates that an effective resume is more than a well-formatted document. It must clearly communicate a candidate's qualifications, align with the target job, remain compatible with Applicant Tracking Systems (ATS), and provide recruiters with relevant information quickly and professionally.
+
+High-quality resume evaluation requires multiple assessment criteria rather than a single subjective score.
+
+---
+
+### Final Decision for Hirely
+
+Based on the research findings, Hirely will implement a comprehensive resume evaluation system that:
+
+- Analyzes resume structure and completeness.
+- Evaluates content quality and relevance.
+- Measures ATS compatibility.
+- Compares resumes with job descriptions.
+- Generates category-based scores.
+- Provides personalized AI-powered recommendations.
+- Explains the reasoning behind every recommendation.
+
+The goal of Hirely is not only to evaluate resumes but also to help users continuously improve them through clear, practical, and explainable feedback.
+
+---
+
+### Impact on System Design
+
+The Resume Checker module will follow the following processing pipeline:
+
+1. Resume Upload
+2. Text Extraction
+3. Resume Parsing
+4. Structure Analysis
+5. ATS Compatibility Analysis
+6. Job Description Matching
+7. Resume Quality Evaluation
+8. Weighted Resume Scoring
+9. AI Feedback Generation
+10. Personalized Improvement Suggestions
+
+This modular workflow establishes the foundation for the Resume Checker and Resume Scorer components that will be implemented during the development phase.
