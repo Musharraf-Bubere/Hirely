@@ -740,3 +740,55 @@ The Resume Checker will identify missing sections, evaluate the organization of 
 - Each section serves a specific purpose.
 - Missing sections may reduce resume effectiveness.
 - Hirely will automatically detect and evaluate resume sections.
+
+---
+
+## 3.3 Characteristics of a Good Resume
+
+### Background
+
+A resume should do more than present information—it should communicate a candidate's qualifications clearly, professionally, and efficiently. Recruiters often review many resumes within a limited time, making clarity and organization essential.
+
+Understanding the characteristics of an effective resume helps define meaningful evaluation criteria for AI-powered resume analysis systems.
+
+---
+
+### Research Findings
+
+A high-quality resume generally demonstrates the following characteristics:
+
+- Clear and easy-to-read structure
+- Concise and relevant content
+- Professional language and tone
+- Accurate and truthful information
+- Well-organized sections
+- Relevant skills and experience for the target role
+- Consistent formatting
+- Compatibility with Applicant Tracking Systems (ATS)
+
+Together, these characteristics improve both recruiter readability and automated resume processing.
+
+---
+
+### Analysis
+
+An effective resume balances completeness with simplicity. It highlights the candidate's most relevant qualifications while avoiding unnecessary information.
+
+A resume should not only be visually organized but also communicate professional value in a way that is understandable to both ATS platforms and human recruiters.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate resumes across multiple quality dimensions instead of assigning a score based on a single factor.
+
+The Resume Checker will assess clarity, structure, relevance, professionalism, ATS compatibility, and overall presentation to generate detailed and personalized feedback.
+
+---
+
+### Key Takeaways
+
+- A good resume communicates value clearly.
+- Clarity and relevance are more important than excessive detail.
+- ATS compatibility and recruiter readability should both be considered.
+- Hirely will evaluate multiple aspects of resume quality.
