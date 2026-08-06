@@ -895,3 +895,63 @@ Each criterion will generate its own score and feedback before contributing to t
 - Independent criteria improve scoring accuracy.
 - Users benefit from detailed category-based feedback.
 - Hirely will combine multiple evaluation criteria into one comprehensive assessment.
+
+---
+
+## 3.6 Resume Scoring Metrics
+
+### Background
+
+To generate meaningful feedback, an AI-powered resume analysis system requires a structured scoring methodology. Rather than assigning arbitrary scores, each important aspect of a resume should contribute to the final evaluation according to its significance.
+
+A weighted scoring model improves consistency, transparency, and explainability.
+
+---
+
+### Research Findings
+
+The proposed evaluation metrics for Hirely Version 1.0 are:
+
+| Evaluation Criterion | Proposed Weight |
+|----------------------|----------------:|
+| Resume Structure | 10% |
+| Content Quality | 20% |
+| ATS Compatibility | 15% |
+| Job Relevance | 20% |
+| Skills Presentation | 10% |
+| Work Experience | 10% |
+| Projects | 10% |
+| Writing Quality | 5% |
+
+The combined score from these categories produces the overall Resume Score.
+
+These weights are based on the current research conducted during the planning phase and may be refined as the project evolves.
+
+---
+
+### Analysis
+
+A weighted scoring model provides greater transparency than a single subjective score.
+
+Category-based scoring enables users to understand why they received a particular score while allowing the system to generate targeted recommendations for improvement.
+
+This approach also simplifies future enhancements because individual evaluation modules can evolve independently without redesigning the entire scoring system.
+
+---
+
+### Decision for Hirely
+
+Hirely Version 1.0 will implement a weighted resume scoring engine based on multiple evaluation criteria.
+
+Each category will be evaluated independently before calculating the overall Resume Score.
+
+The scoring engine will remain configurable so that category weights can be adjusted as future research and user feedback become available.
+
+---
+
+### Key Takeaways
+
+- Resume scoring should use multiple weighted criteria.
+- Category-based scoring improves explainability.
+- Weighted evaluation supports future scalability.
+- Hirely will implement a configurable scoring engine.
