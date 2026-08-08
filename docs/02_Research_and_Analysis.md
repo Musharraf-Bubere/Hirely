@@ -1431,3 +1431,60 @@ The system will not allow the LLM to independently create or modify authoritativ
 - Verified application data should remain the source of truth.
 - Deterministic analysis should be preferred when possible.
 - Hirely will implement multiple safeguards to reduce hallucination risk.
+
+---
+
+## 4.8 Context Window
+
+### Background
+
+A context window represents the amount of information that a Large Language Model can process as part of a single interaction. The context may include system instructions, user input, documents, previous messages, and other information provided to the model.
+
+Understanding context windows is important for Hirely because resume analysis may involve multiple sources of information, including resumes, job descriptions, analysis results, and user instructions.
+
+---
+
+### Research Findings
+
+The context provided to an LLM may include:
+
+- System instructions.
+- User instructions.
+- Resume content.
+- Job description content.
+- Structured analysis results.
+- Relevant conversation context.
+
+The available context is finite and should therefore be managed carefully.
+
+Large or unnecessary inputs can increase token usage, cost, and latency while making it more difficult to focus the model on the information relevant to the current task.
+
+---
+
+### Analysis
+
+Hirely should avoid sending unnecessary information to the LLM.
+
+Instead, the system should first process and structure the available information and then provide the LLM with the relevant context required for the specific task.
+
+For example, when generating resume improvement feedback, the system may provide detected weaknesses, matched skills, missing job-description keywords, and relevant resume content instead of repeatedly sending unrelated application data.
+
+---
+
+### Decision for Hirely
+
+Hirely will use a context management strategy in which relevant information is selected and structured before being sent to the LLM.
+
+The system will minimize unnecessary context while ensuring that the model receives sufficient information to perform the requested task accurately.
+
+This approach will help control token usage, reduce unnecessary costs and latency, and improve the relevance of AI-generated responses.
+
+---
+
+### Key Takeaways
+
+- LLM context is finite.
+- More context does not automatically produce better results.
+- Relevant information should be prioritized.
+- Hirely will prepare and structure context before sending it to an LLM.
+- Context management will help improve efficiency, cost, and response quality.
