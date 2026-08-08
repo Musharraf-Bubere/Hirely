@@ -1237,3 +1237,66 @@ This separation will improve reliability, maintainability, testability, performa
 - Security-critical operations should not depend on an LLM.
 - LLM usage should be limited to tasks where language intelligence provides meaningful value.
 - Hirely will maintain a clear boundary between deterministic software and AI functionality.
+
+---
+
+## 4.5 Prompt Engineering Basics
+
+### Background
+
+Prompt engineering is the process of designing instructions and input context that guide a Large Language Model toward producing useful and consistent results.
+
+Because Hirely will use LLMs for tasks such as resume feedback, content generation, and career guidance, carefully designed prompts will be necessary to control the behavior and quality of AI responses.
+
+---
+
+### Research Findings
+
+A well-designed prompt can define several important components:
+
+- Role or system behavior.
+- Task or objective.
+- Relevant context and input data.
+- Rules and constraints.
+- Expected output format.
+
+For example, a resume analysis prompt may define the role of the AI reviewer, provide structured resume and job description data, specify evaluation criteria, and define the expected response format.
+
+Clear instructions generally make AI responses easier to understand, evaluate, and integrate into software applications.
+
+---
+
+### Analysis
+
+Prompt engineering should be treated as part of the software design rather than as an isolated experimentation process.
+
+Hirely will require prompts that are:
+
+- Clear
+- Specific
+- Consistent
+- Context-aware
+- Testable
+- Appropriate for the intended task
+
+Prompts should also include appropriate constraints to reduce unsupported or fabricated information.
+
+---
+
+### Decision for Hirely
+
+Hirely will maintain dedicated prompts for different AI-powered features rather than relying on one general-purpose prompt.
+
+Prompts will clearly define the task, provide relevant structured context, establish appropriate constraints, and specify the expected response format.
+
+Prompt versions will be maintained as part of the project's development process so that changes can be tested and evaluated systematically.
+
+---
+
+### Key Takeaways
+
+- Prompt engineering helps guide LLM behavior.
+- Good prompts provide clear instructions and relevant context.
+- Constraints help reduce undesirable or unsupported responses.
+- Different Hirely features will use task-specific prompts.
+- Prompts will be treated as maintainable project components.
