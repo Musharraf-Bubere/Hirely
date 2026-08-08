@@ -1363,3 +1363,71 @@ The system will:
 - Prompt quality and context strongly influence output quality.
 - LLMs should not control critical deterministic business logic.
 - Hirely will use architectural safeguards around its AI components.
+
+---
+
+## 4.7 LLM Hallucinations
+
+### Background
+
+LLM hallucination refers to situations where a Large Language Model generates information that is incorrect, unsupported by the provided context, or fabricated while presenting it as a valid response.
+
+Hallucinations are an important concern for Hirely because the platform will analyze personal career information and generate recommendations based on user-provided resumes.
+
+---
+
+### Research Findings
+
+Hallucinations may occur when an LLM:
+
+- Generates skills that are not present in a resume.
+- Invents work experience.
+- Creates unsupported achievements.
+- Assumes certifications that were not provided.
+- Misinterprets incomplete or ambiguous information.
+- Produces information that is not supported by the provided context.
+
+For a career platform, fabricated candidate information can lead to misleading recommendations and reduce user trust.
+
+---
+
+### Analysis
+
+LLMs should not be treated as the source of truth for candidate information.
+
+Hirely should provide the LLM with structured and verified information whenever possible. Deterministic analysis should identify facts such as detected skills, resume sections, job-description keywords, and calculated scores before the LLM is asked to explain or transform that information.
+
+The system should clearly distinguish between verified candidate information and AI-generated suggestions.
+
+---
+
+### Mitigation Strategies
+
+Hirely will reduce hallucination risk through multiple safeguards:
+
+- Provide relevant and structured context to the LLM.
+- Explicitly instruct the model not to invent candidate information.
+- Perform deterministic analysis wherever possible.
+- Separate verified facts from AI-generated recommendations.
+- Validate structured LLM outputs where applicable.
+- Avoid using LLM-generated information as the authoritative source for candidate data.
+
+---
+
+### Decision for Hirely
+
+Hirely will treat hallucination prevention as an important AI engineering requirement.
+
+The LLM will be used primarily to explain verified analysis results, generate recommendations, and transform existing information into useful content.
+
+The system will not allow the LLM to independently create or modify authoritative candidate facts.
+
+---
+
+### Key Takeaways
+
+- LLMs can generate unsupported or fabricated information.
+- Hallucinations can damage trust in career-related applications.
+- Verified application data should remain the source of truth.
+- Deterministic analysis should be preferred when possible.
+- Hirely will implement multiple safeguards to reduce hallucination risk.
