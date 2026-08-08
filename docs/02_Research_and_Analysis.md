@@ -1300,3 +1300,66 @@ Prompt versions will be maintained as part of the project's development process 
 - Constraints help reduce undesirable or unsupported responses.
 - Different Hirely features will use task-specific prompts.
 - Prompts will be treated as maintainable project components.
+
+---
+
+## 4.6 LLM Limitations
+
+### Background
+
+Large Language Models provide powerful natural language capabilities, but they also have limitations that must be considered when designing production AI systems.
+
+Understanding these limitations is important for Hirely because the platform will use LLMs to generate resume feedback, recommendations, and other career-related content.
+
+---
+
+### Research Findings
+
+Important limitations of Large Language Models include:
+
+- Potential generation of incorrect or unsupported information.
+- Probabilistic and non-deterministic behavior.
+- Difficulty interpreting ambiguous or poorly structured context.
+- Context size limitations.
+- Sensitivity to prompt quality.
+- Potentially inconsistent output formatting.
+- API cost and response latency.
+- Dependence on the quality and relevance of the provided context.
+
+These limitations mean that LLM outputs should not automatically be treated as authoritative or completely reliable.
+
+---
+
+### Analysis
+
+LLMs should be treated as probabilistic components rather than deterministic sources of truth.
+
+The reliability of an AI-powered system depends not only on the model but also on input validation, prompt design, context construction, output validation, and the surrounding application architecture.
+
+For Hirely, deterministic components should continue to control important application logic, while LLM-generated content should be validated before being presented to users when appropriate.
+
+---
+
+### Decision for Hirely
+
+Hirely will design its AI layer with the limitations of LLMs in mind.
+
+The system will:
+
+- Validate inputs before sending them to an LLM.
+- Provide structured and relevant context.
+- Use task-specific prompts.
+- Validate structured AI outputs where applicable.
+- Avoid depending on LLMs for deterministic business logic.
+- Minimize unnecessary LLM requests to control cost and latency.
+- Clearly separate AI-generated recommendations from verified user information.
+
+---
+
+### Key Takeaways
+
+- LLMs are powerful but not perfectly reliable.
+- AI-generated information may require validation.
+- Prompt quality and context strongly influence output quality.
+- LLMs should not control critical deterministic business logic.
+- Hirely will use architectural safeguards around its AI components.
