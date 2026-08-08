@@ -1488,3 +1488,80 @@ This approach will help control token usage, reduce unnecessary costs and latenc
 - Relevant information should be prioritized.
 - Hirely will prepare and structure context before sending it to an LLM.
 - Context management will help improve efficiency, cost, and response quality.
+
+---
+
+## 4.9 Structured Output
+
+### Background
+
+LLMs normally generate natural language responses, but production applications often require predictable and machine-readable data.
+
+Structured output allows an LLM response to follow a predefined format, such as JSON with specific fields. This makes AI responses easier for application code to consume, validate, and process.
+
+For Hirely, structured output is important because AI-generated results will eventually be consumed by the FastAPI backend and frontend components.
+
+---
+
+### Research Findings
+
+An unstructured LLM response may contain useful information but can be difficult for software to process reliably.
+
+For example, an LLM may return a natural language response containing:
+
+- Resume score
+- Strengths
+- Weaknesses
+- Missing skills
+- Recommendations
+
+A structured response can represent the same information using predefined fields.
+
+Example:
+
+```json
+{
+  "score": 78,
+  "strengths": [
+    "Strong Python experience"
+  ],
+  "weaknesses": [
+    "Project descriptions lack measurable achievements"
+  ],
+  "recommendations": [
+    "Add measurable outcomes to project descriptions"
+  ]
+}
+```
+
+Structured responses make the boundary between the AI layer and application layer more predictable.
+
+---
+
+### Analysis
+
+Structured output improves the reliability and maintainability of AI-powered applications because application code can work with defined fields rather than attempting to interpret arbitrary natural language.
+
+However, structured output does not guarantee that the information itself is correct. A response can follow the required format while still containing incorrect or unsupported information.
+
+Therefore, structured output should be combined with validation and appropriate application-level rules.
+
+---
+
+### Decision for Hirely
+
+Hirely will prefer structured outputs for LLM tasks where the response needs to be consumed by application code.
+
+AI responses will use predefined schemas whenever appropriate, allowing the FastAPI backend to validate and process the results consistently.
+
+Natural language responses will still be used when a task is intended primarily for direct user interaction and does not require machine-readable data.
+
+---
+
+### Key Takeaways
+
+- LLM responses should be structured when application code needs to consume them.
+- Structured output improves predictability and maintainability.
+- JSON can provide a machine-readable representation of AI results.
+- Structured output does not eliminate hallucinations or incorrect information.
+- Hirely will combine structured output with validation.
