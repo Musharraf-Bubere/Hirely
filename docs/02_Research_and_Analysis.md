@@ -1565,3 +1565,117 @@ Natural language responses will still be used when a task is intended primarily 
 - JSON can provide a machine-readable representation of AI results.
 - Structured output does not eliminate hallucinations or incorrect information.
 - Hirely will combine structured output with validation.
+
+---
+
+## 4.10 Final Decision for Hirely
+
+### Summary
+
+The research conducted on Large Language Models establishes that LLMs are powerful components for natural language understanding, generation, explanation, and personalization. However, they should not replace deterministic software or become the source of truth for application data.
+
+Hirely will therefore use a hybrid architecture that combines traditional software engineering with Large Language Models.
+
+---
+
+### Final Architecture Decision
+
+Hirely will separate responsibilities between deterministic application components and AI-powered components.
+
+#### Traditional Software Components
+
+Traditional software will remain responsible for:
+
+- File validation.
+- Text extraction.
+- Resume parsing.
+- Data validation.
+- ATS analysis.
+- Deterministic scoring.
+- Database operations.
+- Authentication and authorization.
+- Security.
+- Core application business logic.
+
+#### AI Components
+
+Large Language Models will be responsible for tasks such as:
+
+- Explaining resume analysis results.
+- Generating personalized recommendations.
+- Rewriting resume content.
+- Generating professional summaries.
+- Creating cover letters.
+- Supporting interview preparation.
+- Providing career guidance.
+- Generating natural language responses.
+
+---
+
+### AI Reliability Principles
+
+Hirely will follow the following principles when integrating LLMs:
+
+1. **Use AI where it provides meaningful value.**
+2. **Prefer deterministic software for deterministic problems.**
+3. **Do not treat LLM output as the source of truth for candidate information.**
+4. **Provide relevant and structured context to the LLM.**
+5. **Use task-specific prompts.**
+6. **Prevent the model from inventing candidate facts.**
+7. **Prefer structured output when application code needs to consume AI responses.**
+8. **Validate AI-generated output where appropriate.**
+9. **Minimize unnecessary LLM calls to control cost and latency.**
+10. **Keep AI functionality modular and replaceable.**
+
+---
+
+### Final Processing Model
+
+The overall AI processing approach for Hirely will follow this general pattern:
+
+```text
+User Input
+    ↓
+Input Validation
+    ↓
+Document / Data Processing
+    ↓
+Structured Information
+    ↓
+Deterministic Analysis
+    ↓
+Verified Analysis Results
+    ↓
+Relevant Context Preparation
+    ↓
+Task-Specific LLM Prompt
+    ↓
+LLM
+    ↓
+Structured / Natural Language Output
+    ↓
+Output Validation
+    ↓
+User-Facing Response
+```
+
+---
+
+### Decision for Hirely
+
+Large Language Models will be treated as one modular component within the Hirely platform rather than as the entire application intelligence.
+
+The system architecture will combine deterministic software with LLM capabilities to achieve a balance between reliability, explainability, personalization, maintainability, performance, and cost efficiency.
+
+The AI layer should remain modular so that the underlying LLM provider or model can be changed in the future without requiring major changes to the rest of the application.
+
+---
+
+### Key Takeaways
+
+- Hirely will use a hybrid AI architecture.
+- Traditional software will handle deterministic and security-sensitive operations.
+- LLMs will handle language-intensive and personalized tasks.
+- Verified application data will remain the source of truth.
+- AI outputs will be controlled through context, prompts, structured output, and validation.
+- The LLM layer will remain modular and replaceable.
