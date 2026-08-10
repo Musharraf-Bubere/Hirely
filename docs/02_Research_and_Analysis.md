@@ -1982,3 +1982,152 @@ The architecture will also allow additional processing techniques to be introduc
 ### Hirely Principle
 
 > **Extract first, understand second.**
+
+## 5.4 PDF Processing
+
+### Background
+
+PDF is one of the primary document formats supported by Hirely Version 1.
+
+PDF processing is responsible for handling uploaded PDF resumes and making their contents available to the text-extraction stage.
+
+However, PDF documents can contain different types of content and layouts, so the processing strategy must account for both text-based and image-based PDFs.
+
+---
+
+### Types of PDF Documents
+
+PDF resumes can generally be divided into two important categories.
+
+#### 1. Text-Based PDF
+
+A text-based PDF contains an accessible text layer.
+
+The processing flow can be:
+
+```text
+PDF
+ ↓
+PDF Processing
+ ↓
+Text Extraction
+ ↓
+Extracted Text
+ ↓
+Resume Parsing
+```
+
+This type of PDF can usually be processed using text-extraction techniques.
+
+#### 2. Image-Based / Scanned PDF
+
+A scanned PDF may contain pages represented primarily as images rather than accessible text.
+
+The processing flow may therefore become:
+
+```text
+PDF
+ ↓
+PDF Processing
+ ↓
+Image Content
+ ↓
+OCR
+ ↓
+Extracted Text
+ ↓
+Resume Parsing
+```
+
+OCR and scanned-document handling will be studied in later sections.
+
+---
+
+### PDF Layout Challenges
+
+Resume PDFs may contain complex layouts, including:
+
+- Multiple columns.
+- Tables.
+- Headers and footers.
+- Bullet points.
+- Different font sizes.
+- Links.
+- Images.
+- Text positioned in different areas of a page.
+
+Extracting text from such documents does not always guarantee that the original visual reading order will be preserved.
+
+This can affect downstream resume parsing.
+
+For example, content displayed in two columns may be extracted in an order that differs from the way a human reads the resume.
+
+---
+
+### Analysis
+
+Hirely should treat PDF processing as more than simply extracting raw text.
+
+The processing layer should attempt to produce usable and logically ordered content while preserving relevant information from the original document.
+
+The PDF-processing component should remain separate from resume parsing so that document-format-specific logic does not become tightly coupled with resume-understanding logic.
+
+---
+
+### Decision for Hirely
+
+Hirely will support PDF resumes in Version 1.
+
+The PDF-processing layer will:
+
+- Accept supported PDF files.
+- Determine whether usable text is available.
+- Extract text from text-based PDFs.
+- Identify cases where normal text extraction is insufficient.
+- Allow image-based or scanned PDFs to be processed through an OCR pipeline when supported.
+- Pass extracted content to the resume-parsing layer.
+
+PDF processing will remain modular so that extraction techniques can be improved or replaced without changing the rest of the resume-analysis pipeline.
+
+---
+
+### Processing Model
+
+The general PDF processing flow will be:
+
+```text
+                PDF Resume
+                    ↓
+              PDF Processing
+                    ↓
+          ┌─────────┴─────────┐
+          ↓                   ↓
+    Text Available       No Usable Text
+          ↓                   ↓
+   Text Extraction          OCR
+          ↓                   ↓
+          └─────────┬─────────┘
+                    ↓
+             Extracted Text
+                    ↓
+             Resume Parser
+                    ↓
+          Structured Resume Data
+```
+
+---
+
+### Key Takeaways
+
+- PDF is a primary supported format for Hirely V1.
+- PDFs may contain machine-readable text or image-based content.
+- Text-based PDFs can use normal text extraction.
+- Scanned or image-based PDFs may require OCR.
+- PDF layout can affect extraction order and downstream parsing.
+- PDF processing will remain separate from resume parsing.
+
+---
+
+### Hirely Principle
+
+> **PDF processing must focus on extracting usable and logically ordered content, not simply extracting any available text.**
