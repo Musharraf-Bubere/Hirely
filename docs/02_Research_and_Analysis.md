@@ -2131,3 +2131,166 @@ The general PDF processing flow will be:
 ### Hirely Principle
 
 > **PDF processing must focus on extracting usable and logically ordered content, not simply extracting any available text.**
+
+## 5.5 DOCX Processing
+
+### Background
+
+DOCX is one of the primary resume formats supported by Hirely Version 1.
+
+DOCX processing is responsible for accepting an uploaded DOCX resume and extracting usable document content for subsequent resume parsing and analysis.
+
+DOCX documents contain structured document elements such as paragraphs, headings, lists, tables, and other content that may be relevant to a resume.
+
+---
+
+### DOCX Processing Flow
+
+The general processing flow will be:
+
+```text
+DOCX Resume
+     ↓
+DOCX Processing
+     ↓
+Extracted Document Content
+     ↓
+Resume Parser
+     ↓
+Structured Resume Data
+     ↓
+Analysis
+```
+
+The DOCX processing layer should focus on retrieving the content of the document rather than determining what each piece of content means.
+
+---
+
+### Important DOCX Elements
+
+A resume stored as a DOCX document may contain:
+
+- Paragraphs.
+- Headings.
+- Bullet lists.
+- Numbered lists.
+- Tables.
+- Headers and footers.
+- Hyperlinks.
+- Text formatting.
+- Other document metadata.
+
+Some of these elements may contain information that is important for resume processing.
+
+For example, skills may appear inside a bullet list or table rather than a normal paragraph.
+
+---
+
+### DOCX Processing vs Resume Parsing
+
+DOCX processing and resume parsing will have separate responsibilities.
+
+**DOCX Processing**
+
+The purpose is to extract usable content and relevant document elements from the DOCX file.
+
+**Resume Parsing**
+
+The purpose is to interpret that extracted content and identify resume-specific information such as:
+
+- Personal information.
+- Skills.
+- Education.
+- Work experience.
+- Projects.
+- Certifications.
+- Achievements.
+
+Therefore:
+
+```text
+DOCX Processing = Extract document content
+Resume Parsing  = Understand resume content
+```
+
+---
+
+### Analysis
+
+Hirely should keep DOCX-specific processing separate from the resume parser.
+
+This allows the resume parser to work with normalized extracted content instead of being tightly coupled to the internal structure of a particular document format.
+
+The approach also makes the architecture easier to extend if additional document formats are supported in the future.
+
+---
+
+### Important Considerations
+
+DOCX resumes may use different layouts and formatting styles.
+
+For example:
+
+- Important information may appear inside tables.
+- Skills may be represented using bullet lists.
+- Contact information may appear in a header.
+- Sections may be identified using headings.
+- Hyperlinks may contain useful information such as portfolio or LinkedIn URLs.
+
+Therefore, DOCX processing should extract relevant document elements rather than relying only on plain paragraph text.
+
+---
+
+### Decision for Hirely
+
+Hirely will support DOCX resumes in Version 1.
+
+The DOCX-processing component will:
+
+- Accept supported DOCX files.
+- Extract relevant textual content.
+- Process important document elements such as paragraphs, headings, lists, and tables where required.
+- Preserve useful structural information where possible.
+- Pass normalized content to the resume-parsing layer.
+- Remain independent from resume interpretation and analysis.
+
+---
+
+### Processing Model
+
+The DOCX processing pipeline will follow this general model:
+
+```text
+                 DOCX Resume
+                      ↓
+                DOCX Processor
+                      ↓
+          ┌───────────┴───────────┐
+          ↓                       ↓
+    Text Elements          Structural Elements
+          ↓                       ↓
+          └───────────┬───────────┘
+                      ↓
+             Normalized Content
+                      ↓
+               Resume Parser
+                      ↓
+          Structured Resume Data
+```
+
+---
+
+### Key Takeaways
+
+- DOCX is a primary supported format for Hirely V1.
+- DOCX processing extracts document content.
+- Paragraphs, headings, lists, and tables may contain important resume information.
+- DOCX processing should preserve useful structure where possible.
+- Resume parsing remains responsible for understanding the extracted content.
+- DOCX processing and resume parsing will remain separate modules.
+
+---
+
+### Hirely Principle
+
+> **Extract and normalize document content first; interpret the resume structure separately.**
