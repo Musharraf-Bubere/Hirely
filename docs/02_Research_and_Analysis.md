@@ -1679,3 +1679,92 @@ The AI layer should remain modular so that the underlying LLM provider or model 
 - Verified application data will remain the source of truth.
 - AI outputs will be controlled through context, prompts, structured output, and validation.
 - The LLM layer will remain modular and replaceable.
+
+# 5. Document Processing
+
+## 5.1 Why Does Hirely Need Document Processing?
+
+### Background
+
+Hirely will receive resumes as user-uploaded documents rather than as pre-structured application data.
+
+Before resume analysis, ATS evaluation, scoring, or AI-powered feedback can be performed, the system must first extract usable information from the uploaded document.
+
+Document processing therefore forms an important part of the pipeline between the user's uploaded resume and Hirely's analysis components.
+
+---
+
+### Research Findings
+
+A typical Hirely resume-processing flow will require the following stages:
+
+```text
+Uploaded Resume
+       ↓
+Document Processing
+       ↓
+Extracted Text
+       ↓
+Resume Parsing
+       ↓
+Structured Resume Data
+       ↓
+Analysis
+```
+
+Document processing is responsible for converting supported document formats into usable content that can be processed by subsequent application components.
+
+---
+
+### Document Processing vs Resume Parsing
+
+Document processing and resume parsing are related but different responsibilities.
+
+**Document Processing** focuses on extracting usable content from a document.
+
+**Resume Parsing** focuses on understanding that content and identifying resume-specific information such as:
+
+- Name
+- Contact information
+- Skills
+- Education
+- Work experience
+- Projects
+- Certifications
+- Achievements
+
+Therefore, document processing should occur before resume parsing.
+
+---
+
+### Analysis
+
+Hirely should separate document processing from resume parsing so that each component has a clear responsibility.
+
+This separation will make the system easier to develop, test, maintain, and extend to additional document formats in the future.
+
+---
+
+### Decision for Hirely
+
+Hirely will introduce a dedicated document processing layer responsible for accepting supported resume files and extracting usable content.
+
+The extracted content will then be passed to a separate resume parsing component responsible for converting the content into structured resume information.
+
+This separation will establish a modular processing pipeline and prevent document-specific logic from being tightly coupled with resume analysis and scoring.
+
+---
+
+### Key Takeaways
+
+- Hirely will receive resumes as uploaded documents.
+- Documents must be processed before resume analysis.
+- Document processing extracts usable content.
+- Resume parsing converts extracted content into structured resume information.
+- These responsibilities will remain separate and modular.
+
+---
+
+### Hirely Principle
+
+> **Document processing extracts content; resume parsing understands the content.**
