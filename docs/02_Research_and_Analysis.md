@@ -2418,3 +2418,243 @@ OCR accuracy and failure cases will be evaluated separately before final impleme
 ### Hirely Principle
 
 > **If text is unavailable but visual content exists, attempt appropriate OCR processing before declaring the document unreadable.**
+
+## 5.7 Optical Character Recognition (OCR)
+
+### Background
+
+Optical Character Recognition (OCR) is a technology used to recognize text contained within images and convert that visual text into machine-readable text.
+
+OCR is important for Hirely because some resumes may be scanned documents or image-based PDFs that do not contain an accessible text layer.
+
+---
+
+### OCR Processing Flow
+
+The general OCR process can be represented as:
+
+```text
+Image / Scanned Document
+          ↓
+         OCR
+          ↓
+Recognized Machine-Readable Text
+          ↓
+    Resume Parser
+          ↓
+Structured Resume Data
+```
+
+For a scanned PDF, the complete processing flow may be:
+
+```text
+Scanned PDF
+     ↓
+PDF Processing
+     ↓
+Page Images
+     ↓
+OCR
+     ↓
+Extracted Text
+     ↓
+Resume Parser
+     ↓
+Structured Resume Data
+```
+
+---
+
+### What OCR Does
+
+OCR primarily performs text recognition.
+
+For example, an image containing:
+
+```text
+John Doe
+
+Skills:
+Python
+SQL
+FastAPI
+```
+
+may produce machine-readable text such as:
+
+```text
+John Doe
+
+Skills:
+Python
+SQL
+FastAPI
+```
+
+The extracted text can then be passed to the resume parser.
+
+---
+
+### OCR vs Resume Parsing
+
+OCR and resume parsing have different responsibilities.
+
+**OCR**
+
+The purpose is to recognize text from visual content.
+
+**Resume Parsing**
+
+The purpose is to understand the extracted text and identify resume-specific information.
+
+For example:
+
+```text
+OCR:
+"Skills: Python, SQL, FastAPI"
+
+        ↓
+
+Resume Parser:
+
+Skills:
+- Python
+- SQL
+- FastAPI
+```
+
+Therefore:
+
+```text
+OCR = Recognize text
+Resume Parsing = Understand resume information
+```
+
+---
+
+### OCR Limitations
+
+OCR is not guaranteed to produce perfectly accurate text.
+
+Accuracy can be affected by:
+
+- Image resolution.
+- Image quality.
+- Font style.
+- Text size.
+- Document layout.
+- Multiple columns.
+- Tables.
+- Background elements.
+- Rotated text.
+- Blurred or distorted content.
+- Poor scanning quality.
+
+OCR may therefore introduce errors such as incorrect characters, missing text, or incorrect spacing.
+
+---
+
+### Analysis
+
+OCR should be treated as an additional extraction layer rather than as a complete resume-understanding solution.
+
+Hirely should use OCR only when normal text extraction is insufficient or when the document contains image-based text.
+
+The resulting OCR text should then enter the same downstream resume-parsing pipeline used for other extracted text.
+
+This keeps the architecture consistent:
+
+```text
+Text-Based Document
+        ↓
+Normal Text Extraction
+        ↓
+        ┐
+        │
+        ↓
+Extracted Text
+        ↑
+        │
+OCR ────┘
+        ↓
+Resume Parser
+        ↓
+Structured Resume Data
+```
+
+---
+
+### Validation Consideration
+
+Because OCR can introduce recognition errors, Hirely should consider validating extracted content before relying on it for downstream analysis.
+
+For example, the system may check whether:
+
+- Meaningful text was extracted.
+- The extracted content is sufficiently large.
+- Common resume sections can be detected.
+- The document contains mostly readable characters.
+- The extraction result is not empty or corrupted.
+
+These checks can help determine whether the OCR result is usable.
+
+---
+
+### Decision for Hirely
+
+Hirely will use OCR as a fallback processing mechanism for scanned and image-based resumes when normal text extraction cannot provide sufficient content.
+
+OCR will remain separate from:
+
+- Document processing.
+- Normal text extraction.
+- Resume parsing.
+- Resume analysis.
+
+The OCR output will be passed into the common resume-processing pipeline and may be validated before further analysis.
+
+---
+
+### Processing Model
+
+The overall document-processing strategy will be:
+
+```text
+                    Resume
+                       ↓
+              Document Processing
+                       ↓
+              Is usable text available?
+                 /             \
+               Yes              No
+                ↓                ↓
+        Normal Extraction       OCR
+                ↓                ↓
+                └───────┬────────┘
+                        ↓
+                 Extracted Text
+                        ↓
+                  Resume Parser
+                        ↓
+              Structured Resume Data
+                        ↓
+                    Analysis
+```
+
+---
+
+### Key Takeaways
+
+- OCR converts text inside images into machine-readable text.
+- OCR is useful for scanned and image-based resumes.
+- OCR does not understand resume semantics.
+- Resume parsing remains responsible for understanding extracted content.
+- OCR output may contain recognition errors.
+- Hirely will use OCR as a fallback when normal text extraction is insufficient.
+- OCR output should be validated where appropriate.
+
+---
+
+### Hirely Principle
+
+> **OCR recognizes visual text; the resume parser understands what that text means.**
