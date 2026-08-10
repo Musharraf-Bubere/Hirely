@@ -2294,3 +2294,127 @@ The DOCX processing pipeline will follow this general model:
 ### Hirely Principle
 
 > **Extract and normalize document content first; interpret the resume structure separately.**
+
+## 5.6 Handling Scanned / Image-Based Resumes
+
+### Background
+
+Not every resume contains machine-readable text.
+
+A supported PDF may contain scanned images of resume pages rather than an accessible text layer. In this situation, normal text extraction may return little or no usable text even though the resume is visually readable to a human.
+
+Hirely therefore needs to distinguish between a document that contains no meaningful content and a document whose content is present as images.
+
+---
+
+### Problem
+
+A scanned resume may follow this structure:
+
+```text
+Scanned Resume
+      ↓
+PDF
+      ↓
+Image-Based Pages
+      ↓
+No Accessible Text Layer
+      ↓
+Normal Text Extraction
+      ↓
+Little or No Text
+```
+
+If Hirely only relies on normal text extraction, such resumes may incorrectly appear to contain no usable content.
+
+---
+
+### Required Processing Flow
+
+When normal text extraction is insufficient, Hirely should be able to route the document through an OCR-based processing path.
+
+The general flow will be:
+
+```text
+Uploaded Resume
+      ↓
+Document Processing
+      ↓
+Text Extraction
+      ↓
+Usable Text Available?
+      │
+      ├── Yes
+      │    ↓
+      │  Resume Parser
+      │
+      └── No / Insufficient
+           ↓
+          OCR
+           ↓
+     Extracted Text
+           ↓
+      Resume Parser
+```
+
+This allows Hirely to handle both text-based and image-based resumes.
+
+---
+
+### Important Considerations
+
+OCR-based processing may be affected by:
+
+- Image quality.
+- Resolution.
+- Font style.
+- Document layout.
+- Multiple columns.
+- Tables.
+- Background elements.
+- Rotated text.
+- Poorly scanned pages.
+- Handwritten content.
+
+Therefore, OCR output should not automatically be treated as perfectly accurate.
+
+The extracted content may require validation or additional processing before being passed to the resume parser.
+
+---
+
+### Analysis
+
+A scanned resume should not automatically be classified as an unsupported resume simply because normal text extraction fails.
+
+Instead, Hirely should attempt to determine whether the document contains image-based content and, when appropriate, route it through an OCR pipeline.
+
+This approach improves compatibility with real-world resumes while keeping OCR processing separate from normal text extraction.
+
+---
+
+### Decision for Hirely
+
+Hirely will support a processing path for scanned and image-based resumes.
+
+When a supported document does not provide sufficient machine-readable text, the document-processing pipeline may route its visual content to an OCR component.
+
+The OCR component will produce extracted text that can then be passed to the resume-parsing layer.
+
+OCR accuracy and failure cases will be evaluated separately before final implementation.
+
+---
+
+### Key Takeaways
+
+- Supported resumes may contain image-based content.
+- A scanned PDF may not have an accessible text layer.
+- Failure of normal text extraction does not necessarily mean the resume is empty.
+- Hirely will provide an OCR-based path for image-based documents.
+- OCR output may contain errors and should be validated where appropriate.
+- OCR will remain separate from normal text extraction and resume parsing.
+
+---
+
+### Hirely Principle
+
+> **If text is unavailable but visual content exists, attempt appropriate OCR processing before declaring the document unreadable.**
