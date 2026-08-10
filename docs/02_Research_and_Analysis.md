@@ -2942,3 +2942,184 @@ The system will:
 ### Hirely Principle
 
 > **Never assume that an uploaded document is clean, simple, or perfectly machine-readable; validate, process, and normalize it before analysis.**
+
+## 5.9 Final Decision for Hirely
+
+### Summary
+
+The research conducted on document processing establishes that Hirely needs a dedicated document-processing layer between uploaded resumes and the resume-parsing system.
+
+The document-processing layer will be responsible for accepting supported files, validating them, extracting usable content, handling image-based documents when appropriate, and providing normalized content to the resume parser.
+
+---
+
+### Supported Formats
+
+Hirely Version 1 will initially support:
+
+- PDF
+- DOCX
+
+Additional formats may be considered in future versions based on user requirements.
+
+---
+
+### Final Processing Architecture
+
+The document-processing pipeline will follow this general model:
+
+```text
+                    Uploaded Resume
+                           ↓
+                   File Validation
+                           ↓
+                 Document Detection
+                           ↓
+              ┌────────────┴────────────┐
+              ↓                         ↓
+             PDF                       DOCX
+              ↓                         ↓
+       PDF Processing             DOCX Processing
+              ↓                         ↓
+              └────────────┬────────────┘
+                           ↓
+                  Text Extraction
+                           ↓
+                Is sufficient text?
+                     /          \
+                   Yes           No
+                    ↓             ↓
+                    │            OCR
+                    │             ↓
+                    └──────┬──────┘
+                           ↓
+                  Extracted Content
+                           ↓
+                  Content Validation
+                           ↓
+                    Resume Parser
+                           ↓
+              Structured Resume Data
+                           ↓
+                     Analysis
+```
+
+---
+
+### Responsibilities of the Document Processing Layer
+
+The document-processing layer will be responsible for:
+
+- Validating uploaded files.
+- Identifying supported document formats.
+- Processing PDF documents.
+- Processing DOCX documents.
+- Extracting machine-readable text.
+- Detecting insufficient text extraction.
+- Routing appropriate image-based documents to OCR.
+- Validating extracted content.
+- Normalizing extracted content.
+- Handling processing failures safely.
+
+---
+
+### Responsibilities Outside the Document Processing Layer
+
+The document-processing layer will not be responsible for understanding the meaning of resume information.
+
+The following responsibilities belong to later components:
+
+- Resume section identification.
+- Skill extraction.
+- Experience extraction.
+- Education extraction.
+- Resume classification.
+- ATS analysis.
+- Resume scoring.
+- AI-generated feedback.
+
+This separation keeps document extraction independent from resume understanding and analysis.
+
+---
+
+### Reliability Strategy
+
+Hirely will not assume that every uploaded resume will produce perfect extracted text.
+
+The system will use validation and fallback mechanisms to identify situations such as:
+
+- Empty documents.
+- Insufficient extracted text.
+- Image-based documents.
+- OCR failures.
+- Corrupted files.
+- Unsupported files.
+- Poor-quality document content.
+
+Processing failures should be handled gracefully and should not cause the entire application to fail unexpectedly.
+
+---
+
+### Privacy Consideration
+
+Resume documents may contain sensitive personal and professional information.
+
+Hirely will therefore consider secure handling of uploaded documents and extracted content throughout the processing pipeline.
+
+Document data should only be exposed to components and external services when required for the intended processing task.
+
+---
+
+### Modularity Decision
+
+Document processing will be designed as a modular layer.
+
+Format-specific processing components should remain separated so that extraction techniques can be improved or additional formats can be added later without requiring major changes to the resume parser or analysis components.
+
+The general architecture will therefore follow:
+
+```text
+Document Format
+      ↓
+Format-Specific Processor
+      ↓
+Normalized Content
+      ↓
+Resume Parser
+      ↓
+Structured Resume
+```
+
+---
+
+### Final Decision for Hirely
+
+Hirely will implement a modular document-processing layer that supports PDF and DOCX resumes in Version 1.
+
+The layer will validate uploaded documents, perform format-specific processing, extract usable text, use OCR when appropriate, validate extracted content, and provide normalized content to the resume parser.
+
+Document processing will remain separate from resume parsing, ATS analysis, scoring, and AI functionality.
+
+This architecture will provide a reliable foundation for the later resume-analysis pipeline while allowing Hirely to expand document support and processing capabilities in future versions.
+
+---
+
+### Key Takeaways
+
+- Hirely V1 will support PDF and DOCX.
+- Document processing will be a dedicated application layer.
+- File validation will happen before extraction.
+- PDF and DOCX may require different processing strategies.
+- OCR will be used when appropriate for image-based documents.
+- Extracted content will be validated before resume parsing.
+- Document processing and resume parsing will remain separate.
+- The architecture will be modular and extensible.
+- Resume data will be handled with privacy and security considerations.
+
+---
+
+### Hirely Principle
+
+> **Validate → Extract → Normalize → Parse.**
+
+The document-processing layer prepares reliable input for the resume parser; it does not attempt to understand the resume itself.
