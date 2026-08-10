@@ -1854,3 +1854,131 @@ Support for additional formats will be considered in future versions based on us
 ### Hirely Principle
 
 > **Start with a controlled set of formats, build a reliable processing pipeline, and expand format support when the architecture and requirements justify it.**
+
+## 5.3 Text Extraction
+
+### Background
+
+Text extraction is the process of retrieving usable textual content from an uploaded document.
+
+For Hirely, text extraction is an important step because downstream components such as resume parsing, ATS analysis, scoring, and AI processing require accessible text rather than the original document file alone.
+
+---
+
+### Research Findings
+
+The general document-processing flow can be represented as:
+
+```text
+Resume File
+     ↓
+Document Processor
+     ↓
+Text Extraction
+     ↓
+Extracted Text
+     ↓
+Resume Parser
+     ↓
+Structured Resume Data
+```
+
+The text extraction layer converts the contents of a supported document into text that can be processed by subsequent components.
+
+---
+
+### Text Extraction vs Resume Parsing
+
+Text extraction and resume parsing have different responsibilities.
+
+**Text Extraction**
+
+The purpose is to retrieve textual content from the document.
+
+Example:
+
+```text
+Python
+FastAPI
+SQL
+Bachelor of Computer Science
+Software Developer
+```
+
+**Resume Parsing**
+
+The purpose is to interpret the extracted content and identify structured resume information.
+
+For example:
+
+```text
+Skills:
+- Python
+- FastAPI
+- SQL
+
+Education:
+- Bachelor of Computer Science
+
+Experience:
+- Software Developer
+```
+
+Therefore:
+
+```text
+Text Extraction = Get the content
+Resume Parsing = Understand the content
+```
+
+---
+
+### Analysis
+
+Text extraction should remain a separate component from resume parsing.
+
+This separation allows Hirely to support different document formats while keeping the resume-understanding logic independent from format-specific processing.
+
+It also makes the system easier to test because extraction accuracy and parsing accuracy can be evaluated separately.
+
+---
+
+### Important Consideration
+
+Not every document contains directly accessible text.
+
+A document may contain:
+
+- Machine-readable text.
+- Images containing text.
+- A mixture of text and images.
+
+When text is not directly available, additional processing such as OCR may be required.
+
+OCR and scanned-document handling will be studied separately in later sections.
+
+---
+
+### Decision for Hirely
+
+Hirely will include a dedicated text-extraction stage between document processing and resume parsing.
+
+The extraction layer will convert supported documents into usable text while remaining independent from the resume parsing and analysis components.
+
+The architecture will also allow additional processing techniques to be introduced for documents where normal text extraction is insufficient.
+
+---
+
+### Key Takeaways
+
+- Text extraction converts document content into usable text.
+- Text extraction does not determine the meaning of the extracted information.
+- Resume parsing is responsible for understanding the extracted content.
+- Extraction and parsing will remain separate modules in Hirely.
+- Documents without directly accessible text may require additional processing such as OCR.
+
+---
+
+### Hirely Principle
+
+> **Extract first, understand second.**
