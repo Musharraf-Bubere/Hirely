@@ -2658,3 +2658,287 @@ The overall document-processing strategy will be:
 ### Hirely Principle
 
 > **OCR recognizes visual text; the resume parser understands what that text means.**
+
+## 5.8 Document Processing Challenges
+
+### Background
+
+Real-world resumes are created using many different tools, layouts, templates, and document-generation methods.
+
+As a result, extracting reliable content from resumes is not always straightforward.
+
+Hirely's document-processing pipeline must be designed to handle common document-processing problems while keeping the system modular and maintainable.
+
+---
+
+### 1. Complex Resume Layouts
+
+Resumes may contain complex visual layouts such as:
+
+- Multiple columns.
+- Sidebars.
+- Tables.
+- Text boxes.
+- Headers and footers.
+- Icons.
+- Different font sizes.
+- Images.
+- Sections positioned in different areas of a page.
+
+These layouts can affect the order and quality of extracted text.
+
+---
+
+### 2. Multi-Column Resumes
+
+A resume may visually present information in multiple columns.
+
+For example:
+
+```text
+Experience              Skills
+-----------             ------
+Company A               Python
+Company B               SQL
+Company C               Docker
+```
+
+A text-extraction system may not always return the content in the same order that a human visually reads it.
+
+Incorrect reading order can negatively affect downstream resume parsing.
+
+---
+
+### 3. Tables
+
+Tables may be used for:
+
+- Skills.
+- Education.
+- Work experience.
+- Contact information.
+- Project information.
+
+Text extraction may preserve the text but lose the original relationships between rows and columns.
+
+Therefore, table-based content may require additional processing.
+
+---
+
+### 4. Scanned and Image-Based Documents
+
+Some resumes may contain scanned pages or images instead of machine-readable text.
+
+In these cases:
+
+```text
+Document
+   ↓
+No Usable Text
+   ↓
+OCR
+   ↓
+Extracted Text
+```
+
+OCR can introduce recognition errors and therefore should not automatically be treated as perfectly accurate.
+
+---
+
+### 5. OCR Errors
+
+OCR may produce:
+
+- Incorrect characters.
+- Missing characters.
+- Incorrect spacing.
+- Incorrect words.
+- Broken lines.
+- Incorrect recognition of symbols.
+
+These errors can affect resume parsing and later analysis.
+
+---
+
+### 6. Poor Document Quality
+
+Low-quality documents can make extraction more difficult.
+
+Examples include:
+
+- Low-resolution scans.
+- Blurred pages.
+- Skewed pages.
+- Rotated pages.
+- Very small text.
+- Poor contrast.
+- Damaged documents.
+
+Hirely should detect cases where extracted content is insufficient for reliable processing.
+
+---
+
+### 7. Missing or Insufficient Text
+
+A document may technically be valid but still provide little usable text.
+
+For example:
+
+```text
+Uploaded PDF
+     ↓
+Text Extraction
+     ↓
+Almost no text
+     ↓
+Possible scanned/image-based document
+```
+
+The system should distinguish between:
+
+- Empty or invalid documents.
+- Documents containing insufficient extractable text.
+- Image-based documents requiring OCR.
+
+---
+
+### 8. Corrupted or Invalid Files
+
+Uploaded files may be:
+
+- Corrupted.
+- Incomplete.
+- Invalid despite having a valid file extension.
+- Password-protected.
+- Unsupported internally.
+
+Hirely should validate files before attempting document processing.
+
+---
+
+### 9. Large Documents
+
+Although resumes are normally relatively small, the system should still protect itself against unusually large files.
+
+Large documents can increase:
+
+- Processing time.
+- Memory usage.
+- Storage requirements.
+- OCR processing cost.
+- API or downstream processing cost.
+
+File-size limits should therefore be considered during implementation.
+
+---
+
+### 10. Privacy and Sensitive Information
+
+Resumes may contain personal and professional information such as:
+
+- Names.
+- Email addresses.
+- Phone numbers.
+- Addresses.
+- Employment history.
+- Education history.
+- Professional profiles.
+
+Document processing therefore needs to be designed with privacy and secure data handling in mind.
+
+Sensitive resume information should not be unnecessarily exposed to external services.
+
+---
+
+### 11. Format-Specific Differences
+
+PDF and DOCX are different document formats and may require different extraction techniques.
+
+The architecture should therefore avoid assuming that one processing method will work equally well for every format.
+
+Instead:
+
+```text
+             Uploaded Resume
+                    ↓
+            Document Detection
+                    ↓
+          ┌─────────┴─────────┐
+          ↓                   ↓
+         PDF                 DOCX
+          ↓                   ↓
+    PDF Processor       DOCX Processor
+          ↓                   ↓
+          └─────────┬─────────┘
+                    ↓
+             Normalized Content
+```
+
+This allows format-specific processing while maintaining a common downstream pipeline.
+
+---
+
+### Analysis
+
+Document processing should be treated as a potentially unreliable input stage.
+
+The system cannot assume that every uploaded resume will produce perfect extracted text.
+
+Hirely should therefore introduce validation and error-handling mechanisms before passing extracted content to the resume parser.
+
+The document-processing layer should also remain modular so that individual extraction strategies can be improved without changing the rest of the system.
+
+---
+
+### Challenges Hirely Must Address
+
+The initial implementation should consider the following challenges:
+
+- Complex document layouts.
+- Multi-column reading order.
+- Tables and structured content.
+- Scanned documents.
+- OCR accuracy.
+- Poor-quality documents.
+- Insufficient extracted text.
+- Corrupted or invalid files.
+- Large file sizes.
+- Sensitive resume information.
+- Differences between document formats.
+
+---
+
+### Decision for Hirely
+
+Hirely will treat document processing as a validation and extraction layer rather than assuming that uploaded documents are always clean and machine-readable.
+
+The system will:
+
+- Validate uploaded files.
+- Use format-specific processing where required.
+- Detect insufficient extraction results.
+- Support an OCR fallback for appropriate image-based documents.
+- Validate extracted content before resume parsing.
+- Handle processing failures gracefully.
+- Keep document-processing components modular.
+- Consider privacy and secure handling of resume data.
+
+---
+
+### Key Takeaways
+
+- Real-world resumes can have complex layouts.
+- Text extraction does not always preserve visual structure.
+- Tables and multi-column layouts can create parsing challenges.
+- Scanned documents may require OCR.
+- OCR output may contain errors.
+- Invalid, corrupted, or unusually large files must be handled safely.
+- Resume data can contain sensitive personal information.
+- Document processing should validate and normalize content before resume parsing.
+- Format-specific processors should remain modular.
+
+---
+
+### Hirely Principle
+
+> **Never assume that an uploaded document is clean, simple, or perfectly machine-readable; validate, process, and normalize it before analysis.**
