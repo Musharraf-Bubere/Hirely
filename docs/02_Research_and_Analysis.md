@@ -1768,3 +1768,89 @@ This separation will establish a modular processing pipeline and prevent documen
 ### Hirely Principle
 
 > **Document processing extracts content; resume parsing understands the content.**
+
+## 5.2 Supported Resume Formats
+
+### Background
+
+Hirely needs to define which document formats will be accepted during resume upload.
+
+Supporting a controlled set of formats in the initial version will reduce implementation complexity and allow the document-processing pipeline to be developed and tested systematically.
+
+---
+
+### Initial Supported Formats
+
+For the initial version of Hirely, the following resume formats will be supported:
+
+- PDF
+- DOCX
+
+These formats provide a practical starting point for the first version of the resume-processing system.
+
+---
+
+### Future Format Support
+
+Additional formats may be considered in future versions, including:
+
+- TXT
+- RTF
+- ODT
+- Image-based documents
+
+These formats will not be part of the initial document-processing scope unless later requirements justify their inclusion.
+
+---
+
+### Important Consideration
+
+A file extension alone does not determine how easily a document can be processed.
+
+For example, a PDF may contain:
+
+1. Machine-readable text.
+2. Scanned images containing text.
+
+A text-based PDF can generally be processed using text-extraction techniques, while an image-based or scanned PDF may require Optical Character Recognition (OCR).
+
+Therefore, Hirely must distinguish between document format and document content when designing the processing pipeline.
+
+---
+
+### Analysis
+
+Limiting the initial supported formats allows Hirely to focus on building a reliable processing pipeline before expanding format support.
+
+The architecture should remain modular so that additional document processors can be introduced later without significantly changing the rest of the application.
+
+---
+
+### Decision for Hirely
+
+Hirely Version 1 will support:
+
+```text
+PDF
+DOCX
+```
+
+The document-processing architecture will use separate processing logic for different formats where necessary.
+
+Support for additional formats will be considered in future versions based on user requirements and system needs.
+
+---
+
+### Key Takeaways
+
+- Hirely V1 will support PDF and DOCX resumes.
+- Additional formats will be considered later.
+- File extension and document content are different concerns.
+- Scanned PDFs may require OCR.
+- Document processors should remain modular and extensible.
+
+---
+
+### Hirely Principle
+
+> **Start with a controlled set of formats, build a reliable processing pipeline, and expand format support when the architecture and requirements justify it.**
