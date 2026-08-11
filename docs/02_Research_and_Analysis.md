@@ -5360,3 +5360,298 @@ All agent tools should be explicitly defined, validated, permission-controlled, 
 ### Hirely Principle
 
 > **Give AI the tools it needs, but never give an agent more access or autonomy than the task requires.**
+
+## 6.7 LangChain Limitations
+
+### Background
+
+LangChain provides useful abstractions for building LLM-powered applications, but introducing a framework also introduces additional complexity and dependencies.
+
+Hirely should therefore evaluate both the benefits and limitations of using LangChain.
+
+The goal is not to use LangChain everywhere, but to determine where its abstractions provide meaningful value.
+
+---
+
+### 1. Added Complexity
+
+For a simple AI operation:
+
+```text
+Input
+  ↓
+Prompt
+  ↓
+LLM
+  ↓
+Response
+```
+
+a direct model API may be sufficient.
+
+Introducing LangChain for a very simple operation may add unnecessary abstractions.
+
+Therefore:
+
+```text
+Simple Requirement
+      ↓
+Prefer Simple Implementation
+```
+
+---
+
+### 2. Additional Abstraction Layer
+
+With LangChain, the application may contain additional layers:
+
+```text
+Hirely
+   ↓
+AI Service
+   ↓
+LangChain
+   ↓
+Provider Integration
+   ↓
+Model API
+```
+
+This abstraction can provide portability and reusable components, but it can also make debugging and understanding the complete execution path more difficult.
+
+---
+
+### 3. Framework Dependency
+
+If Hirely becomes heavily dependent on LangChain-specific APIs throughout the application, changing the AI framework later may become more difficult.
+
+A better architecture is:
+
+```text
+Hirely Application
+        ↓
+     AI Service
+        ↓
+    LangChain
+        ↓
+      Model
+```
+
+The AI service boundary keeps framework-specific implementation details isolated.
+
+---
+
+### 4. Framework Evolution
+
+AI frameworks evolve rapidly.
+
+APIs, abstractions, integrations, and recommended development patterns can change over time.
+
+Hirely should therefore avoid spreading framework-specific code across unrelated parts of the application.
+
+Keeping framework usage inside the AI layer can reduce the impact of future changes.
+
+---
+
+### 5. Agents Add Complexity
+
+Agents can provide dynamic decision-making, but they are not necessary for every AI workflow.
+
+For example:
+
+```text
+Resume
+  ↓
+Extract Skills
+  ↓
+Calculate Score
+  ↓
+Generate Report
+```
+
+This is a predictable workflow and can be implemented as a fixed pipeline.
+
+Using an agent for such a workflow may introduce unnecessary complexity.
+
+Agents are more appropriate when the next action genuinely depends on the current state or model decision.
+
+---
+
+### 6. Debugging Complexity
+
+A simple AI workflow may look like:
+
+```text
+Input
+  ↓
+Model
+  ↓
+Output
+```
+
+A more complex agent workflow may look like:
+
+```text
+Input
+  ↓
+Agent
+  ↓
+Model
+  ↓
+Tool
+  ↓
+Model
+  ↓
+Tool
+  ↓
+Model
+  ↓
+Output
+```
+
+When something fails in the second workflow, there are more components and execution steps to investigate.
+
+Therefore, Hirely should prefer simpler workflows when they satisfy the requirement.
+
+---
+
+### 7. Cost and Latency
+
+More complex workflows may require:
+
+- Multiple model calls.
+- Multiple tool calls.
+- Additional processing.
+- More tokens.
+
+This can increase:
+
+- API cost.
+- Response latency.
+- Infrastructure requirements.
+- Failure opportunities.
+
+Hirely should therefore avoid unnecessary model calls and unnecessary agent loops.
+
+---
+
+### 8. Provider Differences Remain
+
+LangChain can provide common interfaces across model providers, but different providers and models can still behave differently.
+
+Differences may include:
+
+- Model capabilities.
+- Context limits.
+- Tool-calling behavior.
+- Structured-output support.
+- Performance.
+- Pricing.
+- Reliability.
+
+Therefore:
+
+```text
+Common Interface
+      ≠
+Identical Model Behavior
+```
+
+Hirely must still evaluate the actual models being used.
+
+---
+
+### 9. Abstraction vs Control
+
+Framework abstractions can make development easier, but direct provider APIs may sometimes provide more direct control over provider-specific capabilities.
+
+Hirely therefore needs to balance:
+
+```text
+Abstraction
+    vs
+Control
+```
+
+The correct choice depends on the requirements of each feature.
+
+---
+
+### 10. Potential Vendor / Framework Lock-In
+
+Heavy dependence on framework-specific abstractions can create a form of framework coupling.
+
+For example:
+
+```text
+Business Logic
+      ↓
+LangChain-Specific APIs
+      ↓
+Model
+```
+
+can make future migration more difficult.
+
+A stronger architecture is:
+
+```text
+Business Logic
+      ↓
+Hirely AI Service Interface
+      ↓
+AI Implementation
+      ↓
+LangChain / Direct API
+      ↓
+Model
+```
+
+This allows the underlying AI implementation to change without rewriting the entire application.
+
+---
+
+### Analysis
+
+LangChain can provide significant value for applications requiring model integrations, tools, agents, structured outputs, and composable AI workflows.
+
+However, those capabilities also introduce additional concepts and complexity.
+
+Hirely should therefore avoid treating LangChain as a mandatory layer for every AI operation.
+
+The framework should be introduced where its abstractions solve a real engineering problem.
+
+---
+
+### Decision for Hirely
+
+Hirely will not automatically use LangChain for every AI operation.
+
+The project will follow these principles:
+
+- Prefer direct implementations for simple AI operations when appropriate.
+- Use LangChain where its abstractions provide meaningful value.
+- Keep framework-specific code inside the AI service boundary.
+- Avoid unnecessary agent usage.
+- Minimize unnecessary model and tool calls.
+- Evaluate provider-specific capabilities separately.
+- Keep the architecture flexible enough to replace or modify the AI framework later.
+
+---
+
+### Key Takeaways
+
+- LangChain can simplify complex AI application development.
+- LangChain also introduces additional abstraction and dependency.
+- Simple AI operations may not require a framework.
+- Agents can add significant complexity.
+- More AI calls can increase cost and latency.
+- Provider differences still exist behind common interfaces.
+- Framework-specific code should be isolated.
+- Hirely should use LangChain selectively rather than everywhere.
+
+---
+
+### Hirely Principle
+
+> **Use LangChain where it reduces complexity; do not introduce LangChain where it creates more complexity than it removes.**
