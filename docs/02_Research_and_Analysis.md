@@ -7038,3 +7038,335 @@ The final technology decision will be made after completing the research and und
 ### Hirely Principle
 
 > **Do not ask which AI framework is best in general; ask which architecture best solves the specific Hirely problem with the least unnecessary complexity.**
+
+## 6.11 Final Framework Decision for Hirely
+
+### Purpose
+
+The purpose of this section is to make a preliminary technology decision for Hirely based on the research completed in the previous sections.
+
+The decision should be requirement-driven rather than framework-driven.
+
+The project should not introduce a framework simply because it is popular or provides many features.
+
+The preferred approach is:
+
+```text
+Hirely Requirement
+       ↓
+Identify Architecture Problem
+       ↓
+Choose Appropriate Technology
+```
+
+---
+
+### Research Summary
+
+The research covered:
+
+```text
+LangChain
+   ↓
+LLM Application Building
+   ↓
+Tools and Agents
+   ↓
+Limitations
+
+LangGraph
+   ↓
+Stateful and Complex AI Workflow Orchestration
+
+LlamaIndex
+   ↓
+Data, Indexing, Retrieval and RAG
+```
+
+These technologies have overlapping capabilities, but their primary architectural emphasis differs.
+
+---
+
+### Framework Roles
+
+#### LangChain
+
+Primary role:
+
+```text
+LLM Application Development
+```
+
+Potential Hirely uses:
+
+- Model integrations.
+- Tools.
+- Agents.
+- Structured output.
+- AI application components.
+
+LangChain is a candidate for general AI application functionality where its abstractions provide meaningful value.
+
+---
+
+#### LangGraph
+
+Primary role:
+
+```text
+Complex Stateful AI Workflow Orchestration
+```
+
+Potential Hirely uses:
+
+- Multi-step agent workflows.
+- State management.
+- Conditional routing.
+- Human-in-the-loop workflows.
+- Long-running workflows.
+- Durable execution.
+
+LangGraph should only be introduced when workflow complexity justifies an explicit orchestration layer.
+
+---
+
+#### LlamaIndex
+
+Primary role:
+
+```text
+Data-Connected AI and Retrieval
+```
+
+Potential Hirely uses:
+
+- Resume knowledge bases.
+- Document retrieval.
+- RAG.
+- Data indexing.
+- Knowledge retrieval.
+- Data-aware AI applications.
+
+LlamaIndex should be evaluated when Hirely's AI features depend heavily on external or private data.
+
+---
+
+### Preliminary Hirely Architecture
+
+The AI layer can be conceptually divided into three categories:
+
+```text
+                         Hirely AI
+                             │
+             ┌───────────────┼───────────────┐
+             ↓               ↓               ↓
+         Simple AI       Agentic AI       Data/RAG
+             │               │               │
+             ↓               ↓               ↓
+       Model API /        LangChain       Retrieval
+       LangChain             │            System
+                             ↓               │
+                         LangGraph       LlamaIndex
+```
+
+This represents possible technology roles rather than a requirement to install and use all frameworks simultaneously.
+
+---
+
+### Decision Rule
+
+Hirely will use the following decision process:
+
+```text
+Feature Requirement
+       ↓
+Is it a simple AI operation?
+       ↓
+      Yes
+       ↓
+Direct Model API / Simple AI Layer
+```
+
+If tools or agent capabilities are required:
+
+```text
+Feature
+  ↓
+Tools / Agent
+  ↓
+LangChain
+```
+
+If the workflow becomes complex and stateful:
+
+```text
+Feature
+  ↓
+Complex Workflow
+  ↓
+LangGraph
+```
+
+If the feature depends heavily on external/private data and retrieval:
+
+```text
+Feature
+  ↓
+Data / Retrieval / RAG
+  ↓
+Evaluate LlamaIndex
+```
+
+These are decision guidelines rather than rigid rules.
+
+---
+
+### Initial Technology Strategy
+
+Hirely should begin with the simplest architecture capable of satisfying the current requirements.
+
+The initial strategy is:
+
+```text
+Core AI
+   ↓
+Direct Model API
+   +
+LangChain where useful
+```
+
+Additional technologies will be introduced only when their specific capabilities become necessary.
+
+Potential future additions:
+
+```text
+Complex Agent Workflow
+        ↓
+     LangGraph
+```
+
+```text
+Advanced Data Retrieval / RAG
+        ↓
+   Evaluate LlamaIndex
+```
+
+---
+
+### Why Not Use Everything Immediately?
+
+Using all three frameworks from the beginning would introduce unnecessary complexity.
+
+Potential consequences include:
+
+- More dependencies.
+- More abstractions.
+- More maintenance.
+- More learning overhead.
+- More integration complexity.
+- More difficult debugging.
+- Potential duplication of functionality.
+
+Therefore:
+
+```text
+More Frameworks
+      ≠
+Better Architecture
+```
+
+A better principle is:
+
+```text
+Required Capability
+      ↓
+Minimum Necessary Technology
+```
+
+---
+
+### Hirely Architecture Principle
+
+The project should follow:
+
+```text
+Start Simple
+     ↓
+Build Features
+     ↓
+Identify Real Problems
+     ↓
+Introduce Appropriate Abstractions
+     ↓
+Scale the Architecture
+```
+
+This prevents premature architectural complexity.
+
+---
+
+### Long-Term Possibility
+
+As Hirely evolves, its AI architecture may become:
+
+```text
+                    Hirely AI Layer
+                          │
+          ┌───────────────┼────────────────┐
+          ↓               ↓                ↓
+       Models           Agents            Data
+          │               │                │
+          ↓               ↓                ↓
+     Model API /      LangChain +      Retrieval /
+      LangChain       LangGraph         RAG Layer
+                                             │
+                                         LlamaIndex
+                                        if justified
+```
+
+The exact implementation will depend on the actual requirements discovered during development.
+
+---
+
+### Final Preliminary Decision
+
+At the current research stage:
+
+```text
+LangChain
+→ Candidate for general LLM application capabilities,
+  tools, and agents.
+
+LangGraph
+→ Candidate for complex, stateful, and long-running
+  AI workflows.
+
+LlamaIndex
+→ Candidate for data-heavy AI, indexing, retrieval,
+  and RAG workflows.
+```
+
+Hirely will not automatically adopt all three.
+
+The project will begin with the simplest suitable AI architecture and introduce additional frameworks only when their capabilities solve a real requirement.
+
+---
+
+### Key Takeaways
+
+- Technology decisions should be requirement-driven.
+- LangChain is a candidate for general LLM application capabilities.
+- LangGraph is a candidate for complex stateful workflows.
+- LlamaIndex is a candidate for data-heavy retrieval and RAG.
+- The three frameworks have overlapping capabilities.
+- Hirely should not use all three by default.
+- Simple features should remain simple.
+- Additional frameworks should be introduced only when justified.
+- Architecture should evolve as real requirements emerge.
+- The goal is maintainability and appropriate complexity, not maximum framework usage.
+
+---
+
+### Hirely Principle
+
+> **Choose the simplest architecture that solves the current problem, and introduce additional AI frameworks only when their capabilities provide clear engineering value.**
