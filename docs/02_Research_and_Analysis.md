@@ -3379,3 +3379,254 @@ The final framework decision will be made after completing the remaining AI-fram
 
 > **Use an AI framework when its abstractions simplify the application; do not add a framework merely because the application uses an LLM.**
 
+## 6.2 Why Does Hirely Need LangChain?
+
+### Background
+
+Hirely will contain an AI layer responsible for features such as resume feedback, personalized recommendations, career guidance, content generation, and potentially tool-assisted workflows.
+
+The use of LangChain should therefore be evaluated based on whether it simplifies these requirements.
+
+The goal is not to introduce LangChain simply because Hirely uses Large Language Models.
+
+---
+
+### Potential Role of LangChain in Hirely
+
+A possible AI architecture could be:
+
+```text
+Hirely Application
+        ↓
+     AI Service
+        ↓
+     LangChain
+        ↓
+ Model / Tools / Workflow
+        ↓
+       LLM
+```
+
+LangChain can provide abstractions for connecting application logic with models, tools, and agent-based workflows.
+
+---
+
+### Potential Hirely Use Case 1: Resume Feedback
+
+Hirely may eventually generate personalized resume feedback.
+
+A simplified flow could be:
+
+```text
+Resume
+   ↓
+Structured Resume Data
+   ↓
+AI Service
+   ↓
+LLM
+   ↓
+Personalized Feedback
+```
+
+LangChain could provide useful model and structured-output integrations around this workflow.
+
+However, if the implementation only requires a simple model request, using LangChain may not provide enough additional value to justify the extra abstraction.
+
+---
+
+### Potential Hirely Use Case 2: Career Recommendations
+
+Hirely may provide personalized career recommendations based on information such as:
+
+- Skills.
+- Experience.
+- Education.
+- Projects.
+- Career goals.
+
+A future workflow could involve:
+
+```text
+User Profile
+      ↓
+Relevant Information
+      ↓
+AI Processing
+      ↓
+LLM
+      ↓
+Career Recommendations
+```
+
+If this workflow later requires retrieval, tools, or multiple AI steps, a framework such as LangChain may become more useful.
+
+---
+
+### Potential Hirely Use Case 3: Tool Integration
+
+Some future Hirely features may need AI to interact with application tools.
+
+For example:
+
+```text
+LLM
+ ↓
+Tool Selection
+ ↓
+Hirely Tool
+ ↓
+Result
+ ↓
+LLM
+ ↓
+Final Response
+```
+
+Potential tools could include:
+
+- Resume analysis functions.
+- Database queries.
+- Job-search services.
+- Skill-matching functions.
+- External APIs.
+
+LangChain provides abstractions for tool integration and agent workflows.
+
+---
+
+### Potential Hirely Use Case 4: Structured AI Output
+
+Hirely should not rely on free-form AI responses for every feature.
+
+For example, instead of receiving:
+
+```text
+"The candidate has strong Python skills..."
+```
+
+the application may eventually require structured information such as:
+
+```text
+{
+    "score": 82,
+    "strengths": [...],
+    "weaknesses": [...],
+    "recommendations": [...]
+}
+```
+
+Structured outputs can make AI responses easier for the application to validate and use.
+
+LangChain provides model interfaces that support structured output capabilities.
+
+---
+
+### Potential Hirely Use Case 5: Multiple Model Providers
+
+Hirely may need to experiment with different LLM providers during development.
+
+Conceptually:
+
+```text
+                 Hirely AI Service
+                        ↓
+                    LangChain
+                        ↓
+             ┌──────────┼──────────┐
+             ↓          ↓          ↓
+          Provider A Provider B Provider C
+             ↓          ↓          ↓
+           Model      Model      Model
+```
+
+A common abstraction can reduce the amount of provider-specific application code.
+
+This may be useful when evaluating models based on:
+
+- Quality.
+- Cost.
+- Latency.
+- Availability.
+- Feature support.
+
+---
+
+### When LangChain May NOT Be Necessary
+
+LangChain should not automatically be used for every AI operation.
+
+For a simple workflow:
+
+```text
+User Input
+    ↓
+Prompt
+    ↓
+LLM API
+    ↓
+Response
+```
+
+a direct model API may be simpler and easier to maintain.
+
+Introducing a framework for a very small operation could create unnecessary complexity.
+
+---
+
+### Analysis
+
+The value of LangChain for Hirely depends on the complexity of the AI workflows we eventually implement.
+
+Potential benefits include:
+
+- Model abstraction.
+- Model-provider integrations.
+- Tool integration.
+- Agent capabilities.
+- Structured output support.
+- Reusable AI application components.
+
+Potential costs include:
+
+- Additional dependency.
+- Additional abstraction.
+- Framework-specific concepts.
+- Potentially more complex debugging.
+- Dependency on framework APIs and ecosystem changes.
+
+Therefore, LangChain should be evaluated based on actual Hirely requirements rather than being treated as a mandatory technology.
+
+---
+
+### Decision for Hirely
+
+At this stage, LangChain will be treated as a **candidate framework for the Hirely AI layer**, not as a mandatory dependency for the entire application.
+
+We will continue researching its:
+
+- Core concepts.
+- Components.
+- Model integrations.
+- Tool and agent capabilities.
+- Limitations.
+
+The final decision will be made after comparing LangChain with alternatives such as LangGraph and LlamaIndex.
+
+---
+
+### Key Takeaways
+
+- Hirely may benefit from LangChain for complex AI workflows.
+- LangChain can provide model and tool abstractions.
+- Structured AI output may be useful for Hirely.
+- Multiple model-provider integrations may become valuable.
+- Simple LLM calls may not require LangChain.
+- LangChain should be used only where it provides meaningful architectural value.
+- The final adoption decision will be made after completing the framework comparison.
+
+---
+
+### Hirely Principle
+
+> **Choose the simplest architecture that satisfies the requirement; introduce LangChain when its abstractions provide measurable value.**
