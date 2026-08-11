@@ -4885,3 +4885,478 @@ The final model/provider selection will be made after evaluating Hirely's actual
 
 > **Keep provider-specific details behind the AI service boundary so Hirely can evaluate and change models without unnecessarily rewriting the application.**
 
+## 6.6 LangChain Tools and Agents
+
+### Background
+
+AI models are powerful at understanding and generating information, but a model by itself cannot automatically perform arbitrary actions in an external application.
+
+Tools provide a mechanism for connecting a model or agent to external functionality.
+
+Agents can then use models and tools together to perform dynamic, multi-step tasks.
+
+---
+
+### Tools
+
+A tool is a callable function that an AI system can use to perform a specific operation.
+
+Examples include:
+
+- Searching information.
+- Querying a database.
+- Calling an API.
+- Performing calculations.
+- Accessing application functionality.
+- Retrieving resume information.
+
+Conceptually:
+
+```text
+AI Model
+   ↓
+Tool Selection
+   ↓
+Tool
+   ↓
+Tool Execution
+   ↓
+Tool Result
+```
+
+A tool should have clearly defined inputs and outputs.
+
+---
+
+### Example Tool
+
+Consider a Hirely job-search tool:
+
+```text
+Tool Name:
+search_jobs
+
+Input:
+{
+    "skills": ["Python", "SQL"],
+    "location": "Remote"
+}
+
+Output:
+Job Results
+```
+
+The tool performs the actual operation.
+
+The model determines when the tool may be useful.
+
+---
+
+### Tool Calling
+
+A simplified tool-calling workflow is:
+
+```text
+User Request
+     ↓
+    Model
+     ↓
+Does the task require a tool?
+     ↓
+    Yes
+     ↓
+Tool Call
+     ↓
+Tool Execution
+     ↓
+Tool Result
+     ↓
+    Model
+     ↓
+Final Response
+```
+
+The model does not directly execute the tool.
+
+Instead, it produces a tool call containing the required arguments, and the application/framework executes the tool.
+
+---
+
+### Types of Hirely Tools
+
+Potential Hirely tools could include:
+
+```text
+Resume Tools
+├── get_resume
+├── analyze_resume
+└── extract_skills
+
+Job Tools
+├── search_jobs
+├── get_job_details
+└── match_jobs
+
+User Tools
+├── get_user_profile
+└── get_career_preferences
+```
+
+These are examples for architectural analysis and are not final implementation decisions.
+
+---
+
+### Agents
+
+An agent combines a model with tools and an execution loop.
+
+The agent can determine:
+
+- What the user is asking.
+- Whether a tool is required.
+- Which tool should be used.
+- What arguments should be supplied.
+- Whether another step is necessary.
+- When the task is complete.
+
+Conceptually:
+
+```text
+                  User Request
+                       ↓
+                     Agent
+                       ↓
+                     Model
+                       ↓
+                Decide Next Step
+                  /          \
+                 /            \
+             Tool Needed     No Tool
+                ↓               ↓
+              Tool          Final Answer
+                ↓
+           Tool Result
+                ↓
+              Model
+                ↓
+        Decide Next Step
+                ↓
+          Final Answer
+```
+
+---
+
+### Agent Loop
+
+A simplified agent loop is:
+
+```text
+1. Receive task
+       ↓
+2. Send context to model
+       ↓
+3. Model decides next action
+       ↓
+4. Execute selected tool if required
+       ↓
+5. Return tool result to model
+       ↓
+6. Model evaluates result
+       ↓
+7. Repeat if necessary
+       ↓
+8. Produce final answer
+```
+
+This makes agents different from simple one-shot model calls.
+
+---
+
+### Simple Model vs Agent
+
+A simple model workflow:
+
+```text
+Input
+  ↓
+Prompt
+  ↓
+Model
+  ↓
+Output
+```
+
+An agent workflow:
+
+```text
+Input
+  ↓
+Agent
+  ↓
+Model
+  ↓
+Tool?
+ ├── No → Final Output
+ └── Yes
+       ↓
+     Tool
+       ↓
+     Result
+       ↓
+     Model
+       ↓
+     Tool?
+       ↓
+    ...
+       ↓
+ Final Output
+```
+
+Agents introduce additional decision-making and execution steps.
+
+---
+
+### Potential Hirely Example
+
+Suppose a user asks:
+
+> "Based on my resume, find jobs that match my skills and explain why they are suitable."
+
+A potential agent workflow could be:
+
+```text
+User Request
+      ↓
+     Agent
+      ↓
+ Get Resume
+      ↓
+   Resume Data
+      ↓
+Extract Skills
+      ↓
+    Skills
+      ↓
+ Search Jobs
+      ↓
+ Job Results
+      ↓
+ Compare Resume + Jobs
+      ↓
+Generate Explanation
+      ↓
+ Final Response
+```
+
+The agent could coordinate multiple tools to complete the task.
+
+---
+
+### Another Hirely Example
+
+Consider:
+
+> "What skills am I missing for a Machine Learning Engineer role?"
+
+Potential workflow:
+
+```text
+User Request
+      ↓
+     Agent
+      ↓
+Get Resume
+      ↓
+Extract Current Skills
+      ↓
+Get Target Role Requirements
+      ↓
+Compare Skills
+      ↓
+Identify Gaps
+      ↓
+Generate Recommendations
+      ↓
+Final Response
+```
+
+This is a more dynamic workflow than simply asking an LLM to generate text.
+
+---
+
+### When Hirely Should Use Tools
+
+Tools are useful when the AI needs access to information or functionality that is not contained in the model's existing context.
+
+Potential examples:
+
+```text
+Need current job data
+        ↓
+    Job Search Tool
+
+Need user resume
+        ↓
+    Resume Tool
+
+Need application data
+        ↓
+    Database Tool
+
+Need calculation
+        ↓
+    Calculation Tool
+```
+
+---
+
+### When Hirely Should Use Agents
+
+Agents may be appropriate when:
+
+- The task requires multiple steps.
+- The next step depends on previous results.
+- Different tools may be required.
+- The system needs dynamic decision-making.
+- The workflow cannot easily be represented as a fixed sequence.
+
+For simple deterministic workflows, a normal pipeline may be preferable.
+
+---
+
+### Agent vs Fixed Workflow
+
+A fixed workflow might be:
+
+```text
+Resume
+  ↓
+Extract Skills
+  ↓
+Match Jobs
+  ↓
+Generate Report
+```
+
+The steps are predetermined.
+
+An agent workflow may be:
+
+```text
+User Request
+      ↓
+    Agent
+      ↓
+Determine Required Actions
+      ↓
+Tool A / Tool B / Tool C
+      ↓
+Evaluate Results
+      ↓
+Determine Next Action
+      ↓
+Final Response
+```
+
+Agents provide more flexibility but also introduce more complexity.
+
+---
+
+### Risks of Agents
+
+Agents should not be added without considering their risks.
+
+Potential problems include:
+
+- Unexpected tool calls.
+- Incorrect tool arguments.
+- Unnecessary tool usage.
+- Longer execution time.
+- Higher model usage and cost.
+- More difficult debugging.
+- Non-deterministic execution.
+- Incorrect reasoning leading to incorrect actions.
+
+Therefore, agent workflows require appropriate validation and controls.
+
+---
+
+### Security Considerations
+
+Tools can provide access to sensitive functionality.
+
+For Hirely, tools may eventually access:
+
+- Resume data.
+- User profiles.
+- Database records.
+- External services.
+
+Therefore, tools should have:
+
+- Clearly defined permissions.
+- Input validation.
+- Output validation.
+- Appropriate authentication.
+- Minimal required access.
+- Error handling.
+
+An AI agent should not automatically receive unrestricted access to the application's systems.
+
+---
+
+### Analysis
+
+Tools and agents can significantly extend the capabilities of an LLM-powered application.
+
+However:
+
+```text
+More capability
+      ↓
+More complexity
+      ↓
+More control required
+```
+
+Hirely should therefore use tools where external functionality is genuinely required and agents only where dynamic decision-making provides meaningful value.
+
+---
+
+### Decision for Hirely
+
+Hirely will support the possibility of application-specific tools in the AI layer.
+
+Potential tools may eventually expose safe operations such as:
+
+- Resume retrieval.
+- Resume analysis.
+- Job search.
+- Skill matching.
+- Career information retrieval.
+
+Agents will be considered for complex multi-step AI workflows.
+
+Simple deterministic workflows will remain ordinary application pipelines unless an agent provides a clear advantage.
+
+All agent tools should be explicitly defined, validated, permission-controlled, and limited to the minimum functionality required.
+
+---
+
+### Key Takeaways
+
+- Tools are callable functions available to an AI system.
+- Tools provide access to external functionality.
+- Agents combine models and tools with a decision-making loop.
+- Tool calling allows models to request external actions.
+- Agents are useful for dynamic multi-step tasks.
+- Fixed workflows are often preferable for deterministic processes.
+- Agents introduce additional complexity and cost.
+- Tool permissions and input validation are important security requirements.
+- Hirely will evaluate agents only where they provide meaningful value.
+
+---
+
+### Hirely Principle
+
+> **Give AI the tools it needs, but never give an agent more access or autonomy than the task requires.**
