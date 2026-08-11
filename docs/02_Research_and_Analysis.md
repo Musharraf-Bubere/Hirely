@@ -3123,3 +3123,259 @@ This architecture will provide a reliable foundation for the later resume-analys
 > **Validate → Extract → Normalize → Parse.**
 
 The document-processing layer prepares reliable input for the resume parser; it does not attempt to understand the resume itself.
+
+# 6. AI Frameworks
+
+## 6.1 What is LangChain?
+
+### Background
+
+Large Language Models can be accessed directly through provider-specific APIs, but building a complete AI-powered application often requires additional components such as model integrations, tools, structured interactions, and agent workflows.
+
+LangChain is an open-source framework designed to simplify the development of applications and agents powered by Large Language Models.
+
+It provides abstractions and integrations for working with models, tools, and agent workflows.
+
+---
+
+### LangChain in Simple Terms
+
+A basic application without an AI framework may communicate directly with an LLM provider:
+
+```text
+Application
+     ↓
+Provider API
+     ↓
+LLM
+     ↓
+Response
+```
+
+With LangChain, an additional application framework layer can be introduced:
+
+```text
+Application
+     ↓
+LangChain
+     ↓
+Model / Tools / Agent
+     ↓
+LLM Provider
+     ↓
+Response
+```
+
+LangChain therefore acts as an abstraction and integration layer between an application and many components of an LLM-powered system.
+
+---
+
+### LangChain vs LLM
+
+LangChain is not an LLM.
+
+An LLM is the actual model responsible for generating or interpreting information.
+
+Examples of LLM providers and models include:
+
+- OpenAI models.
+- Anthropic models.
+- Google models.
+- Open-weight models.
+
+LangChain provides a framework for interacting with models and building higher-level AI applications.
+
+Therefore:
+
+```text
+LLM
+=
+AI Model
+
+LangChain
+=
+Framework for building applications around AI Models
+```
+
+---
+
+### Standard Model Interface
+
+One of LangChain's important capabilities is providing a standardized interface for interacting with different model providers.
+
+Different providers may expose different APIs and response formats.
+
+LangChain provides common model interfaces so that application logic can be less tightly coupled to a specific provider.
+
+Conceptually:
+
+```text
+             Application
+                  ↓
+              LangChain
+                  ↓
+        ┌─────────┼─────────┐
+        ↓         ↓         ↓
+     OpenAI    Anthropic   Google
+        ↓         ↓         ↓
+      Model     Model      Model
+```
+
+This can make it easier to experiment with different models and providers.
+
+---
+
+### LangChain and Agents
+
+LangChain also provides agent abstractions.
+
+An agent can combine:
+
+```text
+Language Model
+      +
+Tools
+      +
+Decision / Agent Loop
+```
+
+The model can determine when tools should be used and can work through multiple steps before producing a final result.
+
+For simple LLM applications, an agent may not be necessary.
+
+For applications requiring tool usage or more dynamic workflows, agent abstractions can become useful.
+
+---
+
+### LangChain and Tools
+
+Tools allow an AI system to perform actions beyond generating text.
+
+Examples include:
+
+- Searching information.
+- Querying a database.
+- Calling an external API.
+- Performing calculations.
+- Executing application-specific functions.
+
+Conceptually:
+
+```text
+                 LLM
+                  ↓
+            Decide whether
+             a tool is needed
+                  ↓
+              Tool Call
+                  ↓
+          Tool Execution
+                  ↓
+             Tool Result
+                  ↓
+                 LLM
+                  ↓
+             Final Output
+```
+
+LangChain provides abstractions for defining and integrating such tools.
+
+---
+
+### LangChain and LangGraph
+
+LangChain and LangGraph serve different purposes.
+
+At a high level:
+
+```text
+LangChain
+    ↓
+Higher-level agent framework
+    ↓
+Models + Tools + Agent abstractions
+```
+
+```text
+LangGraph
+    ↓
+Lower-level orchestration framework/runtime
+    ↓
+Stateful and complex workflows
+```
+
+LangChain agents are built on top of LangGraph.
+
+LangGraph will be researched separately later in this module.
+
+---
+
+### LangChain and Hirely
+
+Hirely will eventually contain an AI layer responsible for capabilities such as:
+
+- Resume feedback.
+- Personalized recommendations.
+- Career guidance.
+- Content generation.
+- Cover-letter generation.
+- Interview preparation.
+
+LangChain could provide useful abstractions for connecting these AI capabilities with models and application tools.
+
+However, using LangChain should be based on actual project requirements rather than assuming that every AI operation requires a framework.
+
+---
+
+### Analysis
+
+LangChain can reduce the amount of provider-specific integration code required in an LLM-powered application.
+
+Its standardized interfaces can also make experimentation with different models easier.
+
+However, adding a framework introduces another dependency and abstraction layer.
+
+Therefore, Hirely should use LangChain only where its abstractions provide meaningful value.
+
+Simple tasks that can be implemented cleanly using a direct model API should not automatically be forced through unnecessary framework abstractions.
+
+---
+
+### Decision for Hirely
+
+LangChain will be researched as a potential AI framework for Hirely.
+
+At this stage, Hirely will not make the final decision to use LangChain throughout the entire application.
+
+The framework will be evaluated based on:
+
+- Model integration.
+- Tool integration.
+- Agent requirements.
+- Structured output support.
+- Maintainability.
+- Complexity.
+- Performance.
+- Project requirements.
+
+The final framework decision will be made after completing the remaining AI-framework research.
+
+---
+
+### Key Takeaways
+
+- LangChain is an open-source framework for building LLM-powered applications and agents.
+- LangChain is not an LLM.
+- It provides abstractions for models, tools, and agent workflows.
+- It provides standardized interfaces across model providers.
+- Tools allow AI applications to perform external actions.
+- LangChain provides higher-level abstractions than LangGraph.
+- LangChain may be useful for Hirely's AI layer.
+- Hirely will evaluate LangChain before making a final adoption decision.
+
+---
+
+### Hirely Principle
+
+> **Use an AI framework when its abstractions simplify the application; do not add a framework merely because the application uses an LLM.**
+
