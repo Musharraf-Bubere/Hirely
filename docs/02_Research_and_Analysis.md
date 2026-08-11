@@ -3630,3 +3630,425 @@ The final decision will be made after comparing LangChain with alternatives such
 ### Hirely Principle
 
 > **Choose the simplest architecture that satisfies the requirement; introduce LangChain when its abstractions provide measurable value.**
+
+## 6.3 LangChain Core Concepts
+
+### Background
+
+Understanding LangChain requires understanding its fundamental building blocks before studying individual integrations or advanced agent architectures.
+
+The main concepts relevant to Hirely include:
+
+- Messages.
+- Models.
+- Tools.
+- Structured output.
+- Runnables and composition.
+- Agents.
+
+These concepts form the foundation for building LLM-powered applications with LangChain.
+
+---
+
+### 1. Messages
+
+Messages represent the context exchanged with a model.
+
+A message generally contains:
+
+- A role.
+- Content.
+- Optional metadata.
+
+Common message roles include:
+
+- System.
+- Human / User.
+- AI.
+- Tool.
+
+Conceptually:
+
+```text
+System Message
+      ↓
+Instructions / Behavior
+
+Human Message
+      ↓
+User Input
+
+AI Message
+      ↓
+Model Response
+
+Tool Message
+      ↓
+Tool Result
+```
+
+Messages provide a standardized representation of model interactions.
+
+---
+
+### 2. Models
+
+Models are the actual AI components that process input and generate or reason over output.
+
+Conceptually:
+
+```text
+Application
+     ↓
+LangChain Model Interface
+     ↓
+LLM / Chat Model
+     ↓
+Response
+```
+
+The model is responsible for capabilities such as:
+
+- Understanding language.
+- Generating text.
+- Following instructions.
+- Calling tools when supported.
+- Producing structured output when supported.
+
+LangChain provides standardized interfaces that allow application code to interact with different model providers.
+
+---
+
+### 3. Tools
+
+Tools are callable functions that allow an AI system to interact with external functionality.
+
+Examples include:
+
+- Database queries.
+- API calls.
+- Search operations.
+- Calculations.
+- Application-specific functions.
+
+Conceptually:
+
+```text
+User Request
+     ↓
+     LLM
+     ↓
+Need external information?
+     ↓
+    Tool
+     ↓
+Tool Result
+     ↓
+    LLM
+     ↓
+Final Response
+```
+
+A tool has defined inputs and outputs so that the model can understand how to use it.
+
+---
+
+### 4. Structured Output
+
+Normally, an LLM may return free-form text.
+
+For example:
+
+```text
+"The resume has strong Python experience but should improve
+the project descriptions."
+```
+
+For software applications, structured data is often more useful.
+
+For example:
+
+```json
+{
+  "score": 82,
+  "strengths": [
+    "Python experience"
+  ],
+  "weaknesses": [
+    "Project descriptions"
+  ],
+  "recommendations": [
+    "Add measurable project outcomes"
+  ]
+}
+```
+
+Structured output allows the application to work with predictable data instead of parsing arbitrary natural-language responses.
+
+Hirely can potentially use structured outputs for:
+
+- Resume analysis results.
+- Skill extraction.
+- ATS analysis.
+- Recommendations.
+- Resume scoring.
+- AI-generated reports.
+
+---
+
+### 5. Runnables
+
+A Runnable represents a unit of work that can be invoked and composed with other operations.
+
+Common operations include:
+
+```text
+invoke
+batch
+stream
+```
+
+Conceptually:
+
+```text
+Input
+  ↓
+Runnable A
+  ↓
+Runnable B
+  ↓
+Runnable C
+  ↓
+Output
+```
+
+This allows different processing steps to be combined into reusable workflows.
+
+For example:
+
+```text
+Resume Text
+     ↓
+Prompt
+     ↓
+Model
+     ↓
+Structured Output
+```
+
+Each stage can be treated as part of a larger processing pipeline.
+
+---
+
+### 6. Composition
+
+LangChain components can be combined to construct larger workflows.
+
+A conceptual Hirely workflow could be:
+
+```text
+Resume Data
+     ↓
+Prompt Construction
+     ↓
+Model
+     ↓
+Structured Output
+     ↓
+Validation
+     ↓
+Final Analysis
+```
+
+The benefit of composition is that individual components can remain focused on a specific responsibility while the overall application combines them into a larger workflow.
+
+---
+
+### 7. Agents
+
+Agents combine models with tools.
+
+An agent can:
+
+1. Receive a task.
+2. Use the model to determine what needs to be done.
+3. Select an appropriate tool.
+4. Execute the tool.
+5. Observe the result.
+6. Continue processing.
+7. Return a final response.
+
+Conceptually:
+
+```text
+              User Task
+                  ↓
+                Agent
+                  ↓
+                Model
+                  ↓
+          ┌───────┴───────┐
+          ↓               ↓
+      No Tool          Tool Needed
+          ↓               ↓
+     Final Answer       Tool Call
+                          ↓
+                     Tool Result
+                          ↓
+                        Model
+                          ↓
+                     Final Answer
+```
+
+Agents are more appropriate for dynamic tasks where the system needs to decide what actions to take.
+
+Not every Hirely AI feature will require an agent.
+
+---
+
+### 8. Relationship Between the Concepts
+
+The concepts can be connected as follows:
+
+```text
+                    Hirely Application
+                           ↓
+                        Messages
+                           ↓
+                         Model
+                           ↓
+                 ┌─────────┴─────────┐
+                 ↓                   ↓
+             Direct Task        Agent Workflow
+                 ↓                   ↓
+          Structured Output        Tools
+                 ↓                   ↓
+             Application        Tool Results
+                 ↓                   ↓
+                 └─────────┬─────────┘
+                           ↓
+                     Final Result
+```
+
+Runnables and composition can be used to connect processing steps into reusable workflows.
+
+---
+
+### LangChain Mental Model
+
+A simplified mental model for LangChain is:
+
+```text
+Messages
+   ↓
+Models
+   ↓
+Tools
+   ↓
+Agents / Workflows
+   ↓
+Structured Output
+   ↓
+Application
+```
+
+This is a conceptual model rather than a strict execution order.
+
+Different applications may use only a subset of these components.
+
+---
+
+### Application to Hirely
+
+Potential mappings for Hirely include:
+
+```text
+Resume
+  ↓
+Document Processing
+  ↓
+Structured Resume Data
+  ↓
+Prompt / Context
+  ↓
+LangChain Model
+  ↓
+Structured Analysis
+  ↓
+Hirely Application
+```
+
+For more advanced features:
+
+```text
+User Request
+     ↓
+Hirely AI Service
+     ↓
+LangChain Agent
+     ↓
+Model
+     ↓
+Tool Calls
+     ↓
+Tool Results
+     ↓
+Structured Output
+     ↓
+Hirely Application
+```
+
+However, these are potential architectures rather than final implementation decisions.
+
+---
+
+### Analysis
+
+The main value of understanding these concepts is architectural clarity.
+
+Hirely should not treat LangChain as a single feature or library that automatically solves the AI problem.
+
+Instead, LangChain provides different building blocks that can be selected according to application requirements.
+
+For example:
+
+- A simple AI response may only require a model.
+- A predictable application result may benefit from structured output.
+- An external action may require a tool.
+- A dynamic multi-step task may benefit from an agent.
+- A reusable processing pipeline may benefit from composition.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate LangChain components individually rather than adopting every component by default.
+
+The project will prioritize:
+
+- Clear separation of responsibilities.
+- Structured AI outputs where application integration requires them.
+- Tools only where external actions or information access are necessary.
+- Agents only where dynamic decision-making provides meaningful value.
+- Composable workflows where they improve maintainability.
+
+Simple AI operations will remain as simple as possible.
+
+---
+
+### Key Takeaways
+
+- Messages represent model interaction context.
+- Models provide the core AI capabilities.
+- Tools allow AI systems to interact with external functionality.
+- Structured output provides predictable machine-readable results.
+- Runnables represent composable units of work.
+- Agents combine models and tools for dynamic tasks.
+- Not every Hirely feature requires every LangChain component.
+- LangChain should be used selectively according to actual requirements.
+
+---
+
+### Hirely Principle
+
+> **Treat LangChain as a collection of composable building blocks, not as a requirement to use every abstraction.**
