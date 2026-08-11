@@ -4555,3 +4555,333 @@ These are evaluation decisions rather than final implementation commitments.
 
 > **Choose the smallest LangChain component set that solves the actual problem, and add complexity only when the requirements justify it.**
 
+## 6.5 LangChain and LLM Providers
+
+### Background
+
+Hirely will need access to one or more Large Language Models for its AI features.
+
+Different LLM providers expose different APIs, SDKs, model identifiers, capabilities, and configuration options.
+
+LangChain provides model interfaces and provider integrations that can reduce direct coupling between application code and individual model providers.
+
+---
+
+### Direct Provider Integration
+
+Without a framework abstraction, an application may communicate directly with a provider:
+
+```text
+Hirely
+   ↓
+Provider SDK / API
+   ↓
+Specific Model
+   ↓
+Response
+```
+
+If the application later changes providers, provider-specific code may need to be changed.
+
+---
+
+### LangChain Model Abstraction
+
+With LangChain:
+
+```text
+Hirely
+   ↓
+AI Service
+   ↓
+LangChain Model Interface
+   ↓
+Provider Integration
+   ↓
+Specific Model
+```
+
+The application can interact with a common model interface while the provider integration handles provider-specific details.
+
+---
+
+### Multiple Providers
+
+Conceptually:
+
+```text
+                    Hirely AI Service
+                           ↓
+                        LangChain
+                           ↓
+                  Common Model Interface
+                           ↓
+          ┌────────────────┼────────────────┐
+          ↓                ↓                ↓
+       OpenAI          Anthropic          Google
+          ↓                ↓                ↓
+        Models            Models            Models
+```
+
+This architecture can make model experimentation easier.
+
+---
+
+### Provider and Model
+
+A provider identifies the service responsible for supplying the model.
+
+The model identifies the specific model being used.
+
+Conceptually:
+
+```text
+Provider
+   +
+Model
+   ↓
+Specific AI Model
+```
+
+For example:
+
+```text
+openai : model-name
+anthropic : model-name
+google_genai : model-name
+```
+
+The exact model identifiers depend on the provider and current model catalog.
+
+---
+
+### Why Provider Abstraction Can Help Hirely
+
+Hirely may need to evaluate different models during development.
+
+Possible evaluation criteria include:
+
+- Response quality.
+- Resume-analysis quality.
+- Structured-output reliability.
+- Tool-calling capability.
+- Latency.
+- Cost.
+- Context capacity.
+- Reliability.
+- Availability.
+
+A model abstraction can make this experimentation easier because application-level code does not need to be completely rewritten for every provider.
+
+---
+
+### Example Hirely Scenario
+
+Suppose Hirely initially evaluates one model:
+
+```text
+Hirely
+   ↓
+LangChain
+   ↓
+Provider A
+   ↓
+Model A
+```
+
+Later, the team wants to evaluate another model:
+
+```text
+Hirely
+   ↓
+LangChain
+   ↓
+Provider B
+   ↓
+Model B
+```
+
+The AI service can potentially keep much of its application-level structure while changing the model configuration.
+
+However, provider and model capabilities are not always identical.
+
+---
+
+### Important: Abstraction Does Not Remove Provider Differences
+
+Using LangChain does not mean every model behaves identically.
+
+Different providers and models may differ in:
+
+- Context limits.
+- Tool-calling behavior.
+- Structured-output support.
+- Multimodal capabilities.
+- Reasoning capabilities.
+- Latency.
+- Pricing.
+- Rate limits.
+- Model quality.
+
+Therefore, Hirely must still evaluate the actual model being used.
+
+```text
+Common Interface
+      ≠
+Identical Model Behavior
+```
+
+---
+
+### Model Capabilities
+
+Before selecting a model for Hirely, the project should evaluate whether the model supports the required capabilities.
+
+Potential requirements include:
+
+```text
+Text Generation
+      +
+Structured Output
+      +
+Tool Calling
+      +
+Required Context
+      +
+Required Performance
+```
+
+The exact requirements will depend on the AI features implemented later.
+
+---
+
+### Configuration Strategy
+
+Model configuration should remain separate from core business logic where practical.
+
+Conceptually:
+
+```text
+Application Logic
+       ↓
+AI Service
+       ↓
+Model Configuration
+       ↓
+Provider / Model
+```
+
+This makes experimentation and configuration changes easier.
+
+---
+
+### Development Strategy for Hirely
+
+During development, Hirely may evaluate multiple model providers instead of immediately locking the entire application to one provider.
+
+The evaluation should use representative Hirely tasks such as:
+
+- Resume analysis.
+- Skill extraction.
+- Resume feedback.
+- Career recommendations.
+- Structured analysis.
+- Content generation.
+
+The selected model should be based on actual project requirements rather than popularity alone.
+
+---
+
+### Cost Consideration
+
+LLM usage can generate significant costs as application usage increases.
+
+Therefore, model selection should consider:
+
+```text
+Quality
+   +
+Cost
+   +
+Latency
+   +
+Reliability
+```
+
+A more capable model is not automatically the best choice for every Hirely operation.
+
+Different features may eventually use different models if the architecture and requirements justify it.
+
+---
+
+### Fallback Consideration
+
+For production systems, model availability should also be considered.
+
+A future architecture could potentially support:
+
+```text
+Primary Model
+      ↓
+Failure / Unavailable
+      ↓
+Fallback Model
+```
+
+However, fallback behavior should only be introduced when it provides meaningful reliability benefits and after compatibility between the models has been evaluated.
+
+---
+
+### Analysis
+
+LangChain's model abstraction can reduce provider-specific coupling and make model experimentation easier.
+
+However, it does not eliminate the need to understand provider-specific behavior.
+
+Hirely should therefore use LangChain as an abstraction layer while still treating model selection as an engineering decision.
+
+---
+
+### Decision for Hirely
+
+Hirely will keep the AI model integration behind an application-level AI service.
+
+LangChain may be used inside this service to provide model abstractions and provider integrations.
+
+The application should avoid spreading provider-specific code throughout the rest of the Hirely codebase.
+
+Conceptually:
+
+```text
+Hirely Application
+        ↓
+     AI Service
+        ↓
+    LangChain
+        ↓
+Provider Integration
+        ↓
+      Model
+```
+
+The final model/provider selection will be made after evaluating Hirely's actual AI requirements.
+
+---
+
+### Key Takeaways
+
+- LLM providers expose different models and APIs.
+- LangChain provides common model abstractions and provider integrations.
+- Provider abstraction can reduce application-level coupling.
+- Different models can still behave differently despite a common interface.
+- Hirely should evaluate models using real project requirements.
+- Cost, quality, latency, reliability, and capabilities should all be considered.
+- Provider-specific code should remain isolated from core business logic.
+- LangChain is a possible abstraction layer, not a replacement for model evaluation.
+
+---
+
+### Hirely Principle
+
+> **Keep provider-specific details behind the AI service boundary so Hirely can evaluate and change models without unnecessarily rewriting the application.**
+
