@@ -5655,3 +5655,519 @@ The project will follow these principles:
 ### Hirely Principle
 
 > **Use LangChain where it reduces complexity; do not introduce LangChain where it creates more complexity than it removes.**
+
+## 6.8 LangGraph
+
+### Background
+
+LangGraph is a framework/runtime designed for building more complex, stateful, and long-running AI workflows and agents.
+
+It provides lower-level orchestration capabilities than the higher-level abstractions commonly associated with LangChain agents.
+
+LangGraph can also be used independently of LangChain.
+
+---
+
+### Why LangGraph Exists
+
+Simple AI applications may follow a straightforward workflow:
+
+```text
+Input
+  ↓
+Model
+  ↓
+Output
+```
+
+More advanced AI applications may require:
+
+- Multiple steps.
+- Tool calls.
+- Conditional decisions.
+- Persistent state.
+- Human approval.
+- Long-running execution.
+- Multiple iterations.
+- Recovery after interruptions.
+
+A workflow may therefore look like:
+
+```text
+User Request
+     ↓
+Analyze Input
+     ↓
+Decision
+  /      \
+ ↓        ↓
+Tool A   Tool B
+  \      /
+   ↓    ↓
+ Combine Results
+       ↓
+ Generate Response
+```
+
+Managing such workflows becomes more complex than a simple model call.
+
+LangGraph provides an orchestration model for these kinds of applications.
+
+---
+
+### Core Mental Model
+
+A useful simplified mental model for LangGraph is:
+
+```text
+State
+  +
+Nodes
+  +
+Edges
+  ↓
+Graph-based Workflow
+```
+
+Where:
+
+```text
+State
+=
+Information maintained throughout execution
+
+Node
+=
+A unit of work
+
+Edge
+=
+Defines how execution moves between nodes
+```
+
+---
+
+### State
+
+State represents information that needs to be maintained during the workflow.
+
+For example, a Hirely AI workflow might maintain:
+
+```text
+State
+├── User Request
+├── Resume Data
+├── Extracted Skills
+├── Job Results
+├── Recommendations
+└── Current Workflow Status
+```
+
+As the workflow executes, different nodes can read or update the state.
+
+Conceptually:
+
+```text
+Initial State
+      ↓
+Node A
+      ↓
+Updated State
+      ↓
+Node B
+      ↓
+Updated State
+      ↓
+Node C
+```
+
+This makes state an important part of complex workflows.
+
+---
+
+### Nodes
+
+A node represents a unit of work within the graph.
+
+Examples could include:
+
+```text
+Resume Analysis Node
+Job Search Node
+Skill Matching Node
+Recommendation Node
+Validation Node
+```
+
+Conceptually:
+
+```text
+        ┌──────────────┐
+        │ Resume Node  │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │ Skill Node   │
+        └──────┬───────┘
+               ↓
+        ┌──────────────┐
+        │ Job Node     │
+        └──────────────┘
+```
+
+A node can perform application logic, call a model, or interact with tools.
+
+---
+
+### Edges
+
+Edges define how execution moves between nodes.
+
+A simple workflow:
+
+```text
+Node A
+  ↓
+Node B
+  ↓
+Node C
+```
+
+A conditional workflow:
+
+```text
+             Node A
+                ↓
+            Decision
+           /        \
+          ↓          ↓
+       Node B      Node C
+          \          /
+           \        /
+             Node D
+```
+
+This allows workflows to branch based on the current state or result.
+
+---
+
+### Conditional Routing
+
+One important capability of graph-based workflows is conditional execution.
+
+For example:
+
+```text
+Analyze Resume
+      ↓
+Is resume valid?
+   /        \
+ No          Yes
+ ↓            ↓
+Request       Analyze
+Correction    Skills
+                ↓
+             Continue
+```
+
+This provides more explicit control over workflow execution than simply allowing an agent to decide everything dynamically.
+
+---
+
+### LangGraph and Agents
+
+LangGraph is particularly relevant to agentic applications.
+
+A simplified architecture is:
+
+```text
+User
+ ↓
+Agent Workflow
+ ↓
+Model
+ ↓
+Tool
+ ↓
+Result
+ ↓
+State Update
+ ↓
+Model
+ ↓
+Decision
+ ↓
+Next Step
+```
+
+The graph controls how the workflow progresses.
+
+This can make complex agent behavior more explicit and controllable.
+
+---
+
+### Persistence
+
+Long-running workflows may need to preserve their state.
+
+For example:
+
+```text
+Workflow
+   ↓
+Step 1
+   ↓
+State Saved
+   ↓
+Execution Interrupted
+   ↓
+Resume Later
+   ↓
+Continue Workflow
+```
+
+Persistence can be important for workflows that should survive interruptions or continue over longer periods.
+
+---
+
+### Human-in-the-Loop
+
+Some AI operations should not be completely autonomous.
+
+For example, Hirely might eventually generate an important recommendation and require user confirmation:
+
+```text
+AI Recommendation
+       ↓
+Human Review
+       ↓
+User Approves?
+    /       \
+  No         Yes
+  ↓           ↓
+Modify      Continue
+             ↓
+          Execute
+```
+
+A stateful workflow framework can help model this type of interaction.
+
+---
+
+### Durable Execution
+
+A complex workflow may contain many steps.
+
+If execution fails halfway through, restarting everything may be inefficient.
+
+A durable workflow can potentially resume from a previously persisted state rather than starting from the beginning.
+
+Conceptually:
+
+```text
+Step 1
+  ↓
+Step 2
+  ↓
+State Saved
+  ↓
+Step 3
+  X
+Failure
+  ↓
+Resume
+  ↓
+Step 3
+  ↓
+Step 4
+```
+
+This becomes particularly relevant for long-running workflows.
+
+---
+
+### LangChain vs LangGraph
+
+A simplified comparison:
+
+```text
+LangChain
+    ↓
+Higher-level AI application framework
+    ↓
+Models + Tools + Agents
+```
+
+```text
+LangGraph
+    ↓
+Lower-level orchestration framework/runtime
+    ↓
+Stateful Graph-Based Workflows
+```
+
+LangChain agents can use LangGraph internally, while LangGraph can also be used independently.
+
+Therefore:
+
+```text
+LangChain
+   +
+LangGraph
+```
+
+can be used together, but they are not identical technologies.
+
+---
+
+### When LangGraph May Be Useful for Hirely
+
+Potential Hirely workflows could eventually become complex enough to benefit from explicit orchestration.
+
+Examples:
+
+#### Resume Analysis Workflow
+
+```text
+Upload Resume
+      ↓
+Extract Content
+      ↓
+Validate Data
+      ↓
+Extract Skills
+      ↓
+Analyze Experience
+      ↓
+Generate Feedback
+      ↓
+Validate Output
+      ↓
+Save Results
+```
+
+#### Career Recommendation Workflow
+
+```text
+User Profile
+      ↓
+Resume Data
+      ↓
+Skill Analysis
+      ↓
+Career Goals
+      ↓
+Job / Role Information
+      ↓
+Compare Options
+      ↓
+Generate Recommendations
+      ↓
+User Review
+```
+
+These workflows contain multiple stages and potentially multiple decisions.
+
+---
+
+### When LangGraph Is NOT Necessary
+
+A simple feature such as:
+
+```text
+User
+ ↓
+Prompt
+ ↓
+Model
+ ↓
+Response
+```
+
+does not need a graph orchestration framework.
+
+Likewise, a simple deterministic function may not require LangGraph.
+
+Therefore:
+
+```text
+Simple Workflow
+      ↓
+Keep It Simple
+
+Complex Stateful Workflow
+      ↓
+Consider LangGraph
+```
+
+---
+
+### Analysis
+
+LangGraph provides more explicit control over complex AI execution.
+
+Its state, node, and edge model can make multi-step workflows easier to reason about and control.
+
+However, this additional control also introduces additional concepts and complexity.
+
+Hirely should therefore not introduce LangGraph simply because it is part of the modern AI ecosystem.
+
+It should be introduced only when the application's workflows actually require:
+
+- Stateful execution.
+- Complex branching.
+- Multiple iterations.
+- Long-running workflows.
+- Human-in-the-loop interaction.
+- Durable execution.
+- Explicit orchestration.
+
+---
+
+### Decision for Hirely
+
+LangGraph will be treated as a potential orchestration layer for complex Hirely AI workflows.
+
+The initial Hirely architecture should not require LangGraph for simple model calls or straightforward deterministic pipelines.
+
+If Hirely develops complex agent workflows that require persistent state, branching, human interaction, or durable execution, LangGraph will be evaluated for those workflows.
+
+Conceptually:
+
+```text
+Simple AI Feature
+      ↓
+Model / LangChain
+```
+
+```text
+Complex Stateful AI Workflow
+      ↓
+LangGraph
+      ↓
+Models + Tools + State
+```
+
+The final decision will depend on the complexity of the actual Hirely implementation.
+
+---
+
+### Key Takeaways
+
+- LangGraph is a lower-level orchestration framework/runtime.
+- It is designed for complex and stateful AI workflows.
+- Its core mental model involves state, nodes, and edges.
+- Nodes represent units of work.
+- Edges control workflow transitions.
+- Conditional routing allows branching workflows.
+- Persistence can support long-running workflows.
+- Human-in-the-loop workflows can be modeled explicitly.
+- LangGraph can be used with or without LangChain.
+- Simple AI features do not require LangGraph.
+- Hirely should consider LangGraph only when workflow complexity justifies it.
+
+---
+
+### Hirely Principle
+
+> **Use explicit orchestration when AI workflows become complex enough to require state, control, and reliable execution—not simply because a workflow uses AI.**
