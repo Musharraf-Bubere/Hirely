@@ -6618,3 +6618,423 @@ The final decision will be made after comparing LlamaIndex with LangChain and La
 ### Hirely Principle
 
 > **For AI features that depend heavily on Hirely's own data, prioritize reliable data access and retrieval before adding unnecessary agent complexity.**
+
+## 6.10 Framework Comparison
+
+### Purpose
+
+The purpose of this comparison is to evaluate LangChain, LangGraph, and LlamaIndex based on Hirely's actual requirements.
+
+The project should not select a framework based on popularity or the number of available features.
+
+The framework should be selected based on the problem it needs to solve.
+
+---
+
+### Simplified Mental Model
+
+A useful high-level mental model is:
+
+```text
+                 AI Application
+                      │
+        ┌─────────────┼─────────────┐
+        ↓             ↓             ↓
+    LangChain      LangGraph     LlamaIndex
+        │             │             │
+        ↓             ↓             ↓
+   AI Building     Workflow       Data &
+     Blocks        Control       Retrieval
+```
+
+This is a conceptual model rather than a strict separation.
+
+The three ecosystems have overlapping capabilities.
+
+---
+
+### LangChain
+
+LangChain is primarily useful as a higher-level framework for building LLM-powered applications.
+
+Important areas include:
+
+- Models.
+- Tools.
+- Agents.
+- Structured output.
+- Model-provider integrations.
+- AI application workflows.
+
+Mental model:
+
+```text
+LangChain
+    ↓
+Models + Tools + Agents + AI Application Building Blocks
+```
+
+---
+
+### LangGraph
+
+LangGraph focuses on lower-level orchestration of complex and stateful AI workflows.
+
+Important areas include:
+
+- State.
+- Nodes.
+- Edges.
+- Conditional routing.
+- Persistence.
+- Human-in-the-loop workflows.
+- Long-running execution.
+- Agent orchestration.
+
+Mental model:
+
+```text
+LangGraph
+    ↓
+State + Nodes + Edges
+    ↓
+Complex AI Workflow
+```
+
+---
+
+### LlamaIndex
+
+LlamaIndex focuses strongly on connecting LLM applications with external and private data.
+
+Important areas include:
+
+- Data ingestion.
+- Indexing.
+- Retrieval.
+- RAG.
+- Knowledge bases.
+- Data-connected AI applications.
+
+Mental model:
+
+```text
+LlamaIndex
+    ↓
+Data + Indexing + Retrieval
+    ↓
+Data-Aware AI Application
+```
+
+---
+
+### Comparison by Primary Focus
+
+| Framework | Primary Focus |
+|---|---|
+| LangChain | LLM application building and agent capabilities |
+| LangGraph | Stateful AI workflow orchestration |
+| LlamaIndex | Data-connected AI and retrieval |
+
+These descriptions represent the primary architectural emphasis and do not imply that each framework is limited to only one capability.
+
+---
+
+### Comparison of Major Capabilities
+
+| Capability | LangChain | LangGraph | LlamaIndex |
+|---|---|---|---|
+| General LLM applications | Strong | Moderate | Moderate |
+| Model integrations | Strong | Strong through integrations | Strong |
+| Tools | Strong | Strong | Supported |
+| Agents | Strong | Strong | Supported |
+| Complex workflows | Moderate | Strong | Moderate |
+| Stateful execution | Limited compared with LangGraph | Strong | Not primary focus |
+| RAG | Strong | Possible | Strong |
+| Data indexing | Supported | Not primary focus | Strong |
+| Retrieval | Supported | Not primary focus | Strong |
+| Document-focused AI | Supported | Not primary focus | Strong |
+| Simple AI applications | Strong | Usually unnecessary | Possible |
+
+The table is an architectural comparison, not an official framework ranking.
+
+---
+
+### Hirely Feature Mapping
+
+#### Feature 1: Simple Resume Feedback
+
+Potential workflow:
+
+```text
+Resume
+  ↓
+Prompt
+  ↓
+Model
+  ↓
+Structured Feedback
+```
+
+This feature may not require a complex framework.
+
+A direct model API or a simple LangChain integration could be sufficient.
+
+---
+
+#### Feature 2: AI Job Assistant
+
+Potential workflow:
+
+```text
+User Request
+      ↓
+Agent
+      ↓
+Get Resume
+      ↓
+Search Jobs
+      ↓
+Compare Skills
+      ↓
+Evaluate Results
+      ↓
+Recommendation
+```
+
+Potential technologies:
+
+```text
+LangChain
+   ↓
+Tools + Agent
+
+LangGraph
+   ↓
+Complex workflow orchestration if required
+```
+
+---
+
+#### Feature 3: Ask Questions About Resume
+
+Potential workflow:
+
+```text
+User Question
+      ↓
+Retrieve Relevant Resume Information
+      ↓
+Relevant Context
+      ↓
+LLM
+      ↓
+Answer
+```
+
+Potential technology:
+
+```text
+LlamaIndex
+   ↓
+Data + Retrieval + RAG
+```
+
+However, other retrieval architectures may also satisfy this requirement.
+
+---
+
+### Framework Combination
+
+The frameworks do not necessarily have to be mutually exclusive.
+
+A future architecture could potentially contain:
+
+```text
+                    Hirely AI
+                        │
+        ┌───────────────┼───────────────┐
+        ↓               ↓               ↓
+     Simple AI       Agentic AI       RAG
+        ↓               ↓               ↓
+   Model /           LangGraph      LlamaIndex
+   LangChain            ↓               ↓
+                      Models           LLM
+```
+
+However, introducing multiple frameworks also increases:
+
+- Dependencies.
+- Operational complexity.
+- Maintenance requirements.
+- Learning requirements.
+- Potential integration problems.
+
+Therefore, multiple frameworks should only be introduced when they provide clearly different and valuable capabilities.
+
+---
+
+### Complexity Consideration
+
+A major architectural principle for Hirely is:
+
+```text
+Start Simple
+    ↓
+Identify Actual Requirements
+    ↓
+Add Complexity Only When Needed
+```
+
+The project should avoid:
+
+```text
+Use Everything
+     ↓
+More Dependencies
+     ↓
+More Complexity
+```
+
+---
+
+### Decision Criteria for Hirely
+
+The final framework decision should consider:
+
+1. Feature requirements.
+2. Data requirements.
+3. Retrieval requirements.
+4. Agent requirements.
+5. Workflow complexity.
+6. State management.
+7. Maintainability.
+8. Performance.
+9. Cost.
+10. Framework complexity.
+11. Provider flexibility.
+12. Long-term architecture.
+
+---
+
+### Preliminary Hirely Assessment
+
+At the current research stage:
+
+```text
+LangChain
+→ Strong candidate for general LLM application capabilities.
+
+LangGraph
+→ Strong candidate for complex stateful AI workflows.
+
+LlamaIndex
+→ Strong candidate for data-heavy AI and retrieval workflows.
+```
+
+This is a preliminary assessment.
+
+It is not the final architecture decision.
+
+---
+
+### Potential Evolution of Hirely
+
+A possible incremental approach is:
+
+```text
+Phase 1
+Simple AI
+    ↓
+Direct Model API / LangChain
+```
+
+```text
+Phase 2
+Need Tools
+    ↓
+LangChain Tools
+```
+
+```text
+Phase 3
+Need Complex Stateful Workflows
+    ↓
+Evaluate LangGraph
+```
+
+```text
+Phase 4
+Need Advanced Data Retrieval / RAG
+    ↓
+Evaluate LlamaIndex
+```
+
+The actual order may change based on the features implemented.
+
+---
+
+### Analysis
+
+The comparison shows that the frameworks solve related but different architectural problems.
+
+LangChain provides broad LLM application and agent-building capabilities.
+
+LangGraph provides more explicit control over complex and stateful workflows.
+
+LlamaIndex provides strong abstractions for data-connected AI, indexing, and retrieval.
+
+Therefore, the correct question is not:
+
+> "Which framework is the best?"
+
+The correct question is:
+
+> "Which framework, if any, best solves the specific problem Hirely currently has?"
+
+---
+
+### Preliminary Decision
+
+Hirely will not adopt all three frameworks by default.
+
+The project will initially favor the simplest architecture capable of satisfying its requirements.
+
+Potential direction:
+
+```text
+General AI
+    ↓
+LangChain / Direct Model API
+
+Complex Stateful Agent Workflows
+    ↓
+LangGraph
+
+Data-Heavy RAG / Retrieval
+    ↓
+Evaluate LlamaIndex
+```
+
+The final technology decision will be made after completing the research and understanding the actual implementation requirements.
+
+---
+
+### Key Takeaways
+
+- LangChain focuses broadly on LLM application and agent development.
+- LangGraph focuses on complex and stateful AI workflow orchestration.
+- LlamaIndex focuses strongly on data-connected AI, indexing, and retrieval.
+- Their capabilities overlap.
+- Hirely does not need to use all three.
+- Simple features should remain simple.
+- Complex workflows may justify LangGraph.
+- Data-heavy RAG workflows may justify LlamaIndex.
+- LangChain is a candidate for general AI application capabilities.
+- Framework selection should be requirement-driven.
+
+---
+
+### Hirely Principle
+
+> **Do not ask which AI framework is best in general; ask which architecture best solves the specific Hirely problem with the least unnecessary complexity.**
