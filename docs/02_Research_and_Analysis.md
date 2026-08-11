@@ -6171,3 +6171,450 @@ The final decision will depend on the complexity of the actual Hirely implementa
 ### Hirely Principle
 
 > **Use explicit orchestration when AI workflows become complex enough to require state, control, and reliable execution—not simply because a workflow uses AI.**
+
+## 6.9 LlamaIndex
+
+### Background
+
+LlamaIndex is an open-source framework for building LLM-powered applications that work with external and private data.
+
+Its main focus is connecting Large Language Models with data sources and building data-aware AI applications.
+
+A simplified mental model is:
+
+```text
+Your Data
+    +
+LLM
+    ↓
+LlamaIndex
+    ↓
+Data-Aware AI Application
+```
+
+---
+
+### Why LlamaIndex Exists
+
+A general-purpose LLM does not automatically have access to private application data.
+
+For example, Hirely may contain:
+
+- User resumes.
+- User profiles.
+- Job descriptions.
+- Skill information.
+- Career information.
+- Other application-specific documents.
+
+Hirely may want the AI system to answer questions using this information.
+
+Therefore, the application needs a mechanism for:
+
+```text
+Application Data
+      ↓
+Process
+      ↓
+Index
+      ↓
+Retrieve Relevant Information
+      ↓
+Provide Context to LLM
+      ↓
+Generate Answer
+```
+
+LlamaIndex provides components for building these types of data-connected workflows.
+
+---
+
+### LlamaIndex and RAG
+
+One of the important use cases associated with LlamaIndex is Retrieval-Augmented Generation (RAG).
+
+A simplified RAG workflow is:
+
+```text
+Documents
+    ↓
+Load
+    ↓
+Process
+    ↓
+Index
+    ↓
+Store
+    ↓
+User Question
+    ↓
+Retrieve Relevant Information
+    ↓
+LLM
+    ↓
+Answer
+```
+
+The goal is to provide the model with relevant information from external data rather than relying only on information already contained in the model.
+
+---
+
+### Hirely RAG Example
+
+Suppose a user uploads a resume.
+
+The resume contains:
+
+```text
+Python
+SQL
+Machine Learning
+TensorFlow
+Pandas
+```
+
+The user asks:
+
+> "What skills should I improve to become an ML Engineer?"
+
+A possible workflow is:
+
+```text
+User Question
+      ↓
+Retrieve Relevant Resume Information
+      ↓
+Resume Knowledge
+      ↓
+Relevant Context
+      ↓
+LLM
+      ↓
+Personalized Recommendation
+```
+
+This allows the response to be based on the user's actual information.
+
+---
+
+### Data Sources
+
+An AI application may need to work with different types of data.
+
+Potential sources include:
+
+```text
+Documents
+PDFs
+Web Pages
+Databases
+APIs
+Structured Data
+Unstructured Data
+Knowledge Bases
+```
+
+For Hirely, potential sources include:
+
+```text
+              Hirely Data
+                   ↓
+       ┌───────────┼───────────┐
+       ↓           ↓           ↓
+    Resumes       Jobs       Skills
+       ↓           ↓           ↓
+       └───────────┼───────────┘
+                   ↓
+              Data Layer
+                   ↓
+                 LLM
+```
+
+The exact data architecture will be determined later.
+
+---
+
+### Indexing
+
+Indexing is the process of preparing data so that relevant information can be retrieved efficiently.
+
+Conceptually:
+
+```text
+Raw Data
+   ↓
+Processing
+   ↓
+Index
+   ↓
+Retrieval
+```
+
+For example:
+
+```text
+Resume
+   ↓
+Process Resume
+   ↓
+Create Index
+   ↓
+User Question
+   ↓
+Retrieve Relevant Resume Information
+```
+
+The exact indexing strategy depends on the type and structure of the data.
+
+---
+
+### Retrieval
+
+Retrieval is the process of finding information relevant to a user's question.
+
+For example:
+
+```text
+Question:
+
+"What Python projects have I worked on?"
+```
+
+The system should retrieve the relevant portions of the user's stored information.
+
+Conceptually:
+
+```text
+User Question
+      ↓
+Retriever
+      ↓
+Relevant Data
+      ↓
+LLM
+      ↓
+Answer
+```
+
+Good retrieval is important because the model's answer depends heavily on the quality and relevance of the context provided to it.
+
+---
+
+### LlamaIndex vs LLM
+
+LlamaIndex is not an LLM.
+
+```text
+LlamaIndex
+=
+Framework for connecting AI applications with data
+
+LLM
+=
+AI model responsible for language generation/reasoning
+```
+
+Conceptually:
+
+```text
+Data
+ ↓
+LlamaIndex
+ ↓
+LLM
+ ↓
+Response
+```
+
+---
+
+### LlamaIndex vs LangChain
+
+The two ecosystems overlap, but their primary areas of focus can be viewed differently.
+
+A simplified mental model is:
+
+```text
+LangChain
+    ↓
+Models + Tools + Agents + AI Application Workflows
+```
+
+while:
+
+```text
+LlamaIndex
+    ↓
+Data + Indexing + Retrieval + RAG + Data-Aware AI
+```
+
+This is a conceptual distinction rather than a strict separation.
+
+LangChain can also be used for retrieval and RAG.
+
+LlamaIndex can also support agentic applications.
+
+The important difference is the emphasis of their abstractions and ecosystems.
+
+---
+
+### Hirely Example: Data-Centric AI
+
+Consider:
+
+> "Analyze my resume and tell me which skills I am missing."
+
+This can be viewed primarily as a data and retrieval problem:
+
+```text
+Resume
+   ↓
+Process
+   ↓
+Index / Store
+   ↓
+Retrieve Relevant Information
+   ↓
+LLM
+   ↓
+Skill Gap Analysis
+```
+
+LlamaIndex could be evaluated for this type of architecture.
+
+---
+
+### Hirely Example: Agent-Centric AI
+
+Now consider:
+
+> "Find suitable jobs, compare them with my resume, and recommend the best opportunities."
+
+This may involve:
+
+```text
+User Request
+      ↓
+Agent
+      ↓
+Get Resume
+      ↓
+Search Jobs
+      ↓
+Compare Skills
+      ↓
+Evaluate Results
+      ↓
+Generate Recommendations
+```
+
+This is more strongly related to tools, agents, and orchestration.
+
+LangChain and LangGraph may therefore be particularly relevant for this type of workflow.
+
+---
+
+### Important Overlap
+
+The comparison should not be interpreted as:
+
+```text
+LangChain → Agents only
+LlamaIndex → RAG only
+```
+
+Both ecosystems provide capabilities that overlap.
+
+A better interpretation is:
+
+```text
+LangChain
+→ Broad LLM application and agent ecosystem
+
+LlamaIndex
+→ Strong emphasis on data-connected LLM applications
+```
+
+The actual choice should depend on the requirements of the application.
+
+---
+
+### Potential Hirely Use Cases
+
+LlamaIndex could potentially be useful for:
+
+- Resume knowledge bases.
+- Document question answering.
+- Retrieval-Augmented Generation.
+- Skill information retrieval.
+- Job-description retrieval.
+- Career knowledge bases.
+- Personalized AI responses based on user data.
+
+These are potential use cases and do not represent final implementation decisions.
+
+---
+
+### Limitations and Trade-offs
+
+Using a framework also introduces additional abstraction and dependency.
+
+Potential concerns include:
+
+- Additional complexity.
+- Framework dependency.
+- Need to understand indexing and retrieval concepts.
+- Retrieval quality becoming an important engineering concern.
+- Additional infrastructure for data storage and retrieval.
+- Potential overlap with capabilities already provided by other frameworks.
+
+Therefore, Hirely should evaluate whether LlamaIndex provides enough value for the project's actual data requirements.
+
+---
+
+### Analysis
+
+LlamaIndex is particularly relevant when an AI application needs to work with external, private, or application-specific data.
+
+Hirely has several potential data-heavy AI use cases, especially around resumes, jobs, skills, and career information.
+
+Therefore, LlamaIndex is worth evaluating as part of the Hirely AI architecture.
+
+However, the project should not automatically introduce LlamaIndex if the required retrieval functionality can be implemented more simply using existing application infrastructure or another suitable approach.
+
+---
+
+### Decision for Hirely
+
+LlamaIndex will be evaluated as a potential framework for Hirely's data-connected AI capabilities.
+
+Potential areas for evaluation include:
+
+- Resume retrieval.
+- RAG.
+- Document processing.
+- Knowledge bases.
+- Data indexing.
+- Retrieval quality.
+- Integration with the existing Hirely architecture.
+
+The final decision will be made after comparing LlamaIndex with LangChain and LangGraph.
+
+---
+
+### Key Takeaways
+
+- LlamaIndex is a framework for building LLM-powered applications connected to external data.
+- It is strongly associated with data ingestion, indexing, retrieval, and RAG workflows.
+- LlamaIndex is not an LLM.
+- Retrieval allows relevant application data to be provided to an LLM.
+- Hirely's resumes, jobs, skills, and career information may benefit from data-connected AI.
+- LlamaIndex and LangChain overlap in several areas.
+- LlamaIndex should be evaluated based on Hirely's actual data and retrieval requirements.
+- The framework should not be introduced unless it provides meaningful value.
+
+---
+
+### Hirely Principle
+
+> **For AI features that depend heavily on Hirely's own data, prioritize reliable data access and retrieval before adding unnecessary agent complexity.**
