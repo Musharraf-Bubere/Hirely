@@ -4053,3 +4053,505 @@ Simple AI operations will remain as simple as possible.
 
 > **Treat LangChain as a collection of composable building blocks, not as a requirement to use every abstraction.**
 
+## 6.4 LangChain Components
+
+### Background
+
+LangChain provides multiple building blocks for developing LLM-powered applications.
+
+The major components relevant to Hirely include:
+
+- Models.
+- Messages.
+- Prompts.
+- Tools.
+- Agents.
+- Structured Output.
+- Runnables and Composition.
+- Middleware.
+- Provider Integrations.
+
+These components can be combined depending on the requirements of the application.
+
+Hirely will not necessarily use every component.
+
+---
+
+### 1. Models
+
+Models are the core AI engines used by LangChain applications.
+
+They can be used directly or as part of an agent.
+
+Conceptually:
+
+```text
+Application
+     ↓
+LangChain Model Interface
+     ↓
+LLM / Chat Model
+     ↓
+Response
+```
+
+Models may support capabilities such as:
+
+- Text generation.
+- Reasoning.
+- Tool calling.
+- Structured output.
+- Multimodal input/output.
+
+The exact capabilities depend on the selected model and provider.
+
+---
+
+### 2. Messages
+
+Messages represent information exchanged between an application and a model.
+
+Common message types include:
+
+```text
+System
+Human
+AI
+Tool
+```
+
+Conceptually:
+
+```text
+System Message
+      ↓
+Instructions
+
+Human Message
+      ↓
+User Request
+
+AI Message
+      ↓
+Model Response
+
+Tool Message
+      ↓
+Tool Result
+```
+
+Messages provide a consistent representation of model interaction.
+
+---
+
+### 3. Prompts
+
+Prompts define the instructions and context provided to a model.
+
+A simple prompt may contain:
+
+```text
+System Instructions
+        +
+User Input
+        +
+Relevant Context
+```
+
+For Hirely, prompts may be used to guide tasks such as:
+
+- Resume analysis.
+- Career recommendations.
+- Skill-gap analysis.
+- Cover-letter generation.
+- Interview preparation.
+
+Prompt design should remain separate from business logic where practical so that prompts can be changed without rewriting the entire application.
+
+---
+
+### 4. Tools
+
+Tools allow an AI application to perform actions outside the model itself.
+
+Examples include:
+
+- Database queries.
+- Search.
+- API calls.
+- Calculations.
+- Resume-processing functions.
+- Job-matching functions.
+
+Conceptually:
+
+```text
+Model
+  ↓
+Tool Selection
+  ↓
+Tool
+  ↓
+Result
+  ↓
+Model
+```
+
+Tools should have clearly defined inputs and outputs.
+
+For example:
+
+```text
+Tool:
+search_jobs
+
+Input:
+{
+    "skill": "Python",
+    "location": "Remote"
+}
+
+Output:
+Job results
+```
+
+---
+
+### 5. Agents
+
+Agents combine models and tools to perform dynamic tasks.
+
+A simplified agent loop is:
+
+```text
+User Request
+     ↓
+    Model
+     ↓
+Need Tool?
+   /     \
+ No       Yes
+ ↓         ↓
+Final     Tool
+Answer     ↓
+          Result
+            ↓
+          Model
+            ↓
+       Final Answer
+```
+
+Agents are useful when the system needs to dynamically determine which actions to take.
+
+They are not required for every LLM operation.
+
+---
+
+### 6. Structured Output
+
+Structured output allows the application to receive predictable data instead of relying only on free-form natural language.
+
+For example:
+
+```text
+Free-form:
+
+"The resume is strong but needs better project descriptions."
+```
+
+versus:
+
+```json
+{
+  "score": 82,
+  "strengths": [
+    "Strong technical skills"
+  ],
+  "weaknesses": [
+    "Project descriptions need improvement"
+  ],
+  "recommendations": [
+    "Add measurable project outcomes"
+  ]
+}
+```
+
+Structured output can be useful for Hirely features that need to pass AI results into backend logic or frontend components.
+
+Potential use cases include:
+
+- Resume scoring.
+- Skill extraction.
+- Resume analysis.
+- Recommendation generation.
+- ATS analysis.
+
+LangChain supports structured responses using schemas such as Pydantic models, dataclasses, TypedDict, and JSON Schema. :contentReference[oaicite:3]{index=3}
+
+---
+
+### 7. Runnables and Composition
+
+LangChain supports composable processing units that can be combined into larger workflows.
+
+A conceptual pipeline may look like:
+
+```text
+Input
+  ↓
+Prompt
+  ↓
+Model
+  ↓
+Structured Output
+  ↓
+Validation
+  ↓
+Final Result
+```
+
+Composition allows individual steps to remain focused while being connected into a larger workflow.
+
+This is useful when Hirely needs predictable multi-step processing without necessarily requiring an agent.
+
+---
+
+### 8. Middleware
+
+Middleware provides a mechanism for controlling or customizing agent execution.
+
+Potential uses include:
+
+- Logging.
+- Analytics.
+- Retries.
+- Fallbacks.
+- Rate limiting.
+- Guardrails.
+- PII detection.
+- Prompt transformation.
+- Output transformation.
+- Early termination.
+
+Conceptually:
+
+```text
+Request
+   ↓
+Middleware
+   ↓
+Agent
+   ↓
+Middleware
+   ↓
+Response
+```
+
+Middleware may become useful in Hirely when the AI system moves toward production.
+
+For example:
+
+```text
+User Request
+     ↓
+PII / Security Check
+     ↓
+AI Agent
+     ↓
+Output Validation
+     ↓
+Response
+```
+
+---
+
+### 9. Provider Integrations
+
+LangChain supports integrations with multiple model providers.
+
+Conceptually:
+
+```text
+                  LangChain
+                      ↓
+               Model Interface
+                      ↓
+        ┌─────────────┼─────────────┐
+        ↓             ↓             ↓
+     OpenAI       Anthropic       Google
+        ↓             ↓             ↓
+      Model          Model         Model
+```
+
+A common interface can reduce provider-specific coupling in application code.
+
+This can make it easier to compare or switch models during development.
+
+---
+
+### 10. How Components Work Together
+
+A simple LangChain application may look like:
+
+```text
+User Input
+    ↓
+Messages / Prompt
+    ↓
+Model
+    ↓
+Structured Output
+    ↓
+Application
+```
+
+A more advanced application may look like:
+
+```text
+User Input
+    ↓
+Messages / Prompt
+    ↓
+Agent
+    ↓
+Model
+    ↓
+Tool
+    ↓
+Tool Result
+    ↓
+Model
+    ↓
+Structured Output
+    ↓
+Application
+```
+
+Middleware can be placed around the agent execution where additional control is required.
+
+---
+
+### 11. Potential Hirely Architecture
+
+A future Hirely AI service could potentially use:
+
+```text
+                  Hirely AI Service
+                         ↓
+                     LangChain
+                         ↓
+        ┌────────────────┼────────────────┐
+        ↓                ↓                ↓
+      Model             Tools           Output
+        ↓                ↓                ↓
+       LLM         Hirely Functions    Structured
+                                          Data
+        └────────────────┼────────────────┘
+                         ↓
+                   Hirely Backend
+```
+
+However, this is a potential architecture rather than the final implementation.
+
+---
+
+### Component Selection Strategy
+
+Hirely should select components according to the problem.
+
+```text
+Simple AI Request
+       ↓
+     Model
+
+Predictable AI Result
+       ↓
+Structured Output
+
+External Action
+       ↓
+     Tool
+
+Dynamic Multi-Step Task
+       ↓
+     Agent
+
+Complex Agent Control
+       ↓
+   Middleware / LangGraph
+```
+
+Not every feature needs all components.
+
+---
+
+### Analysis
+
+LangChain is better understood as a collection of composable building blocks rather than a single monolithic system.
+
+This allows an application to start with simple model calls and introduce additional components only when requirements become more complex.
+
+For Hirely, this supports an incremental architecture:
+
+```text
+Simple
+  ↓
+Model
+  ↓
+Structured Output
+  ↓
+Tools
+  ↓
+Agents
+  ↓
+Advanced Orchestration
+```
+
+This avoids unnecessary complexity during the early stages of development.
+
+---
+
+### Decision for Hirely
+
+Hirely will evaluate LangChain components independently.
+
+The initial architecture should prefer the simplest component capable of solving each requirement.
+
+Potential component usage:
+
+| Requirement | Potential Component |
+|---|---|
+| Direct AI generation | Model |
+| Conversation/context | Messages |
+| Instructions | Prompts |
+| External functionality | Tools |
+| Dynamic decision-making | Agents |
+| Predictable machine-readable result | Structured Output |
+| Multi-step composition | Runnables / Composition |
+| Production execution controls | Middleware |
+| Complex stateful orchestration | LangGraph |
+
+These are evaluation decisions rather than final implementation commitments.
+
+---
+
+### Key Takeaways
+
+- LangChain consists of multiple reusable components.
+- Models provide the core AI capability.
+- Messages represent model interaction.
+- Prompts provide instructions and context.
+- Tools connect AI systems with external functionality.
+- Agents combine models and tools for dynamic tasks.
+- Structured output provides predictable application-ready data.
+- Runnables enable composition of processing steps.
+- Middleware can add control, guardrails, retries, and monitoring.
+- Provider integrations reduce model-provider coupling.
+- Hirely should use only the components required by each feature.
+
+---
+
+### Hirely Principle
+
+> **Choose the smallest LangChain component set that solves the actual problem, and add complexity only when the requirements justify it.**
+
