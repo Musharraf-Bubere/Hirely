@@ -8155,3 +8155,1279 @@ This architecture will evolve as the remaining backend research is completed.
 ### Hirely Principle
 
 > **Use the backend API as a clean communication layer between Hirely's frontend and its AI, document-processing, database, and application services.**
+
+## 6.2 REST APIs
+
+### Background
+
+Hirely will need a backend API through which the frontend can communicate with backend services such as:
+
+- Resume processing
+- Resume analysis
+- AI services
+- User management
+- Job-related functionality
+- Database operations
+
+A simplified architecture is:
+
+    User
+      ↓
+    Frontend
+      ↓
+    HTTP Request
+      ↓
+    REST-style API
+      ↓
+    FastAPI
+      ↓
+    Backend Services
+      ├── Resume Processing
+      ├── AI Services
+      ├── User Services
+      └── Database Services
+      ↓
+    HTTP Response
+      ↓
+    Frontend
+      ↓
+    User
+
+REST provides principles for designing this API in a consistent and predictable way.
+
+---
+
+### What is REST?
+
+REST stands for:
+
+**Representational State Transfer**
+
+REST is an **architectural style for designing networked applications and APIs**.
+
+The most important idea is:
+
+> **Design APIs around resources and use standard HTTP methods to operate on those resources.**
+
+For Hirely, possible resources include:
+
+    Users
+    Resumes
+    Jobs
+    Skills
+    Analyses
+
+Instead of designing APIs primarily around function names, REST encourages us to think in terms of resources.
+
+---
+
+### REST is Not a Framework
+
+REST and FastAPI are different concepts.
+
+    REST
+    ↓
+    Architectural style
+
+While:
+
+    FastAPI
+    ↓
+    Python web framework
+
+Therefore:
+
+    REST principles
+           +
+        FastAPI
+           ↓
+    REST-style API implementation
+
+FastAPI can be used to implement APIs following REST principles.
+
+---
+
+### API vs REST API
+
+An API is a general interface that allows software components to communicate.
+
+A REST API is an API designed according to REST principles.
+
+Conceptually:
+
+    API
+    │
+    └── Can be designed in different ways
+
+    REST API
+    │
+    └── API following REST architectural principles
+
+Therefore:
+
+> Every REST API is an API, but not every API is necessarily RESTful.
+
+---
+
+### Resource-Oriented Design
+
+One of the most important REST concepts is the **resource**.
+
+For Hirely, resources can include:
+
+    User
+    Resume
+    Job
+    Skill
+    Analysis
+
+These resources can be represented through URLs.
+
+For example:
+
+    /api/resumes
+
+represents the resume collection.
+
+And:
+
+    /api/resumes/123
+
+represents one specific resume.
+
+The URL identifies the resource.
+
+The HTTP method describes the operation.
+
+---
+
+### Resource + HTTP Method
+
+A useful mental model is:
+
+    RESOURCE + HTTP METHOD
+
+For example:
+
+    GET /api/resumes
+
+means:
+
+> Retrieve resumes.
+
+While:
+
+    POST /api/resumes
+
+means:
+
+> Create or submit a new resume.
+
+And:
+
+    GET /api/resumes/123
+
+means:
+
+> Retrieve resume 123.
+
+This separation makes API behavior more predictable.
+
+---
+
+### HTTP Methods
+
+REST-style APIs commonly use HTTP methods to represent operations.
+
+Important methods include:
+
+    GET
+    POST
+    PUT
+    PATCH
+    DELETE
+
+---
+
+### GET
+
+**GET = retrieve information**
+
+Example:
+
+    GET /api/resumes
+
+Meaning:
+
+> Retrieve the resumes.
+
+Another example:
+
+    GET /api/resumes/123
+
+Meaning:
+
+> Retrieve resume 123.
+
+Conceptually:
+
+    Frontend
+       ↓
+    GET /api/resumes/123
+       ↓
+    FastAPI
+       ↓
+    Database
+       ↓
+    Resume
+       ↓
+    Frontend
+
+GET is generally used for retrieving information rather than changing server state.
+
+---
+
+### POST
+
+**POST = create or submit data**
+
+Example:
+
+    POST /api/resumes
+
+could mean:
+
+> Submit a new resume.
+
+The request could contain:
+
+    Resume File
+    User Information
+    Metadata
+
+Another possible Hirely operation could be:
+
+    POST /api/analyses
+
+which could submit a request to create a new resume analysis.
+
+Conceptually:
+
+    Frontend
+       ↓
+    POST Request
+       ↓
+    FastAPI
+       ↓
+    Validate
+       ↓
+    Process
+       ↓
+    AI Analysis
+       ↓
+    Result
+
+---
+
+### PUT
+
+**PUT = replace a resource representation**
+
+Example:
+
+    PUT /api/users/123
+
+could mean:
+
+> Replace the current representation of user 123.
+
+Conceptually:
+
+    Frontend
+       ↓
+    PUT /api/users/123
+       ↓
+    FastAPI
+       ↓
+    Replace User Data
+
+PUT is generally associated with replacing the representation of a resource.
+
+---
+
+### PATCH
+
+**PATCH = partially modify a resource**
+
+Suppose a user only wants to change their name.
+
+The frontend could send:
+
+    PATCH /api/users/123
+
+with:
+
+    {
+        "name": "New Name"
+    }
+
+The server can update only the specified field.
+
+Think:
+
+    PUT
+    ↓
+    Replace
+
+    PATCH
+    ↓
+    Partial modification
+
+---
+
+### DELETE
+
+**DELETE = remove a resource**
+
+Example:
+
+    DELETE /api/resumes/123
+
+Meaning:
+
+> Delete resume 123.
+
+Conceptually:
+
+    Frontend
+       ↓
+    DELETE /api/resumes/123
+       ↓
+    FastAPI
+       ↓
+    Database
+       ↓
+    Resume Removed
+
+---
+
+### HTTP Method Summary
+
+| Method | General Meaning | Hirely Example |
+|---|---|---|
+| GET | Retrieve | GET /api/resumes/123 |
+| POST | Create/submit | POST /api/resumes |
+| PUT | Replace/update | PUT /api/users/123 |
+| PATCH | Partially update | PATCH /api/users/123 |
+| DELETE | Delete | DELETE /api/resumes/123 |
+
+---
+
+### RESTful URL Design
+
+REST encourages URLs to represent resources rather than actions.
+
+#### Less resource-oriented approach
+
+    /api/getAllResumes
+    /api/createResume
+    /api/deleteResume
+    /api/updateResume
+
+These URLs describe actions.
+
+#### REST-style approach
+
+    GET    /api/resumes
+    POST   /api/resumes
+    GET    /api/resumes/123
+    PUT    /api/resumes/123
+    PATCH  /api/resumes/123
+    DELETE /api/resumes/123
+
+Here:
+
+    URL
+    ↓
+    Identifies the resource
+
+    HTTP Method
+    ↓
+    Describes the operation
+
+This is an important REST design principle.
+
+---
+
+### Collection vs Individual Resource
+
+REST APIs commonly distinguish between a collection and an individual resource.
+
+Collection:
+
+    /api/resumes
+
+represents:
+
+> The collection of resumes.
+
+Individual resource:
+
+    /api/resumes/123
+
+represents:
+
+> Resume with ID 123.
+
+Therefore:
+
+    /api/resumes
+            ↑
+        Collection
+
+and:
+
+    /api/resumes/123
+                  ↑
+        Individual Resource
+
+This makes API URLs predictable.
+
+---
+
+### Hirely Resources
+
+Potential Hirely resources include:
+
+    /api/users
+    /api/resumes
+    /api/jobs
+    /api/skills
+    /api/analyses
+
+For example:
+
+    /api/resumes
+
+represents resumes.
+
+    /api/jobs
+
+represents jobs.
+
+    /api/analyses
+
+represents analysis resources.
+
+The exact API structure will be finalized during implementation.
+
+---
+
+### Hirely User APIs
+
+Potential user endpoints:
+
+    GET    /api/users
+    GET    /api/users/123
+    POST   /api/users
+    PATCH  /api/users/123
+    DELETE /api/users/123
+
+These provide a consistent interface for user resources.
+
+---
+
+### Hirely Resume APIs
+
+Potential resume endpoints:
+
+    GET    /api/resumes
+    GET    /api/resumes/123
+    POST   /api/resumes
+    DELETE /api/resumes/123
+
+A resume upload could use:
+
+    POST /api/resumes
+
+The exact implementation may use multipart file upload because resumes can be PDF or DOCX files.
+
+---
+
+### Hirely Job APIs
+
+Potential job endpoints:
+
+    GET  /api/jobs
+    GET  /api/jobs/123
+    POST /api/jobs
+
+For example:
+
+    GET /api/jobs
+
+could retrieve available jobs.
+
+And:
+
+    GET /api/jobs/123
+
+could retrieve information about one specific job.
+
+---
+
+### Resource Relationships
+
+Resources can have relationships.
+
+For example:
+
+    User
+     └── Resumes
+
+A user may have multiple resumes.
+
+A possible endpoint could be:
+
+    GET /api/users/123/resumes
+
+meaning:
+
+> Retrieve resumes belonging to user 123.
+
+Another possible relationship:
+
+    Resume
+     └── Analyses
+
+could potentially be represented as:
+
+    GET /api/resumes/123/analyses
+
+However, nested resources should be used carefully.
+
+The API should remain simple and understandable.
+
+---
+
+### Request
+
+A REST API communication begins with a request.
+
+A request can contain:
+
+    HTTP Method
+    URL
+    Headers
+    Body
+
+Example:
+
+    POST /api/resumes
+
+The request may contain resume information or a resume file.
+
+Conceptually:
+
+    Frontend
+       ↓
+    HTTP Request
+       ├── Method
+       ├── URL
+       ├── Headers
+       └── Body
+       ↓
+    FastAPI
+
+---
+
+### Response
+
+The backend sends a response back to the client.
+
+A response can contain:
+
+    Status Code
+    Headers
+    Body
+
+For example:
+
+    {
+        "id": 123,
+        "filename": "resume.pdf",
+        "status": "processed"
+    }
+
+Conceptually:
+
+    FastAPI
+       ↓
+    HTTP Response
+       ├── Status Code
+       ├── Headers
+       └── Body
+       ↓
+    Frontend
+
+---
+
+### HTTP Status Codes
+
+REST APIs use HTTP status codes to communicate the result of an operation.
+
+Important status codes include:
+
+    200
+    OK
+
+    201
+    Created
+
+    204
+    No Content
+
+    400
+    Bad Request
+
+    401
+    Unauthorized
+
+    403
+    Forbidden
+
+    404
+    Not Found
+
+    500
+    Internal Server Error
+
+---
+
+### 200 OK
+
+    200 OK
+
+Generally means:
+
+> The request was successfully processed.
+
+Example:
+
+    GET /api/resumes/123
+
+could return:
+
+    200 OK
+
+with the resume data.
+
+---
+
+### 201 Created
+
+    201 Created
+
+is commonly used when a new resource has been successfully created.
+
+For example:
+
+    POST /api/resumes
+
+could return:
+
+    201 Created
+
+after successfully creating the resume resource.
+
+---
+
+### 204 No Content
+
+    204 No Content
+
+means the request succeeded but there is no response body to return.
+
+This can be useful for certain successful update or delete operations.
+
+---
+
+### 400 Bad Request
+
+    400 Bad Request
+
+generally means the request is invalid or cannot be processed because of client-provided input.
+
+For example:
+
+    Invalid request data
+
+---
+
+### 401 Unauthorized
+
+    401 Unauthorized
+
+generally indicates that authentication is required or the provided authentication credentials are invalid.
+
+Example:
+
+    Frontend
+       ↓
+    GET /api/resumes/123
+       ↓
+    No valid authentication
+       ↓
+    401 Unauthorized
+
+---
+
+### 403 Forbidden
+
+    403 Forbidden
+
+generally means the client is authenticated but does not have permission to perform the requested operation.
+
+Example:
+
+    User A
+       ↓
+    Attempts to access User B's protected resource
+       ↓
+    403 Forbidden
+
+Authentication and authorization will be studied more deeply later.
+
+---
+
+### 404 Not Found
+
+    404 Not Found
+
+means the requested resource cannot be found.
+
+Example:
+
+    GET /api/resumes/999
+
+If resume 999 does not exist:
+
+    404 Not Found
+
+---
+
+### 500 Internal Server Error
+
+    500 Internal Server Error
+
+generally indicates an unexpected problem on the server side.
+
+For example:
+
+    Frontend
+       ↓
+    API Request
+       ↓
+    FastAPI
+       ↓
+    Unexpected Backend Error
+       ↓
+    500 Internal Server Error
+
+Production applications should handle errors properly rather than exposing internal implementation details.
+
+---
+
+### Statelessness
+
+One important REST principle is **statelessness**.
+
+Statelessness means that each request should contain the information necessary for the server to process that request.
+
+Conceptually:
+
+    Request 1
+       ↓
+    Server
+       ↓
+    Response
+
+    Request 2
+       ↓
+    Server
+       ↓
+    Response
+
+The server should not depend on hidden conversational state from an earlier request to understand the current request.
+
+Authentication information can be included with requests through mechanisms such as tokens.
+
+---
+
+### Why Statelessness Matters for Hirely
+
+Stateless API design can make scaling easier.
+
+For example:
+
+                        Load Balancer
+                        /           \
+                       ↓             ↓
+                  FastAPI 1      FastAPI 2
+                       ↑             ↑
+                       └──── API ────┘
+
+If requests contain the necessary information, different backend instances can process different requests.
+
+This can become useful as Hirely grows.
+
+---
+
+### REST and Authentication
+
+Hirely will eventually require authentication and authorization.
+
+A simplified flow may look like:
+
+    User
+     ↓
+    Login
+     ↓
+    Authentication
+     ↓
+    Token / Session
+     ↓
+    API Request
+     ↓
+    FastAPI
+     ↓
+    Authorization
+     ↓
+    Resource
+
+For example:
+
+    GET /api/resumes/123
+
+may require the user to be authenticated and authorized to access that resume.
+
+Authentication and security will be researched separately.
+
+---
+
+### REST and CRUD
+
+CRUD stands for:
+
+    Create
+    Read
+    Update
+    Delete
+
+REST APIs often support CRUD-style operations, but:
+
+**REST ≠ CRUD**
+
+CRUD describes common data operations.
+
+REST is a broader architectural style involving concepts such as:
+
+    Resources
+    HTTP methods
+    Representations
+    Stateless communication
+    Standard HTTP semantics
+
+Therefore:
+
+    CRUD
+    ↓
+    Operations
+
+    REST
+    ↓
+    Architectural style
+
+They are related but not identical.
+
+---
+
+### REST and FastAPI
+
+The relationship can be summarized as:
+
+    REST
+    ↓
+    Architectural principles
+
+    HTTP
+    ↓
+    Communication protocol
+
+    FastAPI
+    ↓
+    Python framework
+
+    Pydantic
+    ↓
+    Data validation / modeling
+
+    SQLAlchemy
+    ↓
+    Database interaction
+
+For Hirely:
+
+    Frontend
+       ↓
+    HTTP
+       ↓
+    REST-style API
+       ↓
+    FastAPI
+       ↓
+    Backend Services
+
+---
+
+### Hirely Resume Lifecycle
+
+A simplified resume lifecycle demonstrates how REST principles can be applied.
+
+#### 1. Create Resume
+
+    POST /api/resumes
+
+    Frontend
+       ↓
+    POST
+       ↓
+    FastAPI
+       ↓
+    Store Resume
+
+#### 2. Retrieve Resume
+
+    GET /api/resumes/123
+
+    Frontend
+       ↓
+    GET
+       ↓
+    FastAPI
+       ↓
+    Resume
+
+#### 3. Update Resume
+
+    PATCH /api/resumes/123
+
+    Frontend
+       ↓
+    PATCH
+       ↓
+    FastAPI
+       ↓
+    Update Resume
+
+#### 4. Delete Resume
+
+    DELETE /api/resumes/123
+
+    Frontend
+       ↓
+    DELETE
+       ↓
+    FastAPI
+       ↓
+    Delete Resume
+
+This creates a predictable resource lifecycle.
+
+---
+
+### REST and AI Operations
+
+Not every Hirely operation will necessarily be simple CRUD.
+
+Hirely may eventually have operations such as:
+
+    Resume Analysis
+    Document Processing
+    AI Generation
+    Job Matching
+    Long-running AI Tasks
+
+Some of these operations may require specialized API designs.
+
+Therefore:
+
+> REST principles should guide the API architecture, but every operation should still be designed according to its actual requirements.
+
+We should not force every AI operation into an unnecessarily complicated CRUD model.
+
+---
+
+### REST API Architecture for Hirely
+
+The current conceptual architecture is:
+
+                             Hirely
+                               │
+                            Frontend
+                               │
+                              HTTP
+                               │
+                               ↓
+                        REST-style API
+                               │
+                            FastAPI
+                               │
+                 ┌─────────────┼─────────────┐
+                 ↓             ↓             ↓
+              Resume          AI          Database
+              Services      Services       Services
+
+The API layer acts as the communication boundary between the frontend and backend services.
+
+---
+
+### Separation of Responsibilities
+
+The architecture should keep different responsibilities separate.
+
+    Frontend
+    → User interface
+
+    HTTP
+    → Communication protocol
+
+    REST
+    → API architectural principles
+
+    FastAPI
+    → API implementation
+
+    Pydantic
+    → Request/response validation and modeling
+
+    Application Services
+    → Business logic
+
+    AI Services
+    → AI/LLM functionality
+
+    Document Processing
+    → File/text processing
+
+    Database Layer
+    → Data persistence
+
+This separation improves maintainability and makes the system easier to evolve.
+
+---
+
+### Advantages of REST-style APIs for Hirely
+
+Potential advantages include:
+
+- Standard HTTP methods.
+- Resource-oriented design.
+- Predictable URL structures.
+- Clear separation between frontend and backend.
+- Stateless communication.
+- Easy integration with different clients.
+- Suitable for web and mobile applications.
+- Easy to test using standard HTTP tools.
+- Can work well with FastAPI.
+- Provides a clear foundation for a scalable backend architecture.
+
+---
+
+### Potential Limitations and Considerations
+
+REST-style APIs also require careful design.
+
+Important considerations include:
+
+- Correct HTTP method selection.
+- Consistent URL naming.
+- Proper status code usage.
+- Authentication and authorization.
+- Error handling.
+- API versioning.
+- Request validation.
+- Response schema design.
+- Pagination for large collections.
+- Rate limiting where appropriate.
+- Handling long-running AI operations.
+- Avoiding unnecessarily complex nested URLs.
+
+REST provides architectural principles, but good API design still requires engineering decisions.
+
+---
+
+### Analysis for Hirely
+
+Hirely needs a standardized communication layer between its frontend and backend.
+
+REST-style API design provides a familiar and predictable approach.
+
+For example:
+
+    Frontend
+       ↓
+    GET /api/resumes/123
+       ↓
+    FastAPI
+       ↓
+    Resume Service
+       ↓
+    Database
+       ↓
+    Response
+
+Or:
+
+    Frontend
+       ↓
+    POST /api/analyses
+       ↓
+    FastAPI
+       ↓
+    Resume Analysis Service
+       ↓
+    AI Service
+       ↓
+    Analysis Result
+
+This allows Hirely's backend services to remain separated from the frontend.
+
+---
+
+### Decision for Hirely
+
+Hirely will use **REST-style API design principles** for its backend API layer where appropriate.
+
+The preliminary technology and architecture decision is:
+
+    HTTP
+      ↓
+    REST-style API
+      ↓
+    FastAPI
+      ↓
+    Application Services
+      ↓
+    AI / Document Processing / Database
+
+REST is selected because it provides a clear and widely understood approach for designing APIs around resources and HTTP operations.
+
+However, the final API design will be refined during implementation.
+
+---
+
+### Preliminary Hirely API Structure
+
+The current conceptual API structure is:
+
+    /api
+     ├── /users
+     │     ├── GET
+     │     ├── POST
+     │     └── /{id}
+     │           ├── GET
+     │           ├── PATCH
+     │           └── DELETE
+     │
+     ├── /resumes
+     │     ├── GET
+     │     ├── POST
+     │     └── /{id}
+     │           ├── GET
+     │           ├── PATCH
+     │           └── DELETE
+     │
+     ├── /jobs
+     │     ├── GET
+     │     └── /{id}
+     │           └── GET
+     │
+     └── /analyses
+           ├── GET
+           ├── POST
+           └── /{id}
+                 └── GET
+
+This is a preliminary structure and may change as the actual Hirely features are implemented.
+
+---
+
+### Key Takeaways
+
+- REST stands for Representational State Transfer.
+- REST is an architectural style, not a programming language or framework.
+- REST APIs are commonly designed around resources.
+- URLs identify resources.
+- HTTP methods describe operations.
+- GET is generally used for retrieving data.
+- POST is generally used for creating or submitting data.
+- PUT is generally associated with replacing a resource.
+- PATCH is generally used for partial modification.
+- DELETE is used for deleting a resource.
+- REST and CRUD are related but not the same.
+- REST APIs use HTTP status codes to communicate results.
+- Statelessness is an important REST principle.
+- FastAPI can be used to implement REST-style APIs.
+- REST should guide the design without forcing every operation into a simple CRUD pattern.
+- Hirely will use REST-style API principles where they provide a clean and appropriate design.
+
+---
+
+### Important Mental Model
+
+Remember this:
+
+    HTTP
+    ↓
+    Communication Protocol
+
+    REST
+    ↓
+    Architectural Style
+
+    FastAPI
+    ↓
+    Python Framework
+
+    Pydantic
+    ↓
+    Validation / Data Modeling
+
+    SQLAlchemy
+    ↓
+    Database Interaction
+
+For Hirely:
+
+    Frontend
+       ↓
+    HTTP Request
+       ↓
+    REST-style API
+       ↓
+    FastAPI
+       ↓
+    Application Logic
+       ↓
+    AI / Document Processing / Database
+       ↓
+    HTTP Response
+       ↓
+    Frontend
+
+---
+
+### Hirely Principle
+
+> **Design APIs around meaningful resources, use standard HTTP semantics, keep communication predictable, and let FastAPI implement the API layer.**
