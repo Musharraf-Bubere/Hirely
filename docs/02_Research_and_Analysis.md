@@ -10933,3 +10933,1081 @@ For Hirely:
 The most important idea is:
 
 > **Pydantic defines the structure Hirely expects and validates data before important application logic uses it.**
+
+## 7.4 SQLAlchemy
+
+### Background
+
+After understanding FastAPI, REST APIs, and Pydantic, the next requirement for Hirely is the database layer.
+
+Hirely will need to store and retrieve many types of information, such as:
+
+- Users
+- Resumes
+- Resume metadata
+- Education
+- Work experience
+- Skills
+- Projects
+- Jobs
+- Applications
+- Resume analyses
+- Recommendations
+- Analysis history
+
+The backend needs a reliable way to communicate with the database.
+
+Conceptually:
+
+    Hirely Backend
+          ↓
+    Database Layer
+          ↓
+       Database
+
+This is where SQLAlchemy becomes important.
+
+
+### What is SQLAlchemy?
+
+**SQLAlchemy is a Python SQL toolkit and Object Relational Mapper (ORM).**
+
+In simple terms:
+
+> SQLAlchemy allows a Python application to interact with a relational database in a structured way.
+
+Conceptually:
+
+    Python Application
+          ↓
+      SQLAlchemy
+          ↓
+       Database
+
+SQLAlchemy provides tools for:
+
+- Database connections
+- SQL queries
+- Database models
+- Relationships
+- CRUD operations
+- Transactions
+- ORM-based database interaction
+
+
+### Why do we need SQLAlchemy?
+
+A backend application needs to perform many database operations.
+
+For Hirely, these may include:
+
+- Creating users
+- Retrieving users
+- Storing resumes
+- Retrieving resumes
+- Updating resume information
+- Storing analysis results
+- Retrieving analysis history
+- Managing relationships between entities
+
+Without a proper database layer, database operations can become scattered throughout the application.
+
+Conceptually:
+
+    Application
+          ↓
+      SQL Queries
+          ↓
+       Database
+
+As the project grows, this can become difficult to maintain.
+
+SQLAlchemy provides a structured layer between the application and the database:
+
+    Application
+          ↓
+      SQLAlchemy
+          ↓
+       Database
+
+
+### What is ORM?
+
+ORM stands for:
+
+> **Object Relational Mapping**
+
+An ORM connects application objects with relational database structures.
+
+Python works with:
+
+    Objects
+
+Relational databases work with:
+
+    Tables
+    Rows
+    Columns
+    Relationships
+
+ORM creates a mapping between them.
+
+Conceptually:
+
+    Python World              Database World
+
+    User Object       ↔       users Table
+
+    Resume Object     ↔       resumes Table
+
+    Job Object        ↔       jobs Table
+
+    Analysis Object   ↔       analyses Table
+
+Therefore:
+
+> ORM allows the application to work with database entities using programming-language objects instead of dealing with database structures everywhere.
+
+
+### SQLAlchemy Models
+
+A SQLAlchemy model represents a database entity in the Python application.
+
+For Hirely, possible models include:
+
+    User
+    Resume
+    Education
+    Experience
+    Skill
+    Project
+    Job
+    Application
+    Analysis
+
+For example:
+
+    User Model
+        ↓
+    users Table
+
+    Resume Model
+        ↓
+    resumes Table
+
+    Analysis Model
+        ↓
+    analyses Table
+
+This creates a clear relationship between the application's data models and the database structure.
+
+
+### Model vs Database Table
+
+It is important to understand the difference.
+
+A model exists in the Python application:
+
+    User
+    ├── id
+    ├── name
+    ├── email
+    └── created_at
+
+The database contains the corresponding table:
+
+    users
+    ├── id
+    ├── name
+    ├── email
+    └── created_at
+
+SQLAlchemy provides the mapping:
+
+    Python Model
+          ↕
+      SQLAlchemy
+          ↕
+    Database Table
+
+
+### Database Columns
+
+A database table contains columns.
+
+For example:
+
+    users
+
+    id
+    name
+    email
+    created_at
+
+Each column has a data type.
+
+Conceptually:
+
+    id
+    → Integer
+
+    name
+    → String
+
+    email
+    → String
+
+    created_at
+    → DateTime
+
+SQLAlchemy allows these database columns to be represented in Python models.
+
+
+### Primary Key
+
+A primary key uniquely identifies a database record.
+
+For example:
+
+    users
+
+    id | name
+    ---|------
+    1  | Ali
+    2  | Ahmed
+    3  | John
+
+Here:
+
+    id
+
+is the primary key.
+
+For Hirely:
+
+    User
+      ↓
+    id → Primary Key
+
+Similarly:
+
+    Resume
+      ↓
+    id → Primary Key
+
+    Analysis
+      ↓
+    id → Primary Key
+
+Primary keys are important because other database records may need to reference them.
+
+
+### Foreign Key
+
+A foreign key creates a connection between database tables.
+
+For example:
+
+    users
+
+    id | name
+    ---|------
+    1  | Ali
+    2  | Ahmed
+
+And:
+
+    resumes
+
+    id | user_id | file_name
+    ---|---------|-----------
+    1  | 1       | resume.pdf
+    2  | 1       | resume2.pdf
+    3  | 2       | cv.pdf
+
+Here:
+
+    resumes.user_id
+
+references:
+
+    users.id
+
+Conceptually:
+
+    users.id
+        ↑
+        │
+    resumes.user_id
+
+This allows the database to represent relationships between entities.
+
+
+### Why Foreign Keys Matter for Hirely
+
+A user can have multiple resumes.
+
+For example:
+
+    User
+      │
+      ├── Resume 1
+      ├── Resume 2
+      └── Resume 3
+
+The database needs to know which user owns each resume.
+
+This can be represented through:
+
+    resumes.user_id
+          ↓
+       users.id
+
+Therefore, foreign keys are important for maintaining relationships between Hirely's entities.
+
+
+### Relationships
+
+Hirely will contain many related entities.
+
+For example:
+
+    User
+      ↓
+    Resumes
+      ↓
+    Analyses
+
+And:
+
+    Resume
+      ↓
+    Skills
+
+And:
+
+    Resume
+      ↓
+    Experience
+
+SQLAlchemy allows these database relationships to be represented in the application's models.
+
+
+### One-to-Many Relationship
+
+One-to-many means:
+
+> One record is associated with multiple records.
+
+For Hirely:
+
+    One User
+       ↓
+    Multiple Resumes
+
+Conceptually:
+
+    User
+      │
+      ├── Resume 1
+      ├── Resume 2
+      └── Resume 3
+
+Another possible relationship is:
+
+    One Resume
+       ↓
+    Multiple Analyses
+
+For example:
+
+    Resume
+      │
+      ├── Analysis 1
+      ├── Analysis 2
+      └── Analysis 3
+
+
+### Many-to-One Relationship
+
+The same relationship can be viewed from the opposite direction.
+
+For example:
+
+    Resume 1 ──┐
+    Resume 2 ──┼──→ User
+    Resume 3 ──┘
+
+Many resumes belong to one user.
+
+Therefore:
+
+    User
+    → One
+
+    Resume
+    → Many
+
+
+### Many-to-Many Relationship
+
+Many-to-many means:
+
+> Multiple records on one side can be associated with multiple records on the other side.
+
+Skills are a good example.
+
+One candidate can have:
+
+    Python
+    SQL
+    FastAPI
+
+And one skill can belong to many candidates.
+
+Conceptually:
+
+    Candidate
+         ↕
+       Skills
+
+A relational database normally represents this using an association table:
+
+    candidates
+         ↓
+    candidate_skills
+         ↓
+       skills
+
+This allows Hirely to represent candidate-skill relationships efficiently.
+
+
+### CRUD Operations
+
+CRUD is a fundamental database concept.
+
+CRUD stands for:
+
+    C → Create
+    R → Read
+    U → Update
+    D → Delete
+
+Hirely will require all four operations.
+
+
+### Create
+
+Create means inserting new data.
+
+Examples:
+
+    Create User
+    Create Resume
+    Create Job
+    Create Analysis
+
+Conceptually:
+
+    Application
+        ↓
+    SQLAlchemy
+        ↓
+    Database
+
+
+### Read
+
+Read means retrieving existing data.
+
+Examples:
+
+    Get User
+    Get Resume
+    Get Analysis
+    Get Job
+
+Conceptually:
+
+    Database
+        ↓
+    SQLAlchemy
+        ↓
+    Application
+
+
+### Update
+
+Update means modifying existing information.
+
+Examples:
+
+    Update User Profile
+    Update Resume Metadata
+    Update Job
+    Update Analysis Status
+
+
+### Delete
+
+Delete means removing data.
+
+Examples:
+
+    Delete Resume
+    Delete Job
+    Delete User
+
+Deletion needs to be designed carefully when related records exist.
+
+For example:
+
+    User
+      ↓
+    Resumes
+      ↓
+    Analyses
+
+If a user is deleted, Hirely needs a clear policy for what happens to the related records.
+
+
+### SQLAlchemy Session
+
+The **Session** is an important SQLAlchemy concept.
+
+It provides a workspace through which the application performs database operations.
+
+Conceptually:
+
+    Application
+          ↓
+        Session
+          ↓
+       Database
+
+The Session can be involved in:
+
+- Reading data
+- Adding records
+- Updating records
+- Deleting records
+- Committing changes
+- Rolling back changes
+
+It also plays an important role in transaction management.
+
+
+### Transactions
+
+A transaction represents a logical unit of database work.
+
+For example, Hirely may need to:
+
+    Create Analysis
+          ↓
+    Store Analysis Result
+          ↓
+    Update Analysis Status
+
+These operations may need to succeed together.
+
+Conceptually:
+
+    Begin Transaction
+          ↓
+    Operation A
+          ↓
+    Operation B
+          ↓
+    Operation C
+          ↓
+    Commit
+
+If something fails:
+
+    Error
+      ↓
+    Rollback
+
+This helps maintain database consistency.
+
+
+### Commit
+
+Commit confirms the changes made during a transaction.
+
+Conceptually:
+
+    Application
+        ↓
+      Session
+        ↓
+      Commit
+        ↓
+     Database
+
+After the transaction is committed, the changes become persistent in the database.
+
+
+### Rollback
+
+Rollback reverses uncommitted changes from the current transaction.
+
+Conceptually:
+
+    Database Operation
+          ↓
+        Error
+          ↓
+      Rollback
+          ↓
+    Previous Consistent State
+
+This is important when multiple related database operations are performed together.
+
+
+### SQLAlchemy and FastAPI
+
+SQLAlchemy fits naturally into the backend architecture we have already designed.
+
+Our architecture becomes:
+
+    Client
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Service Layer
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+Each component has a different responsibility.
+
+    FastAPI
+    → API / HTTP handling
+
+    Pydantic
+    → Data validation and schemas
+
+    Service Layer
+    → Business logic
+
+    SQLAlchemy
+    → Database interaction
+
+    Database
+    → Persistent storage
+
+
+### Pydantic vs SQLAlchemy
+
+This distinction is extremely important.
+
+Pydantic:
+
+    Data Validation
+    Data Modeling
+    API Request Schemas
+    API Response Schemas
+    Serialization
+
+SQLAlchemy:
+
+    Database Models
+    Database Queries
+    Relationships
+    Transactions
+    Persistence
+    ORM
+
+Therefore:
+
+    Pydantic
+       ↓
+    Validates application data
+
+    SQLAlchemy
+       ↓
+    Stores and retrieves application data
+
+
+### Pydantic Model vs SQLAlchemy Model
+
+Pydantic models and SQLAlchemy models may represent similar information, but they have different purposes.
+
+Pydantic model:
+
+    API / Application Data
+          ↓
+    Validation
+          ↓
+    Structured Data
+
+SQLAlchemy model:
+
+    Application Data
+          ↓
+    Database Mapping
+          ↓
+    Database Table
+
+Conceptually:
+
+    API Request
+        ↓
+    Pydantic
+        ↓
+    Service Layer
+        ↓
+    SQLAlchemy
+        ↓
+    Database
+
+
+### SQLAlchemy and Hirely Users
+
+A user registration flow may look like:
+
+    User Registration
+          ↓
+    FastAPI
+          ↓
+    Pydantic
+          ↓
+    User Service
+          ↓
+    SQLAlchemy
+          ↓
+    Users Table
+
+When retrieving the user:
+
+    Users Table
+          ↓
+    SQLAlchemy
+          ↓
+    User Service
+          ↓
+    Pydantic
+          ↓
+    FastAPI
+          ↓
+    Frontend
+
+
+### SQLAlchemy and Hirely Resumes
+
+Resume information can follow:
+
+    Resume Upload
+          ↓
+    Document Processing
+          ↓
+    Resume Parser
+          ↓
+    Structured Resume Data
+          ↓
+    Pydantic Validation
+          ↓
+    Resume Service
+          ↓
+    SQLAlchemy
+          ↓
+    Database
+
+The database can store resume-related information such as:
+
+    resume_id
+    user_id
+    file_name
+    file_type
+    storage_reference
+    created_at
+
+
+### SQLAlchemy and Resume Analysis
+
+Hirely will also need to store analysis results.
+
+Conceptually:
+
+    Resume
+       ↓
+    AI Analysis
+       ↓
+    Structured Analysis
+       ↓
+    Pydantic Validation
+       ↓
+    SQLAlchemy
+       ↓
+    Analysis Table
+
+This allows Hirely to maintain analysis history and retrieve previous results.
+
+
+### SQLAlchemy and AI
+
+Later, Hirely will use AI / LLMs for:
+
+- Resume analysis
+- Skill analysis
+- Job matching
+- Recommendations
+- Resume improvement
+
+The flow can become:
+
+    Resume
+       ↓
+    AI / LLM
+       ↓
+    Structured Output
+       ↓
+    Pydantic
+       ↓
+    Validation
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+This separates AI generation from database persistence.
+
+
+### SQLAlchemy and Database Security
+
+Database credentials should not be hardcoded directly into the source code.
+
+Configuration should be managed through environment variables or another secure configuration mechanism.
+
+Conceptually:
+
+    Environment
+          ↓
+    Database Configuration
+          ↓
+    SQLAlchemy
+          ↓
+    Database
+
+For example:
+
+    DATABASE_URL
+
+can contain the database connection configuration.
+
+Sensitive credentials should be protected properly.
+
+
+### SQLAlchemy and Database Performance
+
+As Hirely grows, database performance will become important.
+
+Important areas include:
+
+- Efficient queries
+- Indexes
+- Pagination
+- Connection pooling
+- Relationship loading
+- Transactions
+- Proper database design
+
+SQLAlchemy provides tools for these areas, but efficient database design and query design are still the developer's responsibility.
+
+
+### SQLAlchemy and Database Migrations
+
+Database schemas change as applications evolve.
+
+For example:
+
+Initial:
+
+    users
+    ├── id
+    ├── name
+    └── email
+
+Later:
+
+    users
+    ├── id
+    ├── name
+    ├── email
+    └── created_at
+
+We need a controlled way to apply database schema changes.
+
+For SQLAlchemy-based applications, **Alembic** is commonly used for database migrations.
+
+Conceptually:
+
+    SQLAlchemy Models
+          ↓
+    Schema Changes
+          ↓
+    Alembic Migration
+          ↓
+    Database
+
+
+### SQLAlchemy and Hirely Architecture
+
+Our current backend architecture is:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    REST API
+       ↓
+    Pydantic
+       ↓
+    Service / Business Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Relational Database
+
+For the resume system:
+
+    Resume Upload
+          ↓
+    Document Processing
+          ↓
+    Resume Parser
+          ↓
+    Pydantic
+          ↓
+    Resume Service
+          ↓
+    SQLAlchemy
+          ↓
+    Database
+
+For AI analysis:
+
+    Stored Resume
+          ↓
+    AI / LLM
+          ↓
+    Pydantic
+          ↓
+    Analysis Service
+          ↓
+    SQLAlchemy
+          ↓
+    Database
+
+
+### SQLAlchemy Does Not Replace Other Technologies
+
+SQLAlchemy has a specific responsibility.
+
+It does not replace:
+
+    FastAPI
+    Pydantic
+    Business Logic
+    Authentication
+    Authorization
+    Document Processing
+    OCR
+    AI / LLM
+    Database
+
+Instead, it works together with them.
+
+Conceptually:
+
+    FastAPI
+    → API
+
+    Pydantic
+    → Validation
+
+    Business Logic
+    → Application Decisions
+
+    SQLAlchemy
+    → Database Interaction
+
+    Database
+    → Persistent Storage
+
+
+### Final Decision for Hirely
+
+Based on our research, SQLAlchemy will be used as the **database interaction and ORM layer for Hirely**.
+
+The main reasons are:
+
+- Python integration
+- ORM support
+- Database model mapping
+- Relationship management
+- CRUD operations
+- Transaction support
+- Query construction
+- Maintainable database architecture
+- Strong integration with the Python backend ecosystem
+
+The database layer will remain separate from the API and validation layers.
+
+Our conceptual architecture is:
+
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+
+### Key Takeaways
+
+Remember SQLAlchemy using this simple idea:
+
+> **SQLAlchemy connects our Python application with the relational database.**
+
+The most important distinction is:
+
+    Pydantic
+    → Validates and structures data
+
+    SQLAlchemy
+    → Interacts with the database
+
+And the Hirely backend architecture is:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+For Hirely specifically:
+
+    User
+       ↓
+    Resume
+       ↓
+    Analysis
+       ↓
+    Recommendations
+
+SQLAlchemy will provide the database layer required to store and retrieve these entities and their relationships.
