@@ -12011,3 +12011,797 @@ For Hirely specifically:
     Recommendations
 
 SQLAlchemy will provide the database layer required to store and retrieve these entities and their relationships.
+
+## 7.5 Async Programming
+
+### Background
+
+Modern backend applications frequently perform operations that involve waiting.
+
+Examples include:
+
+- Database operations
+- API requests
+- Network requests
+- LLM API calls
+- File operations
+- External services
+
+Hirely will perform several of these operations.
+
+For example:
+
+    User
+      ↓
+    FastAPI
+      ↓
+    Resume Analysis
+      ↓
+    LLM API
+      ↓
+    Wait for Response
+      ↓
+    Continue Processing
+
+During the waiting period, the application may be able to handle other work.
+
+This is where asynchronous programming becomes useful.
+
+
+### What is Async Programming?
+
+**Asynchronous programming** is a programming approach that allows an application to handle waiting operations without unnecessarily blocking the execution of other available work.
+
+The basic idea is:
+
+> Do not unnecessarily block the application while waiting for an I/O operation to complete.
+
+Conceptually:
+
+    Request A
+       ↓
+    Waiting for Database
+       │
+       ├────────→ Request B
+       │             ↓
+       │        Other Work
+       │
+       ←─────────────┘
+
+Asynchronous programming is especially useful for applications that perform many I/O-bound operations.
+
+
+### Synchronous Programming
+
+In synchronous execution, operations generally happen sequentially.
+
+For example:
+
+    Request A
+       ↓
+    Database Operation
+       ↓
+    Wait
+       ↓
+    Response A
+       ↓
+    Request B
+       ↓
+    Database Operation
+       ↓
+    Response B
+
+If the application spends significant time waiting for an external operation, other work may be delayed depending on the execution model.
+
+
+### Asynchronous Programming
+
+With asynchronous execution, an application can make progress on other available tasks while an I/O operation is waiting.
+
+Conceptually:
+
+    Request A
+       ↓
+    Start I/O Operation
+       ↓
+    Waiting...
+    
+    Request B
+       ↓
+    Start Other Work
+       ↓
+    Continue
+    
+    I/O Operation Completes
+       ↓
+    Continue Request A
+
+This allows the application to use its execution time more efficiently for I/O-heavy workloads.
+
+
+### I/O-Bound Operations
+
+An I/O-bound operation is an operation where the application spends significant time waiting for something outside the CPU.
+
+Common examples include:
+
+- Database operations
+- Network requests
+- HTTP requests
+- External APIs
+- LLM API calls
+- File I/O
+
+These operations are important for Hirely because the application will communicate with databases and external AI services.
+
+
+### CPU-Bound Operations
+
+A CPU-bound operation requires significant CPU computation.
+
+Examples include:
+
+- Heavy mathematical calculations
+- Large computational workloads
+- Complex data processing
+- Certain machine learning operations
+- Intensive image processing
+
+Async programming by itself does not automatically make CPU-bound work faster.
+
+Therefore:
+
+    I/O-Bound
+       ↓
+    Async can be useful
+
+    CPU-Bound
+       ↓
+    Async alone is generally not the solution
+
+
+### Why Async Programming is Important for Hirely
+
+Hirely will perform several I/O-heavy operations.
+
+For example:
+
+    User Request
+          ↓
+    FastAPI
+          ↓
+    Resume Analysis
+          ↓
+    LLM API Request
+          ↓
+    Wait for LLM Response
+          ↓
+    Continue Processing
+
+The LLM request involves network communication and waiting.
+
+Other examples include:
+
+    FastAPI Requests
+    Database Operations
+    LLM API Calls
+    External APIs
+    Network Requests
+    File Operations
+
+Asynchronous programming can therefore help Hirely handle I/O-bound workloads efficiently.
+
+
+### Async Programming and FastAPI
+
+FastAPI supports asynchronous endpoints.
+
+Conceptually:
+
+    Client
+       ↓
+    FastAPI
+       ↓
+    Async Endpoint
+       ↓
+    Async I/O
+       ↓
+    Response
+
+An endpoint can be defined as an asynchronous function.
+
+The important Python keyword is:
+
+    async def
+
+For example:
+
+    async def analyze_resume():
+        ...
+
+This allows the function to participate in Python's asynchronous execution model.
+
+
+### The `async` Keyword
+
+The `async` keyword is used to define an asynchronous function.
+
+Conceptually:
+
+    async def function():
+        ...
+
+An asynchronous function can use asynchronous operations with `await`.
+
+However:
+
+> Simply using `async def` does not automatically make every operation inside the function asynchronous.
+
+The operations being performed must also support asynchronous execution.
+
+
+### The `await` Keyword
+
+The `await` keyword is used to wait for an asynchronous operation.
+
+Conceptually:
+
+    result = await some_operation()
+
+The idea is:
+
+> Wait for this asynchronous operation while allowing the asynchronous execution system to make progress on other available work.
+
+For example:
+
+    Request A
+       ↓
+    await LLM request
+       ↓
+    Waiting...
+       ↓
+    Other tasks can make progress
+       ↓
+    LLM response arrives
+       ↓
+    Continue Request A
+
+
+### Event Loop
+
+The **event loop** is a central part of Python's asynchronous programming model.
+
+A simplified representation is:
+
+    Event Loop
+        │
+        ├── Task A
+        ├── Task B
+        └── Task C
+
+When one task is waiting for an I/O operation, the event loop can allow another task to make progress.
+
+Conceptually:
+
+    Task A
+       ↓
+    Waiting for I/O
+       ↓
+    Event Loop
+       ↓
+    Task B
+       ↓
+    Other Work
+
+When the I/O operation completes, the event loop can continue the waiting task.
+
+
+### Async Programming and Concurrency
+
+Asynchronous programming is mainly useful for achieving efficient **concurrency**.
+
+Concurrency means multiple tasks can make progress over overlapping periods.
+
+Conceptually:
+
+    Task A
+       ↓
+    Waiting
+       ↓
+    Task B
+       ↓
+    Working
+       ↓
+    Task A Continues
+
+This is different from automatically executing multiple CPU operations simultaneously.
+
+
+### Async is Not the Same as Parallelism
+
+Async programming should not be confused with parallelism.
+
+**Concurrency:**
+
+    Multiple tasks
+          ↓
+    Make progress over overlapping periods
+
+**Parallelism:**
+
+    Multiple computations
+          ↓
+    Execute simultaneously
+
+For Hirely, the primary benefit of async programming is:
+
+    Concurrency
+        ↓
+    Efficient I/O handling
+
+
+### Async LLM Requests
+
+LLM communication is an important use case for Hirely.
+
+A resume analysis may involve:
+
+    Resume
+       ↓
+    Prepare Prompt
+       ↓
+    LLM API Request
+       ↓
+    Wait
+       ↓
+    LLM Response
+       ↓
+    Validate Result
+
+The LLM API request is a network operation.
+
+An asynchronous implementation can use:
+
+    await LLM Request
+
+This allows the application to handle other available work while waiting for the external service.
+
+
+### Async Database Operations
+
+Database operations can also involve waiting.
+
+For example:
+
+    FastAPI
+       ↓
+    Service Layer
+       ↓
+    Database Query
+       ↓
+    Wait
+       ↓
+    Database Result
+
+If the database access library supports asynchronous operations, the application can use asynchronous database access.
+
+Conceptually:
+
+    FastAPI
+       ↓
+    Async Service
+       ↓
+    Async SQLAlchemy
+       ↓
+    Async Database Driver
+       ↓
+    PostgreSQL
+
+
+### Async HTTP Requests
+
+Hirely may communicate with external services.
+
+For example:
+
+    Hirely
+       ↓
+    External API
+
+Network communication involves waiting:
+
+    HTTP Request
+        ↓
+    Network
+        ↓
+    Wait
+        ↓
+    Response
+
+Asynchronous HTTP clients can allow the application to perform other available work while waiting for network responses.
+
+
+### Async File Operations
+
+Document processing may also involve file operations.
+
+For example:
+
+    Resume Upload
+          ↓
+    Read File
+          ↓
+    Process Document
+
+Some file operations can be handled asynchronously depending on the library and implementation.
+
+However:
+
+> Not every file operation automatically needs to be asynchronous.
+
+Async should be used where it provides practical value.
+
+
+### Async Libraries
+
+An important architectural principle is that an `async` function should use asynchronous-compatible operations where appropriate.
+
+For example:
+
+    Async Function
+         ↓
+    Async Database Operation
+         ↓
+    Async HTTP Request
+
+Simply writing:
+
+    async def
+
+around blocking synchronous code does not automatically make the operation non-blocking.
+
+Therefore:
+
+> Async programming requires appropriate async-compatible libraries and operations.
+
+
+### Async and SQLAlchemy
+
+SQLAlchemy can be used in asynchronous applications when configured with appropriate asynchronous database support.
+
+Conceptually:
+
+    FastAPI
+       ↓
+    Async Service
+       ↓
+    Async SQLAlchemy
+       ↓
+    Async Database Driver
+       ↓
+    Database
+
+This connects the two backend technologies already researched:
+
+    FastAPI
+       ↓
+    Async Programming
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+
+### Async and Pydantic
+
+Pydantic itself is primarily responsible for data validation and structured data.
+
+Async programming handles the execution model for I/O-bound operations.
+
+Therefore:
+
+    FastAPI
+       ↓
+    Async Request Handling
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    Async Database / APIs
+
+Pydantic and async programming have different responsibilities but work together within the backend.
+
+
+### Async Hirely Resume Analysis Flow
+
+A future Hirely resume analysis request may follow:
+
+    User
+       ↓
+    FastAPI
+       ↓
+    Pydantic Validation
+       ↓
+    Resume Service
+       ↓
+    Async Database Request
+       ↓
+    Resume Data
+       ↓
+    Prepare AI Context
+       ↓
+    Async LLM Request
+       ↓
+    AI Response
+       ↓
+    Pydantic Validation
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+       ↓
+    FastAPI Response
+       ↓
+    User
+
+Important asynchronous operations may include:
+
+- Database requests
+- LLM API requests
+- External API requests
+- Network operations
+
+
+### Where Async Should Be Used in Hirely
+
+Good candidates for asynchronous programming include:
+
+- LLM API calls
+- External API calls
+- Database operations
+- Network requests
+- Other I/O-bound operations
+
+Potentially:
+
+- File I/O
+
+depending on the selected implementation and libraries.
+
+
+### Where Async Should Not Automatically Be Used
+
+Not every function in Hirely needs to be asynchronous.
+
+Examples include:
+
+- Simple calculations
+- Basic validation
+- Small data transformations
+- Simple deterministic business logic
+
+The goal should not be:
+
+    Make Everything Async
+
+Instead:
+
+> **Use asynchronous programming where it provides practical benefits, especially for I/O-bound operations.**
+
+
+### Async and Blocking Operations
+
+A major consideration is blocking code.
+
+For example:
+
+    async def function():
+        synchronous_blocking_operation()
+
+Although the function is declared with `async def`, the blocking operation can still block execution.
+
+Therefore:
+
+    async def
+        ≠
+    Everything is automatically asynchronous
+
+The underlying operations must support asynchronous execution when non-blocking behavior is required.
+
+
+### Async and Hirely Backend Architecture
+
+The backend architecture can be represented as:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    Async API Handling
+       ↓
+    Pydantic
+       ↓
+    Service / Business Logic
+       ↓
+    Async Database / External Services
+       ↓
+    SQLAlchemy / HTTP Clients
+       ↓
+    Database / External APIs
+
+This architecture is suitable for an application that performs multiple I/O-heavy operations.
+
+
+### Async Programming and Scalability
+
+As Hirely grows, the backend may need to handle multiple users and requests simultaneously.
+
+For example:
+
+    User A
+       ↓
+    Resume Analysis
+
+    User B
+       ↓
+    Resume Analysis
+
+    User C
+       ↓
+    Resume Analysis
+
+Each request may involve waiting for:
+
+    Database
+    LLM
+    External API
+
+Async programming can help the backend efficiently manage these waiting periods.
+
+However, async programming alone does not guarantee scalability.
+
+Scalability also depends on:
+
+- Database design
+- Query efficiency
+- Application architecture
+- Infrastructure
+- Caching
+- External service limits
+- Resource management
+
+
+### Async Programming Limitations
+
+Async programming is useful, but it is not a universal performance solution.
+
+Important limitations include:
+
+- It does not automatically speed up CPU-heavy operations.
+- Blocking code can still block an async application.
+- Async-compatible libraries may be required.
+- Poorly designed async code can become difficult to understand.
+- Async does not automatically mean parallel execution.
+- Database and external-service limitations still apply.
+
+Therefore, async should be introduced where it solves a real problem.
+
+
+### Decision for Hirely
+
+Based on the research, **Hirely will use asynchronous programming for appropriate I/O-bound backend operations**.
+
+The primary candidates are:
+
+- Database operations
+- LLM API calls
+- External API requests
+- Network operations
+
+FastAPI's asynchronous capabilities will be used where appropriate.
+
+The architecture will follow the principle:
+
+    Use Async Where I/O Waiting Matters
+
+rather than making every function asynchronous without a practical reason.
+
+
+### Hirely Backend Architecture
+
+The current backend architecture becomes:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    Async Request Handling
+       ↓
+    Pydantic
+       ↓
+    Service / Business Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+For AI-powered operations:
+
+    Resume
+       ↓
+    Async Service
+       ↓
+    LLM API
+       ↓
+    Structured Output
+       ↓
+    Pydantic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+
+### Key Takeaways
+
+The most important concepts are:
+
+    async def
+    → Defines an asynchronous function
+
+    await
+    → Waits for an asynchronous operation
+
+    Event Loop
+    → Coordinates asynchronous tasks
+
+    I/O-Bound
+    → Good candidate for async programming
+
+    CPU-Bound
+    → Async alone is generally not the solution
+
+    Async
+    → Primarily helps with concurrency and I/O efficiency
+
+    Async ≠ Parallelism
+    → They are different concepts
+
+    async def ≠ Automatically Async
+    → Underlying operations must support asynchronous execution
+
+
+### Final Concept
+
+The core idea for Hirely is:
+
+> **Asynchronous programming allows Hirely to handle I/O-bound operations efficiently without unnecessarily blocking the application while waiting for external operations to complete.**
+
+The main Hirely architecture is:
+
+    FastAPI
+       ↓
+    Async Programming
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+And for AI operations:
+
+    FastAPI
+       ↓
+    Async Service
+       ↓
+    LLM API
+       ↓
+    Pydantic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
