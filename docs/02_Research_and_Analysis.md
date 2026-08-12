@@ -7370,8 +7370,8 @@ The project will begin with the simplest suitable AI architecture and introduce 
 ### Hirely Principle
 
 > **Choose the simplest architecture that solves the current problem, and introduce additional AI frameworks only when their capabilities provide clear engineering value.**
-
-## 6.1 FastAPI
+# 7 Backend Technologies
+## 7.1 FastAPI
 
 ### Background
 
@@ -8156,7 +8156,7 @@ This architecture will evolve as the remaining backend research is completed.
 
 > **Use the backend API as a clean communication layer between Hirely's frontend and its AI, document-processing, database, and application services.**
 
-## 6.2 REST APIs
+## 7.2 REST APIs
 
 ### Background
 
@@ -9431,3 +9431,1505 @@ For Hirely:
 ### Hirely Principle
 
 > **Design APIs around meaningful resources, use standard HTTP semantics, keep communication predictable, and let FastAPI implement the API layer.**
+
+## 7.3 Pydantic
+
+### Background
+
+After understanding FastAPI and REST APIs, the next important requirement for Hirely is **data validation and data modeling**.
+
+A backend application receives data from many different sources:
+
+- Frontend
+- REST API requests
+- Resume parser
+- Document processing system
+- OCR
+- AI / LLM systems
+- Database layer
+- External services
+
+We cannot assume that all incoming data will always have the correct structure.
+
+For example, Hirely may expect:
+
+    experience_years → integer
+    skills → list of strings
+    email → string
+
+But the application may receive:
+
+    experience_years → "five"
+    skills → "Python, SQL"
+    email → missing
+
+If invalid data enters the application, it can create:
+
+- Runtime errors
+- Unexpected behavior
+- Incorrect analysis
+- Database problems
+- API errors
+- AI pipeline failures
+
+Therefore, Hirely needs a proper mechanism to define and validate the structure of its data.
+
+This is where **Pydantic** becomes important.
+
+
+### What is Pydantic?
+
+**Pydantic is a Python library used for data validation and data modeling using Python type annotations.**
+
+In simple terms:
+
+> Pydantic allows us to define what our data should look like and validate incoming data against that structure.
+
+Conceptually:
+
+    Incoming Data
+          ↓
+       Pydantic
+          ↓
+       Validation
+          ↓
+    Structured Data
+          ↓
+    Application Logic
+
+Pydantic allows us to create structured models that describe the data our application expects.
+
+
+### Why do we need Pydantic?
+
+Imagine Hirely receives candidate information.
+
+The application expects:
+
+    name → string
+    email → string
+    experience_years → integer
+
+But the incoming request contains:
+
+    name → "John"
+    email → 12345
+    experience_years → "three"
+
+The application now has inconsistent data.
+
+Without validation:
+
+    Request
+      ↓
+    Application
+      ↓
+    Business Logic
+      ↓
+    Database / AI
+      ↓
+    Error
+
+With validation:
+
+    Request
+      ↓
+    Pydantic
+      ↓
+    Validation
+      ↓
+    Valid Data
+      ↓
+    Application
+
+Invalid data can be detected much earlier.
+
+Therefore:
+
+> Pydantic helps protect the application from incorrectly structured data.
+
+
+### Pydantic as a Data Gatekeeper
+
+A useful mental model for Pydantic is:
+
+> **Pydantic acts as a gatekeeper for structured data.**
+
+The flow is:
+
+    External Data
+          ↓
+       Pydantic
+          ↓
+       Validate
+          ↓
+    ┌─────┴─────┐
+    ↓           ↓
+  Valid       Invalid
+    ↓           ↓
+Application   Error
+
+This creates a boundary between external data and internal application logic.
+
+
+### Pydantic and Python Type Hints
+
+Pydantic makes extensive use of Python type annotations.
+
+For example:
+
+    name: str
+
+means:
+
+    name should be a string
+
+Similarly:
+
+    age: int
+
+means:
+
+    age should be an integer
+
+And:
+
+    skills: list[str]
+
+means:
+
+    skills should be a list containing strings
+
+This makes Pydantic models easy to understand because the expected structure is visible directly in the model.
+
+
+### BaseModel
+
+One of the most important concepts in Pydantic is:
+
+    BaseModel
+
+Pydantic models generally inherit from `BaseModel`.
+
+Conceptually:
+
+    BaseModel
+        ↓
+    Our Model
+        ↓
+    Validated Data Structure
+
+For example, a candidate model can contain:
+
+    Candidate
+    ├── name
+    ├── email
+    ├── experience_years
+    └── skills
+
+The model defines the expected structure of candidate data.
+
+
+### Pydantic Fields
+
+Every attribute inside a Pydantic model represents a field.
+
+For example:
+
+    Candidate
+
+    name
+    email
+    phone
+    experience_years
+    skills
+
+Each field can have a defined type.
+
+Conceptually:
+
+    name
+    → string
+
+    email
+    → string
+
+    phone
+    → string
+
+    experience_years
+    → integer
+
+    skills
+    → list of strings
+
+This creates a clear data contract.
+
+
+### Required Fields
+
+Some information is essential.
+
+For example, Hirely may require:
+
+    name
+    email
+
+These fields should be required if the application cannot work correctly without them.
+
+Conceptually:
+
+    Candidate
+    ├── name → required
+    ├── email → required
+    └── phone → optional
+
+If a required field is missing, Pydantic can identify the problem during validation.
+
+
+### Optional Fields
+
+Real-world data is not always complete.
+
+This is especially true for resumes.
+
+One candidate may provide:
+
+    Name
+    Email
+    Phone
+    LinkedIn
+    GitHub
+
+Another candidate may provide:
+
+    Name
+    Email
+    Phone
+
+Therefore, some fields need to be optional.
+
+For example:
+
+    phone → optional
+    linkedin → optional
+    github → optional
+
+This is important because Hirely should not assume that every resume contains exactly the same information.
+
+
+### Default Values
+
+Pydantic models can also define default values.
+
+For example, an analysis may have:
+
+    status → pending
+
+If no status is provided when the analysis is created, the application can use:
+
+    pending
+
+The analysis can later move through states such as:
+
+    pending
+       ↓
+    processing
+       ↓
+    completed
+
+or:
+
+    pending
+       ↓
+    processing
+       ↓
+    failed
+
+This can become useful in Hirely's resume analysis pipeline.
+
+
+### Data Validation
+
+Validation means checking whether incoming data satisfies the expected rules.
+
+Suppose Hirely expects:
+
+    pages → integer
+
+Valid:
+
+    pages = 3
+
+Potentially invalid:
+
+    pages = "three"
+
+The validation flow becomes:
+
+    Incoming Data
+          ↓
+       Pydantic
+          ↓
+       Validation
+          ↓
+    ┌─────┴─────┐
+    ↓           ↓
+  Valid       Invalid
+    ↓           ↓
+Continue     Error
+
+The goal is to detect invalid data as early as possible.
+
+
+### Type Validation
+
+Pydantic validates data according to the declared types.
+
+For Hirely, we may have:
+
+    score
+    → number
+
+    skills
+    → list of strings
+
+    experience_years
+    → integer
+
+    name
+    → string
+
+    projects
+    → list of structured objects
+
+This is particularly useful because Hirely will work with complex resume information.
+
+
+### Type Coercion
+
+Pydantic can perform certain conversions when appropriate.
+
+For example:
+
+    Expected:
+    experience_years → int
+
+    Received:
+    "3"
+
+Depending on the validation configuration, Pydantic may convert:
+
+    "3"
+      ↓
+     3
+
+This is called:
+
+> Type coercion
+
+However, automatic conversion should not always be blindly trusted.
+
+For important Hirely data, we need to decide where conversion is acceptable and where stricter validation is required.
+
+
+### Strict Validation
+
+Sometimes automatic conversion is not desirable.
+
+For example:
+
+    Expected:
+    3
+
+    Received:
+    "3"
+
+In some situations, we may want to reject the string rather than convert it.
+
+Pydantic provides strict validation capabilities for stronger type enforcement.
+
+Conceptually:
+
+    Normal Validation
+    → more flexible validation
+
+    Strict Validation
+    → stronger type enforcement
+
+
+### Nested Models
+
+Real-world application data is rarely flat.
+
+A resume is a perfect example.
+
+A resume can contain:
+
+    Resume
+    ├── Personal Information
+    ├── Education
+    ├── Experience
+    ├── Skills
+    └── Projects
+
+Each section can contain its own fields.
+
+For example:
+
+    Personal Information
+    ├── name
+    ├── email
+    ├── phone
+    ├── linkedin
+    └── github
+
+And:
+
+    Education
+    ├── degree
+    ├── institution
+    ├── start_date
+    └── end_date
+
+This is called:
+
+> Nested modeling
+
+Pydantic allows complex structures to be represented using nested models.
+
+
+### Why Nested Models Matter for Hirely
+
+Hirely's resume data will eventually become complex.
+
+A resume is not simply:
+
+    name
+    email
+    skills
+
+It may contain:
+
+    Personal Information
+    Education
+    Work Experience
+    Skills
+    Projects
+    Certifications
+    Achievements
+    Languages
+
+Some sections can contain multiple records.
+
+For example:
+
+    Experience
+       ↓
+    Experience 1
+       ↓
+    Experience 2
+       ↓
+    Experience 3
+
+Therefore, structured models are required instead of one large unorganized object.
+
+
+### Pydantic and FastAPI
+
+Pydantic has a very close relationship with FastAPI.
+
+Our sequence is:
+
+    FastAPI
+       ↓
+    REST APIs
+       ↓
+    Pydantic
+
+FastAPI provides the API framework.
+
+Pydantic provides data modeling and validation.
+
+Conceptually:
+
+    Client
+       ↓
+    HTTP Request
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Validation
+       ↓
+    Application Logic
+
+This combination is very useful for building structured Python APIs.
+
+
+### Pydantic Request Models
+
+When a client sends data to Hirely, the backend needs to understand what the request should contain.
+
+For example:
+
+    POST /api/resume/analyze
+
+The request may contain:
+
+    resume_id
+    analysis_type
+
+A Pydantic request model can define the expected structure.
+
+Conceptually:
+
+    Frontend
+       ↓
+    HTTP Request
+       ↓
+    FastAPI
+       ↓
+    Pydantic Request Model
+       ↓
+    Validation
+       ↓
+    Service Layer
+
+This creates a clear contract between the frontend and backend.
+
+
+### Pydantic Response Models
+
+Pydantic can also define API response structures.
+
+Suppose Hirely returns:
+
+    resume_id
+    score
+    strengths
+    weaknesses
+    recommendations
+
+We want the response to have a predictable structure.
+
+Conceptually:
+
+    Application
+       ↓
+    Pydantic Response Model
+       ↓
+    FastAPI
+       ↓
+    JSON Response
+       ↓
+    Frontend
+
+This makes the API easier to consume and maintain.
+
+
+### Request Model vs Response Model
+
+Request and response structures do not always need to be identical.
+
+For example:
+
+    CreateUserRequest
+
+    name
+    email
+    password
+
+Response:
+
+    UserResponse
+
+    id
+    name
+    email
+    created_at
+
+The password may be required when creating the account but should not be returned in a normal response.
+
+Therefore:
+
+    Request Model
+    → what the client sends
+
+    Response Model
+    → what the API returns
+
+Separating these models improves API design and security.
+
+
+### Pydantic and API Contracts
+
+An API needs a predictable contract between frontend and backend.
+
+The frontend should know:
+
+- What fields it can send
+- Which fields are required
+- What types are expected
+- What structure the response will have
+
+Pydantic helps define these structures.
+
+Conceptually:
+
+    Frontend
+       ↓
+    Request Contract
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Application
+
+And:
+
+    Application
+       ↓
+    Pydantic Response Model
+       ↓
+    FastAPI
+       ↓
+    Response Contract
+       ↓
+    Frontend
+
+This makes communication between frontend and backend more reliable.
+
+
+### Pydantic and Serialization
+
+Serialization means converting structured application data into a format that can be transmitted or stored.
+
+Conceptually:
+
+    Pydantic Model
+          ↓
+      Serialization
+          ↓
+    Dictionary / JSON-compatible Data
+
+Modern Pydantic provides methods such as:
+
+    model_dump()
+
+Conceptually:
+
+    Pydantic Model
+          ↓
+      model_dump()
+          ↓
+    Python Dictionary
+
+This is useful when validated data needs to move between different layers of Hirely.
+
+
+### Pydantic and JSON Schema
+
+Pydantic models can also be represented using JSON Schema.
+
+Conceptually:
+
+    Pydantic Model
+          ↓
+      JSON Schema
+          ↓
+    Machine-readable Structure
+
+This can be useful for:
+
+- API documentation
+- API contracts
+- Schema generation
+- Developer tooling
+- Client development
+
+This also connects with FastAPI because FastAPI can use Pydantic models when generating API documentation and schemas.
+
+
+### Pydantic Validation Errors
+
+When data does not satisfy the expected model, Pydantic provides structured validation errors.
+
+For example:
+
+    Missing required field
+
+or:
+
+    Incorrect field type
+
+or:
+
+    Invalid value
+
+Conceptually:
+
+    Incoming Data
+          ↓
+       Pydantic
+          ↓
+       Validation
+          ↓
+    Validation Error
+          ↓
+      Error Details
+
+This makes it easier to understand what went wrong.
+
+
+### Pydantic and Document Processing
+
+This connects directly with our previous Hirely research.
+
+We established:
+
+> Document processing and resume parsing are NOT the same thing.
+
+Document processing answers:
+
+> How do we extract the content?
+
+Resume parsing answers:
+
+> What does the extracted content mean?
+
+Pydantic answers:
+
+> Does the resulting structured data match the structure our application expects?
+
+Therefore:
+
+    Resume Upload
+          ↓
+    File Validation
+          ↓
+    Document Detection
+          ↓
+    PDF / DOCX Processing
+          ↓
+    OCR when required
+          ↓
+    Text Extraction
+          ↓
+    Resume Parser
+          ↓
+    Structured Resume Data
+          ↓
+    Pydantic Validation
+          ↓
+    Validated Resume
+          ↓
+    Resume Analysis
+
+This keeps each component responsible for a specific task.
+
+
+### Document Processing vs Pydantic
+
+These technologies solve different problems.
+
+Document Processing:
+
+    PDF Processing
+    DOCX Processing
+    OCR
+    Text Extraction
+    Document Detection
+
+Pydantic:
+
+    Data Modeling
+    Data Validation
+    Structured Data
+    API Schemas
+    Serialization
+
+Therefore:
+
+    Document Processing
+    → extracts content
+
+    Resume Parser
+    → structures information
+
+    Pydantic
+    → validates the structure
+
+    Analysis
+    → analyzes the validated information
+
+
+### Pydantic and Resume Parser Output
+
+Suppose our resume parser produces:
+
+    {
+        "name": "Candidate",
+        "email": "candidate@example.com",
+        "skills": ["Python", "SQL"],
+        "experience": []
+    }
+
+The parser has produced structured information.
+
+But we still need to verify that the structure matches what Hirely expects.
+
+Therefore:
+
+    Resume
+       ↓
+    Document Processing
+       ↓
+    Text
+       ↓
+    Resume Parser
+       ↓
+    Structured Resume Data
+       ↓
+    Pydantic
+       ↓
+    Validated Resume
+       ↓
+    Resume Analysis
+
+This separates:
+
+    Extraction
+    Parsing
+    Validation
+    Analysis
+
+
+### Pydantic and AI / LLMs
+
+This will become one of the most important future uses of Pydantic in Hirely.
+
+Later, Hirely will use AI / LLMs for:
+
+- Resume analysis
+- Skill analysis
+- Job matching
+- Recommendations
+- Resume improvement
+
+Suppose an AI model produces:
+
+    {
+        "score": 82,
+        "skills": ["Python", "SQL"],
+        "strengths": [
+            "Strong programming background"
+        ],
+        "weaknesses": [
+            "Limited cloud experience"
+        ],
+        "recommendations": [
+            "Improve cloud knowledge"
+        ]
+    }
+
+Hirely expects a defined structure.
+
+Pydantic can validate that structure before the rest of the application uses it.
+
+The flow becomes:
+
+    Resume
+       ↓
+    AI / LLM
+       ↓
+    Generated Output
+       ↓
+    Pydantic
+       ↓
+    Validation
+       ↓
+    Validated Analysis
+       ↓
+    Application
+
+
+### AI Output Should Not Be Automatically Trusted
+
+An AI model can generate output that looks structured but is still incorrect.
+
+For example, Hirely may expect:
+
+    score → integer
+
+but the AI may produce:
+
+    score → "excellent"
+
+Pydantic can identify the structural/type problem.
+
+However, if the AI produces:
+
+    score → 82
+
+Pydantic can determine that 82 is structurally valid as an integer.
+
+But Pydantic cannot determine whether 82 is actually the correct score.
+
+Therefore:
+
+    Pydantic
+    → structural validation
+
+    Business Logic / Evidence / Evaluation
+    → semantic validation
+
+This distinction will be extremely important when we build Hirely's AI layer.
+
+
+### Pydantic Does Not Solve AI Hallucination
+
+Pydantic is not an AI hallucination detector.
+
+Suppose an LLM generates:
+
+    company = Google
+    position = Senior Software Engineer
+
+Pydantic can validate:
+
+    company
+    → string
+
+    position
+    → string
+
+But it cannot determine whether the candidate actually worked at Google.
+
+Therefore:
+
+    Pydantic
+    → validates structure
+
+    Other systems
+    → verify meaning / truth
+
+This means:
+
+> Pydantic provides structural validation, not complete semantic validation.
+
+
+### Pydantic and Structured AI Output
+
+Hirely may eventually require an AI result such as:
+
+    AnalysisResult
+    ├── overall_score
+    ├── strengths
+    ├── weaknesses
+    ├── missing_skills
+    ├── recommendations
+    └── job_match
+
+Expected structures could be:
+
+    overall_score
+    → number
+
+    strengths
+    → list of strings
+
+    weaknesses
+    → list of strings
+
+    missing_skills
+    → list of strings
+
+    recommendations
+    → list of strings
+
+This makes AI output easier for the application to consume.
+
+The principle is:
+
+    LLM
+      ↓
+    Generate
+      ↓
+    Pydantic
+      ↓
+    Validate
+      ↓
+    Application
+
+
+### Pydantic vs Database Models
+
+A very important distinction is:
+
+    Pydantic Model
+    ≠
+    Database Model
+
+Pydantic mainly deals with:
+
+    Data Validation
+    Data Modeling
+    API Schemas
+    Serialization
+    Structured Application Data
+
+The database layer deals with:
+
+    Tables
+    Relationships
+    Queries
+    Persistence
+    Database Operations
+
+This distinction will become important when we research SQLAlchemy.
+
+
+### Pydantic vs SQLAlchemy
+
+The roles are different.
+
+Pydantic:
+
+    Data Validation
+    Data Modeling
+    API Schemas
+    Serialization
+
+SQLAlchemy:
+
+    Database Interaction
+    ORM
+    Queries
+    Persistence
+    Database Models
+
+Conceptual Hirely architecture:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Application Logic
+       ↓
+    SQLAlchemy
+       ↓
+    Database
+
+Therefore:
+
+    Pydantic
+    → validates application data
+
+    SQLAlchemy
+    → interacts with the database
+
+They work together but solve different problems.
+
+
+### Pydantic Is Not an ORM
+
+ORM means:
+
+> Object Relational Mapping
+
+An ORM maps application objects to database structures.
+
+Pydantic is not an ORM.
+
+Pydantic focuses on:
+
+    Validation
+    Modeling
+    Serialization
+
+SQLAlchemy focuses on:
+
+    Database
+    ORM
+    Queries
+    Persistence
+
+Therefore:
+
+    Pydantic
+    ≠
+    SQLAlchemy
+
+
+### Pydantic and Maintainability
+
+Pydantic can improve maintainability.
+
+Imagine Hirely has:
+
+    Resume Service
+    AI Service
+    API Service
+    Database Service
+
+Without shared models, different services may interpret the same data differently.
+
+For example:
+
+    Resume Service
+    skills → list
+
+    AI Service
+    skills → string
+
+    API Service
+    skills → dictionary
+
+This creates inconsistency.
+
+A shared Pydantic model can provide a common contract.
+
+Conceptually:
+
+                 Resume Model
+                      ↓
+          ┌───────────┼───────────┐
+          ↓           ↓           ↓
+        Parser        API         AI
+
+This improves consistency between different components.
+
+
+### Pydantic and Modularity
+
+Pydantic should have a focused responsibility.
+
+    FastAPI
+    → API Framework
+
+    Pydantic
+    → Data Validation / Modeling
+
+    Document Processing
+    → Document Handling
+
+    Resume Parser
+    → Resume Information Extraction / Structuring
+
+    AI Service
+    → AI / LLM Interaction
+
+    SQLAlchemy
+    → Database Interaction
+
+Each component has a clear responsibility.
+
+This supports the modular architecture we are building for Hirely.
+
+
+### Pydantic at Data Boundaries
+
+One of the strongest architectural uses of Pydantic is at important data boundaries.
+
+Potential Hirely boundaries include:
+
+    Frontend
+       ↓
+    Pydantic
+
+    Resume Parser
+       ↓
+    Pydantic
+
+    AI / LLM
+       ↓
+    Pydantic
+
+    External Service
+       ↓
+    Pydantic
+
+The general principle is:
+
+> Validate data when it enters an important application boundary.
+
+This prevents unexpected structures from spreading throughout the system.
+
+
+### Hirely Resume Data Flow
+
+Our current conceptual resume pipeline is:
+
+    Resume Upload
+          ↓
+    File Validation
+          ↓
+    Document Detection
+          ↓
+    PDF / DOCX Processing
+          ↓
+    OCR when required
+          ↓
+    Text Extraction
+          ↓
+    Resume Parser
+          ↓
+    Structured Resume Data
+          ↓
+    Pydantic Validation
+          ↓
+    Validated Resume
+          ↓
+    Resume Analysis
+
+Notice the separation:
+
+    Document Processing
+    → extracts content
+
+    Resume Parsing
+    → structures content
+
+    Pydantic
+    → validates structure
+
+    Analysis
+    → analyzes validated information
+
+
+### Hirely AI Data Flow
+
+When AI is introduced:
+
+    Validated Resume
+          ↓
+       AI / LLM
+          ↓
+    Generated Analysis
+          ↓
+    Pydantic Validation
+          ↓
+    Validated Analysis
+          ↓
+    Application Logic
+          ↓
+    API Response
+
+This is important because LLM output is probabilistic while the rest of the application needs predictable structures.
+
+
+### Pydantic and Business Logic
+
+Another important distinction is:
+
+    Pydantic
+    → What shape should the data have?
+
+    Business Logic
+    → What should the application do with the data?
+
+For example, Pydantic can validate:
+
+    score → integer
+
+Business logic can decide:
+
+    score >= 80
+    → Strong Match
+
+    score >= 60
+    → Moderate Match
+
+    score < 60
+    → Weak Match
+
+Therefore, business decisions should remain in the application/service layer rather than being mixed into basic data modeling.
+
+
+### Pydantic and Security
+
+Pydantic is not a complete security framework.
+
+However, carefully designed models can help control what information is accepted and exposed.
+
+Imagine an internal user object contains:
+
+    id
+    name
+    email
+    password_hash
+    created_at
+
+But the API response should contain:
+
+    id
+    name
+    email
+    created_at
+
+The sensitive field:
+
+    password_hash
+
+should not be exposed through a normal response.
+
+However:
+
+    Pydantic ≠ Authentication
+    Pydantic ≠ Authorization
+    Pydantic ≠ Complete Security
+
+Security will be researched separately.
+
+
+### Advantages of Pydantic
+
+Pydantic provides several important advantages for Hirely:
+
+- Clear data models
+- Data validation
+- Type-based structure
+- FastAPI integration
+- Nested models
+- Serialization
+- API contracts
+- Structured AI output validation
+- Better maintainability
+- Consistent data structures
+- Clear boundaries between components
+
+
+### Limitations of Pydantic
+
+Pydantic is powerful, but it does not solve every application problem.
+
+Pydantic does not replace:
+
+    Authentication
+    Authorization
+    Database Management
+    Document Processing
+    OCR
+    AI Reasoning
+    Business Logic
+    Complete Security
+    Semantic Truth Verification
+
+For example:
+
+Pydantic can validate:
+
+    score → integer
+
+But it cannot determine:
+
+    Is this score actually correct?
+
+Pydantic can validate:
+
+    company → string
+
+But it cannot determine:
+
+    Did the candidate actually work at that company?
+
+Therefore:
+
+> Pydantic provides structural validation, not complete semantic validation.
+
+
+### Hirely Pydantic Architecture
+
+The current conceptual architecture is:
+
+                    External Data
+                         │
+                         ↓
+                     Pydantic
+                         │
+                     Validation
+                         │
+                         ↓
+                  Structured Data
+                         │
+                         ↓
+                Application Services
+                         │
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+           Resume        AI      Database
+           Services    Services     Layer
+              ↓          ↓          ↓
+            Parser       LLM    SQLAlchemy
+
+The key principle is:
+
+    Validate
+       ↓
+    Structure
+       ↓
+    Process
+
+
+### Final Decision for Hirely
+
+Based on our research, Pydantic will be used as the **data validation and data modeling layer for Hirely**.
+
+The main reasons are:
+
+- Hirely requires structured data models.
+- Hirely receives data from multiple sources.
+- API requests require predictable structures.
+- API responses should follow defined schemas.
+- Resume parser output needs a predictable structure.
+- AI-generated structured output should be validated.
+- Pydantic integrates naturally with FastAPI.
+- Python type annotations fit naturally into the backend.
+- Shared models improve consistency.
+- Pydantic creates a clear boundary between external data and application logic.
+
+The exact implementation details will be decided during the development phase.
+
+
+### Key Takeaways
+
+Remember Pydantic using this simple flow:
+
+    External / Untrusted Data
+              ↓
+           Pydantic
+              ↓
+           Validate
+              ↓
+        Structured Data
+              ↓
+       Application Logic
+
+For Hirely:
+
+    Frontend
+       ↓
+    FastAPI
+       ↓
+    Pydantic
+       ↓
+    Application
+       ↓
+    ┌───────────────┬────────────────┬────────────────┐
+    ↓               ↓                ↓
+    Resume          AI           Database
+    Processing    Services          Layer
+    ↓               ↓                ↓
+    Parser          LLM         SQLAlchemy
+    ↓               ↓
+    Pydantic        Pydantic
+    Validation      Validation
+
+The most important idea is:
+
+> **Pydantic defines the structure Hirely expects and validates data before important application logic uses it.**
