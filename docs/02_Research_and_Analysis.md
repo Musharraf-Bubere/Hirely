@@ -7370,3 +7370,788 @@ The project will begin with the simplest suitable AI architecture and introduce 
 ### Hirely Principle
 
 > **Choose the simplest architecture that solves the current problem, and introduce additional AI frameworks only when their capabilities provide clear engineering value.**
+
+## 6.1 FastAPI
+
+### Background
+
+Hirely is an AI-powered application that will need a backend layer to connect the frontend with AI services, document processing, databases, and other application functionality.
+
+The backend will provide APIs through which the frontend can communicate with Hirely's application logic.
+
+A simplified architecture is:
+
+```text
+User
+  ↓
+Frontend
+  ↓
+HTTP Request
+  ↓
+Backend API
+  ↓
+Application Logic
+  ↓
+AI / Document Processing / Database
+  ↓
+HTTP Response
+  ↓
+Frontend
+  ↓
+User
+```
+
+FastAPI is a Python web framework designed for building APIs.
+
+For Hirely, FastAPI is being researched as a potential backend framework because the project is heavily based on Python technologies, including AI, machine learning, document processing, and LLM-related functionality.
+
+---
+
+### What is FastAPI?
+
+FastAPI is a modern Python web framework for building APIs.
+
+Its purpose is to provide a structured way to expose backend functionality through HTTP endpoints.
+
+Conceptually:
+
+```text
+Python
+   ↓
+FastAPI
+   ↓
+Backend APIs
+   ↓
+Application Services
+```
+
+FastAPI itself is not:
+
+```text
+❌ An LLM
+❌ A machine learning model
+❌ A database
+❌ A document processor
+❌ An AI framework
+```
+
+Instead, it provides the API layer through which these different components can communicate.
+
+---
+
+### Why Does Hirely Need a Backend?
+
+Hirely will contain multiple application components.
+
+Potential components include:
+
+```text
+Frontend
+    ↓
+Backend API
+    ├── User Management
+    ├── Resume Upload
+    ├── Resume Processing
+    ├── Resume Analysis
+    ├── AI Services
+    ├── Job-related Features
+    └── Database Operations
+```
+
+The frontend should not be responsible for directly managing all of these backend operations.
+
+Instead, the frontend communicates with the backend through APIs.
+
+---
+
+### Frontend-to-Backend Communication
+
+A simplified Hirely workflow can be represented as:
+
+```text
+User
+ ↓
+Upload Resume
+ ↓
+Frontend
+ ↓
+HTTP Request
+ ↓
+FastAPI Backend
+ ↓
+Validate Request
+ ↓
+Process Resume
+ ↓
+AI Analysis
+ ↓
+Generate Result
+ ↓
+HTTP Response
+ ↓
+Frontend
+ ↓
+Display Result
+```
+
+This separation allows the frontend and backend to have clearly defined responsibilities.
+
+---
+
+### API Concept
+
+API stands for:
+
+**Application Programming Interface**
+
+In the context of Hirely, an API provides a defined interface through which another application can communicate with the backend.
+
+For example:
+
+```text
+Frontend
+    ↓
+POST /api/resume/analyze
+    ↓
+FastAPI
+    ↓
+Resume Analysis Service
+    ↓
+Result
+    ↓
+Frontend
+```
+
+The API defines how the frontend can request a particular backend operation.
+
+---
+
+### Hirely API Examples
+
+Potential Hirely endpoints could include:
+
+```text
+POST /api/resume/upload
+POST /api/resume/analyze
+GET  /api/resume/{id}
+
+POST /api/jobs/search
+GET  /api/jobs/{id}
+
+GET  /api/users/{id}
+```
+
+These are conceptual examples for architecture planning.
+
+The final API structure will be defined later during API design and implementation.
+
+---
+
+### FastAPI and Python
+
+FastAPI is built for Python.
+
+This is relevant to Hirely because Python is expected to play an important role in:
+
+```text
+AI
+Machine Learning
+LLMs
+Resume Processing
+Document Processing
+Data Processing
+```
+
+Therefore, a Python-based backend can allow the application to work within a consistent Python ecosystem.
+
+Conceptually:
+
+```text
+                    Hirely Backend
+                          │
+          ┌───────────────┼───────────────┐
+          ↓               ↓               ↓
+       API Layer       AI Services     Data Layer
+          ↓               ↓               ↓
+       FastAPI          Python        Database
+```
+
+---
+
+### FastAPI Routes
+
+An API endpoint is commonly represented through a route.
+
+For example:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "Welcome to Hirely"}
+```
+
+The route:
+
+```text
+GET /
+```
+
+can return:
+
+```json
+{
+  "message": "Welcome to Hirely"
+}
+```
+
+This simple example demonstrates the basic relationship between:
+
+```text
+HTTP Method
+     ↓
+Route
+     ↓
+Python Function
+     ↓
+Response
+```
+
+The syntax will be studied further during implementation.
+
+---
+
+### HTTP Methods
+
+APIs commonly use HTTP methods to describe the type of operation being requested.
+
+Important methods include:
+
+```text
+GET
+POST
+PUT
+PATCH
+DELETE
+```
+
+A simplified interpretation is:
+
+```text
+GET
+→ Retrieve information
+
+POST
+→ Create or submit information
+
+PUT
+→ Replace/update information
+
+PATCH
+→ Partially update information
+
+DELETE
+→ Remove information
+```
+
+For example:
+
+```text
+GET /api/resume/123
+```
+
+could retrieve a resume.
+
+While:
+
+```text
+POST /api/resume/upload
+```
+
+could submit a new resume for processing.
+
+The complete API design will be researched separately under REST APIs.
+
+---
+
+### FastAPI and Type Hints
+
+FastAPI makes extensive use of Python type hints.
+
+For example:
+
+```python
+def analyze_resume(resume_id: int):
+    ...
+```
+
+Here:
+
+```text
+resume_id: int
+```
+
+indicates that the function expects an integer value.
+
+Type information can help FastAPI understand the expected structure and types of API data.
+
+This becomes particularly important when combined with request validation and Pydantic models.
+
+---
+
+### FastAPI and Pydantic
+
+FastAPI works closely with Pydantic for data validation and data modeling.
+
+Conceptually:
+
+```text
+Client Request
+      ↓
+FastAPI
+      ↓
+Pydantic Validation
+      ↓
+Application Logic
+      ↓
+Response
+```
+
+For example, a resume-analysis request might eventually contain:
+
+```text
+resume_id
+user_id
+analysis_type
+```
+
+A Pydantic model can define the expected structure of this request.
+
+Pydantic will be studied separately as part of the Backend Technologies research.
+
+---
+
+### FastAPI and AI Services
+
+FastAPI can act as the API layer connecting users to Hirely's AI functionality.
+
+For example:
+
+```text
+User
+ ↓
+Frontend
+ ↓
+POST /api/resume/analyze
+ ↓
+FastAPI
+ ↓
+Resume Processing
+ ↓
+Resume Parser
+ ↓
+AI / LLM
+ ↓
+Analysis Result
+ ↓
+FastAPI
+ ↓
+Frontend
+```
+
+This allows AI functionality to be exposed through normal backend APIs.
+
+---
+
+### FastAPI and Database
+
+FastAPI can also communicate with database-related services.
+
+A simplified architecture is:
+
+```text
+Frontend
+   ↓
+FastAPI
+   ↓
+Application Logic
+   ↓
+Database Layer
+   ↓
+Database
+```
+
+For Hirely, the database may eventually contain information such as:
+
+```text
+Users
+Resumes
+Skills
+Experience
+Education
+Jobs
+Analysis Results
+```
+
+The exact database technology will be researched separately under Database Design.
+
+SQLAlchemy will also be evaluated separately as part of Backend Technologies.
+
+---
+
+### FastAPI and Document Processing
+
+Hirely's resume workflow may require document processing.
+
+A possible architecture is:
+
+```text
+Resume Upload
+      ↓
+FastAPI
+      ↓
+File Validation
+      ↓
+Document Processing
+      ↓
+Text Extraction
+      ↓
+Resume Parsing
+      ↓
+AI Analysis
+      ↓
+Result
+```
+
+FastAPI is responsible for receiving and exposing the operation through an API.
+
+The actual document processing is handled by separate services or libraries.
+
+Therefore:
+
+```text
+FastAPI
+≠
+Document Processing
+```
+
+Instead:
+
+```text
+FastAPI
+   ↓
+Document Processing Service
+```
+
+This separation helps keep the architecture modular.
+
+---
+
+### FastAPI and Async Programming
+
+FastAPI supports asynchronous programming.
+
+This can be useful for backend operations involving tasks where the application spends time waiting for external operations, such as:
+
+```text
+External APIs
+Database operations
+Network requests
+AI service requests
+Other I/O operations
+```
+
+Conceptually:
+
+```text
+Request
+   ↓
+FastAPI
+   ↓
+Async Operation
+   ↓
+Wait without unnecessarily blocking other work
+   ↓
+Result
+```
+
+Async programming will be studied separately under:
+
+```text
+6.5 Async Programming
+```
+
+Therefore, async behavior should not be treated as the main purpose of FastAPI.
+
+---
+
+### Automatic API Documentation
+
+One useful characteristic of FastAPI is its ability to generate API documentation from the API definitions.
+
+Conceptually:
+
+```text
+FastAPI Routes
+      ↓
+API Schema
+      ↓
+Automatic Documentation
+```
+
+This can help developers understand and test available endpoints during development.
+
+For a project such as Hirely, this can become useful as the number of API endpoints increases.
+
+---
+
+### FastAPI Architecture in Hirely
+
+A possible backend architecture is:
+
+```text
+                         Hirely
+                            │
+                        Frontend
+                            │
+                         HTTP/API
+                            │
+                            ↓
+                         FastAPI
+                            │
+             ┌──────────────┼──────────────┐
+             ↓              ↓              ↓
+       User Services    AI Services    Data Services
+             │              │              │
+             ↓              ↓              ↓
+       Authentication      LLM          Database
+             │              │              │
+             ↓              ↓              ↓
+       Resume Services   AI Analysis   SQLAlchemy
+             │
+             ↓
+       Document Processing
+```
+
+This is a conceptual architecture.
+
+The exact implementation will be defined during later design stages.
+
+---
+
+### Separation of Responsibilities
+
+A major architectural benefit of using an API framework is the ability to separate responsibilities.
+
+For example:
+
+```text
+Frontend
+→ User interface
+
+FastAPI
+→ API layer
+
+Application Services
+→ Business logic
+
+Document Processing
+→ File and text processing
+
+AI Services
+→ LLM and AI operations
+
+Database Layer
+→ Data persistence
+```
+
+This separation can make the system easier to maintain and evolve.
+
+---
+
+### Advantages Relevant to Hirely
+
+Potential advantages of FastAPI for Hirely include:
+
+- Python-based development.
+- Suitable for API development.
+- Strong use of Python type hints.
+- Request and response validation support.
+- Integration with Pydantic.
+- Support for asynchronous programming.
+- Automatic API documentation.
+- Suitable for separating API logic from AI and data services.
+- Good fit for Python-based AI applications.
+
+These advantages are reasons for evaluating FastAPI rather than an automatic decision to use it.
+
+---
+
+### Potential Limitations and Considerations
+
+FastAPI also requires architectural discipline.
+
+Potential considerations include:
+
+- Developers need to understand HTTP and API design.
+- Authentication and authorization still need to be designed.
+- Database architecture still needs to be designed.
+- Background processing may require additional components.
+- Application structure must be organized as the project grows.
+- Security must be explicitly designed.
+- API versioning and error handling need to be considered.
+
+FastAPI provides the API framework, but it does not automatically solve the complete backend architecture.
+
+---
+
+### FastAPI Does Not Replace the Entire Backend
+
+An important distinction is:
+
+```text
+FastAPI
+    ↓
+API Framework
+```
+
+not:
+
+```text
+FastAPI
+    ↓
+Complete Backend System
+```
+
+A production backend may contain:
+
+```text
+FastAPI
+   +
+Business Logic
+   +
+Database
+   +
+Authentication
+   +
+Validation
+   +
+AI Services
+   +
+Document Processing
+   +
+Logging
+   +
+Error Handling
+   +
+Security
+```
+
+FastAPI provides the foundation for the API layer, while the rest of the backend architecture must be designed separately.
+
+---
+
+### Analysis for Hirely
+
+Hirely is expected to use Python heavily for AI, LLM, and document-processing functionality.
+
+The application will also require an API layer through which the frontend can communicate with these backend services.
+
+FastAPI provides a potential Python-based API layer for this architecture.
+
+A conceptual flow is:
+
+```text
+Frontend
+    ↓
+FastAPI
+    ↓
+Backend Services
+    ├── Resume Processing
+    ├── AI Analysis
+    ├── User Services
+    └── Database Services
+```
+
+This makes FastAPI a strong candidate for Hirely's backend technology.
+
+---
+
+### Decision for Hirely
+
+FastAPI will be adopted as the **preliminary backend API framework for Hirely**, subject to validation during implementation.
+
+The main reasons are:
+
+1. Hirely is heavily based on Python.
+2. Hirely requires an API layer.
+3. FastAPI is designed for building Python APIs.
+4. It supports type-hint-based development.
+5. It integrates with Pydantic for validation.
+6. It supports asynchronous programming.
+7. It can expose AI and document-processing functionality through APIs.
+8. It provides automatic API documentation.
+
+The final backend architecture will also depend on the decisions made for:
+
+```text
+REST APIs
+Pydantic
+SQLAlchemy
+Async Programming
+Authentication
+Security
+Database
+Deployment
+```
+
+---
+
+### Preliminary Hirely Backend Architecture
+
+The current direction is:
+
+```text
+                     Hirely Backend
+                           │
+                        FastAPI
+                           │
+            ┌──────────────┼──────────────┐
+            ↓              ↓              ↓
+       API Routes     Application      Services
+                         Logic            │
+                           │       ┌──────┼──────┐
+                           │       ↓      ↓      ↓
+                           │      AI   Documents Database
+                           │
+                           ↓
+                       Validation
+                       / Pydantic
+```
+
+This architecture will evolve as the remaining backend research is completed.
+
+---
+
+### Key Takeaways
+
+- FastAPI is a Python web framework for building APIs.
+- It can provide the backend API layer for Hirely.
+- APIs allow the frontend to communicate with backend services.
+- FastAPI is not an LLM, database, or document-processing system.
+- FastAPI can expose AI functionality through HTTP endpoints.
+- FastAPI works closely with Python type hints and Pydantic.
+- FastAPI supports asynchronous programming.
+- FastAPI can generate API documentation.
+- Backend responsibilities should remain separated into appropriate services.
+- FastAPI does not automatically solve authentication, database design, security, or complete backend architecture.
+- FastAPI is a strong candidate for Hirely's backend API layer.
+
+---
+
+### Hirely Principle
+
+> **Use the backend API as a clean communication layer between Hirely's frontend and its AI, document-processing, database, and application services.**
