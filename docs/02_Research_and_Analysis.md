@@ -13496,3 +13496,621 @@ The most important architectural principle is:
 > **The frontend should remain separated from the backend, business logic, and database layers.**
 
 Streamlit is therefore a strong candidate for the early Hirely frontend, but the final decision should be made after comparing it with alternative frontend technologies and considering the required user experience.
+
+## 8.2 Alternative Frontend Frameworks
+
+### Background
+
+After researching Streamlit, the next step is to understand alternative frontend technologies that could be used for Hirely.
+
+The purpose is not to learn every frontend framework in depth.
+
+The purpose is to answer:
+
+> Is Streamlit the right long-term frontend for Hirely, or would another frontend technology be more suitable?
+
+The main alternatives considered are:
+
+- React
+- Next.js
+- Vue
+- Angular
+
+The most important comparison for Hirely is:
+
+    Streamlit
+        vs
+    React / Next.js
+
+
+### What is a Frontend Framework?
+
+A frontend framework or library provides tools and patterns for building the part of an application that users interact with.
+
+The frontend is responsible for:
+
+- Pages
+- Buttons
+- Forms
+- Navigation
+- File uploads
+- Dashboards
+- User interactions
+- Displaying results
+
+The general architecture is:
+
+    User
+      ↓
+    Frontend
+      ↓
+    Backend API
+      ↓
+    Database / AI
+
+
+### React
+
+**React is a JavaScript library for building user interfaces.**
+
+React uses a component-based approach.
+
+Conceptually:
+
+    React Application
+           ↓
+       Components
+           ↓
+      User Interface
+
+A Hirely frontend could be divided into reusable components such as:
+
+    Navbar
+    ResumeUploader
+    JobDescriptionForm
+    AnalyzeButton
+    ResumeScore
+    SkillsSection
+    RecommendationCard
+
+Each component can be developed and reused independently.
+
+
+### React and Hirely
+
+A React-based Hirely architecture could be:
+
+    React Frontend
+          ↓
+       REST API
+          ↓
+        FastAPI
+          ↓
+       Pydantic
+          ↓
+     Business Logic
+          ↓
+       SQLAlchemy
+          ↓
+       Database
+
+For AI functionality:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    AI / LLM
+      ↓
+    Analysis Result
+      ↓
+    React
+      ↓
+    User
+
+React provides greater control over the user interface compared with a simpler framework such as Streamlit.
+
+
+### Next.js
+
+**Next.js is a React-based framework for building web applications.**
+
+Conceptually:
+
+    React
+      ↓
+    Next.js
+      ↓
+    More complete web application framework
+
+Next.js provides additional capabilities around React applications, including routing and different rendering approaches.
+
+This can be useful when building larger production-oriented web applications.
+
+
+### Next.js and Hirely
+
+A possible Hirely architecture using Next.js is:
+
+    Next.js
+       ↓
+    FastAPI
+       ↓
+    Backend
+       ↓
+    Database
+
+For AI functionality:
+
+    Next.js
+       ↓
+    FastAPI
+       ↓
+    LLM / AI
+       ↓
+    Analysis
+       ↓
+    Next.js
+
+
+### Vue
+
+**Vue is a JavaScript framework for building user interfaces.**
+
+Like React, Vue supports a component-based approach.
+
+Conceptually:
+
+    Vue
+     ↓
+    Components
+     ↓
+    User Interface
+
+A Hirely interface could contain:
+
+    Resume Upload
+    Dashboard
+    Resume Score
+    Skills
+    Recommendations
+    Profile
+
+Vue can communicate with the same FastAPI backend.
+
+    Vue
+      ↓
+    REST API
+      ↓
+    FastAPI
+      ↓
+    Backend
+
+
+### Angular
+
+**Angular is a full-featured web application framework based on TypeScript.**
+
+Angular provides many built-in features for building larger frontend applications.
+
+Conceptually:
+
+    Angular
+       ↓
+    Frontend Application
+       ↓
+    FastAPI
+       ↓
+    Backend
+
+Angular is powerful, but it generally introduces more structure and complexity than is necessary for the initial Hirely development stage.
+
+
+### Streamlit vs Traditional Frontend Frameworks
+
+The important comparison for Hirely is between Streamlit and dedicated frontend technologies.
+
+#### Streamlit
+
+    Python
+      ↓
+    Streamlit
+      ↓
+    UI
+
+Advantages:
+
+- Fast development
+- Python-based
+- Useful for AI/ML applications
+- Easy prototyping
+- Simple MVP development
+
+
+#### React / Next.js
+
+    JavaScript / TypeScript
+             ↓
+       React / Next.js
+             ↓
+             UI
+
+Advantages:
+
+- Highly customizable
+- Component-based architecture
+- Greater control over UI
+- Suitable for complex web interfaces
+- Large frontend ecosystem
+
+However, these technologies introduce a separate frontend development stack.
+
+
+### Why This Comparison Matters for Hirely
+
+An initial Hirely application may only need:
+
+    Upload Resume
+          ↓
+    Analyze Resume
+          ↓
+    Show Results
+
+For this type of workflow, Streamlit may be sufficient.
+
+However, Hirely may eventually grow into:
+
+    Login
+       ↓
+    Dashboard
+       ↓
+    Resume Management
+       ↓
+    Multiple Resumes
+       ↓
+    Job Tracking
+       ↓
+    AI Analysis
+       ↓
+    Recommendations
+       ↓
+    Profile
+       ↓
+    Notifications
+
+As the application becomes more complex, a dedicated frontend framework may become more attractive.
+
+
+### Component-Based Architecture
+
+One major advantage of React, Vue, and similar technologies is component-based development.
+
+Instead of creating one large frontend, the interface can be divided into reusable components.
+
+For Hirely:
+
+    Hirely
+    │
+    ├── Navbar
+    ├── Sidebar
+    ├── ResumeUploader
+    ├── JobSelector
+    ├── AnalysisDashboard
+    │   ├── ScoreCard
+    │   ├── Skills
+    │   ├── Experience
+    │   └── Recommendations
+    └── Footer
+
+This approach helps organize complex interfaces and promotes component reuse.
+
+
+### Frontend and Backend Separation
+
+A dedicated frontend can communicate with the backend through APIs.
+
+The architecture becomes:
+
+        Frontend
+    React / Next.js
+          ↓
+       REST API
+          ↓
+        FastAPI
+          ↓
+     Business Logic
+        ↙      ↘
+    Database    AI
+
+This separation means the frontend does not need to know how the database or AI system works internally.
+
+It only communicates through the API layer.
+
+
+### Frontend Does Not Need to Know AI Details
+
+The frontend should not need to know:
+
+- Which LLM is being used
+- How prompts are created
+- How the database works
+- How resume parsing works
+- How the scoring system works
+
+Instead:
+
+    Frontend
+       ↓
+    API Request
+       ↓
+    Backend
+       ↓
+    AI Processing
+       ↓
+    API Response
+       ↓
+    Frontend
+
+This keeps responsibilities separated.
+
+
+### Example: Resume Analysis
+
+When a user selects:
+
+    [ Analyze Resume ]
+
+the frontend can send a request such as:
+
+    POST /resume/analyze
+
+FastAPI receives the request:
+
+    FastAPI
+       ↓
+    Pydantic Validation
+       ↓
+    Resume Service
+       ↓
+    AI Analysis
+       ↓
+    Result
+
+The backend can return structured data such as:
+
+    {
+        score: 82,
+        skills: [...],
+        recommendations: [...]
+    }
+
+The frontend can then display:
+
+    Resume Score: 82
+
+    Skills
+    ✓ Python
+    ✓ SQL
+    ✓ FastAPI
+
+    Recommendations
+    → Improve project descriptions
+    → Add measurable achievements
+
+
+### Frontend Independence
+
+The backend architecture should remain largely independent of the frontend technology.
+
+The same backend can potentially support:
+
+    Streamlit
+        ↓
+    FastAPI
+
+or:
+
+    React
+        ↓
+    FastAPI
+
+or:
+
+    Next.js
+        ↓
+    FastAPI
+
+This is one reason for keeping frontend and backend responsibilities separated.
+
+
+### Why We Should Not Choose a Framework Only Because It Is Popular
+
+Technology selection should be based on project requirements.
+
+Important factors include:
+
+- Development speed
+- UI requirements
+- Customization
+- Scalability
+- Maintainability
+- Developer experience
+- Integration
+- Deployment
+- Future requirements
+
+For example:
+
+    Simple AI MVP
+        ↓
+    Streamlit may be enough
+
+    Complex production UI
+        ↓
+    React / Next.js may be more suitable
+
+The correct choice depends on Hirely's actual requirements.
+
+
+### Practical Comparison
+
+| Requirement | Streamlit | React / Next.js |
+|---|---|---|
+| Python-based | Yes | No |
+| Rapid prototyping | Excellent | Good |
+| AI/ML prototype | Excellent | Good |
+| UI customization | Limited | High |
+| Complex frontend | Limited | Strong |
+| Component architecture | Basic | Strong |
+| Frontend ecosystem | Smaller | Large |
+| Learning complexity | Lower | Higher |
+| MVP development | Excellent | Good |
+| Custom production UI | Limited | Strong |
+
+
+### Hirely Frontend Considerations
+
+The most important question is:
+
+> What kind of frontend will Hirely eventually require?
+
+If the primary workflow is:
+
+    Upload Resume
+          ↓
+    Analyze
+          ↓
+    Show Results
+
+Streamlit may be sufficient.
+
+If Hirely evolves into a larger platform with:
+
+    Authentication
+    Dashboard
+    Resume Management
+    Job Tracking
+    AI Analysis
+    Recommendations
+    Profiles
+    Notifications
+
+then a dedicated frontend framework becomes more attractive.
+
+
+### Preliminary Direction
+
+Based on the research:
+
+    Streamlit
+        ↓
+    Strong candidate for MVP / early development
+
+    React / Next.js
+        ↓
+    Potential candidate for advanced production UI
+
+This is not yet the final frontend decision.
+
+The final decision should be based on:
+
+    Frontend Requirements
+          ↓
+    UI/UX Research
+          ↓
+    Project Complexity
+          ↓
+    Final Technology Decision
+
+
+### Decision for Hirely
+
+At the current research stage, Streamlit remains a strong candidate for Hirely's early frontend and MVP.
+
+Its main advantages are:
+
+- Python-based development
+- Fast development
+- Simple interactive UI
+- Strong suitability for AI applications
+- Easy integration with Python-based workflows
+- Useful for validating the Hirely user experience
+
+However, dedicated frontend frameworks such as React and Next.js provide greater control and flexibility for complex production interfaces.
+
+Therefore:
+
+> **The final frontend technology will be selected after completing the remaining frontend research, especially UI/UX considerations.**
+
+
+### Current Hirely Frontend Concept
+
+The current architecture can be represented as:
+
+    User
+      ↓
+    Frontend
+      ↓
+    FastAPI
+      ↓
+    Pydantic
+      ↓
+    Business Logic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+For AI functionality:
+
+    User
+      ↓
+    Frontend
+      ↓
+    FastAPI
+      ↓
+    AI / LLM
+      ↓
+    Pydantic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+
+### Key Takeaways
+
+Remember the main idea:
+
+> **Streamlit focuses on rapid Python-based application development, while frameworks such as React and Next.js provide greater control and flexibility for complex web interfaces.**
+
+For Hirely:
+
+    Streamlit
+        ↓
+    Fast MVP / Prototype
+
+    React / Next.js
+        ↓
+    Potential Advanced Production UI
+
+The goal is not to select a technology because it is popular.
+
+The goal is to select the technology that best fits Hirely's requirements.
+
+
+### Final Concept
+
+Frontend technology selection should follow:
+
+    Requirements
+        ↓
+    Research
+        ↓
+    Comparison
+        ↓
+    Architecture Decision
+        ↓
+    Implementation
+
+For Hirely, the frontend decision will be made after completing the remaining frontend research.
