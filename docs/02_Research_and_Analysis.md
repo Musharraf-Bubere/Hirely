@@ -14114,3 +14114,848 @@ Frontend technology selection should follow:
     Implementation
 
 For Hirely, the frontend decision will be made after completing the remaining frontend research.
+
+## 8.3 UI/UX Considerations
+
+### Background
+
+Frontend technology is only one part of building a good application.
+
+Even if Hirely uses a technically strong frontend framework, the application can still provide a poor experience if the interface is confusing or difficult to use.
+
+Therefore, UI/UX research is important for determining how users should interact with Hirely.
+
+The main goal is:
+
+> **Make the Hirely resume-analysis experience simple, clear, trustworthy, and useful.**
+
+The core user journey should be:
+
+    Upload
+      ↓
+    Analyze
+      ↓
+    Understand
+      ↓
+    Improve
+
+
+### What is UI?
+
+**UI (User Interface)** refers to the visual and interactive elements through which a user interacts with an application.
+
+Examples include:
+
+- Buttons
+- Forms
+- Menus
+- Cards
+- Text
+- Icons
+- Colors
+- Layout
+- Input fields
+- Dashboards
+
+For Hirely:
+
+    Hirely
+       ↓
+    Upload Resume
+       ↓
+    Analyze
+       ↓
+    View Results
+
+Everything the user sees and interacts with is part of the UI.
+
+
+### What is UX?
+
+**UX (User Experience)** refers to the overall experience a user has while using an application.
+
+UX is broader than visual design.
+
+For Hirely, a good experience would be:
+
+    User opens Hirely
+          ↓
+    Understands what to do
+          ↓
+    Uploads Resume
+          ↓
+    Starts Analysis
+          ↓
+    Understands Processing
+          ↓
+    Receives Results
+          ↓
+    Understands Recommendations
+
+The goal is to make the entire workflow simple and understandable.
+
+
+### UI vs UX
+
+A simple way to remember the difference:
+
+    UI
+    ↓
+    How the application looks and how users interact with it
+
+    UX
+    ↓
+    How the entire experience works and feels
+
+For Hirely:
+
+    Beautiful Resume Dashboard
+            ↓
+            UI
+
+    Easy Resume Analysis Workflow
+            ↓
+            UX
+
+A visually attractive interface can still provide poor UX if the workflow is confusing.
+
+
+### Why UI/UX Matters for Hirely
+
+Hirely is designed to help users understand and improve their resumes.
+
+Users should not have to figure out:
+
+- Where to upload their resume
+- What information they need to provide
+- What happens after uploading
+- Why analysis is taking time
+- What the score means
+- Why a recommendation was generated
+- What they should improve
+
+The interface should guide the user through the complete workflow.
+
+
+### Hirely Core User Journey
+
+The main user journey is:
+
+    User
+      ↓
+    Open Hirely
+      ↓
+    Upload Resume
+      ↓
+    Provide Job Description
+      ↓
+    Start Analysis
+      ↓
+    Processing
+      ↓
+    Results
+      ↓
+    Recommendations
+
+Every stage should be clear to the user.
+
+
+### Resume Upload Experience
+
+Resume upload will be one of the first major interactions.
+
+The interface should clearly communicate:
+
+    Upload Your Resume
+
+    [ Choose File ]
+
+    Supported formats:
+    PDF / DOCX
+
+The user should immediately understand:
+
+- What to upload
+- Which formats are supported
+- Where to upload
+- What happens after uploading
+
+
+### File Validation
+
+The frontend should provide clear feedback when an invalid file is uploaded.
+
+Example:
+
+    ❌ Unsupported file format.
+
+    Please upload a PDF or DOCX resume.
+
+Instead of exposing only a technical message such as:
+
+    Error 400
+
+The user-facing message should explain what went wrong and what the user should do next.
+
+Principle:
+
+> **Errors should help the user understand the problem and recover from it.**
+
+
+### Job Description Input
+
+Resume analysis becomes more useful when Hirely understands the target job.
+
+The interface can provide:
+
+    Job Description
+
+    [ Paste job description here ]
+
+The purpose of the input should also be clear.
+
+For example:
+
+    Add the job description to receive
+    job-specific resume recommendations.
+
+The user should understand why the information is required.
+
+
+### Primary Action
+
+Hirely should have a clear primary action.
+
+For example:
+
+    [ Analyze Resume ]
+
+The user should immediately understand what to do after providing the required information.
+
+The interface should avoid presenting many competing actions at the same time.
+
+
+### Loading and Processing State
+
+AI analysis may require some processing time.
+
+The user should know that the system is working.
+
+For example:
+
+    Analyzing your resume...
+
+    ✓ Reading resume
+    ✓ Extracting information
+    ⏳ Generating analysis
+    ○ Preparing recommendations
+
+This is better than showing a blank screen while the system is processing.
+
+The user should understand:
+
+> **The application is currently processing my request.**
+
+
+### Processing Feedback
+
+Hirely may perform multiple stages:
+
+    Document Processing
+          ↓
+    Resume Parsing
+          ↓
+    AI Analysis
+          ↓
+    Recommendation Generation
+
+The UI can communicate the current processing stage.
+
+For example:
+
+    Processing Resume
+          ↓
+    Extracting Information
+          ↓
+    Analyzing Resume
+          ↓
+    Generating Recommendations
+
+This provides useful feedback during longer operations.
+
+
+### Results Presentation
+
+Hirely may generate a large amount of information.
+
+For example:
+
+- Resume Score
+- Skills
+- Experience
+- Education
+- Missing Skills
+- Recommendations
+- ATS Analysis
+
+Displaying everything as one large block of text would make the results difficult to understand.
+
+Information should therefore be organized:
+
+    Resume Score
+          ↓
+    Skills
+          ↓
+    Experience
+          ↓
+    Missing Skills
+          ↓
+    Recommendations
+          ↓
+    Detailed Analysis
+
+
+### Resume Score
+
+If Hirely provides a resume score, the meaning of the score should be clear.
+
+For example:
+
+    Resume Score: 82/100
+
+The user should also understand:
+
+- What the score represents
+- Why the score was given
+- Which factors influenced it
+- How the score can be improved
+
+A score should not be presented as an unexplained number.
+
+
+### Explainability
+
+AI-generated recommendations should be understandable.
+
+Instead of:
+
+    Improve your resume.
+
+A more useful result would be:
+
+    Your project descriptions could be more measurable.
+
+    Consider adding:
+    - Performance improvements
+    - Quantifiable results
+    - Technologies used
+
+The goal is:
+
+    AI Result
+        ↓
+    Reason
+        ↓
+    Actionable Recommendation
+
+
+### Trust in AI Results
+
+Hirely uses AI for resume analysis.
+
+Therefore, AI-generated results should be presented as recommendations rather than unquestionable facts.
+
+The interface should make it clear that AI is assisting the user.
+
+The goal is:
+
+    AI Analysis
+        ↓
+    User Understanding
+        ↓
+    User Decision
+
+rather than:
+
+    AI
+     ↓
+    Absolute Decision
+
+
+### Information Hierarchy
+
+Information hierarchy means organizing information according to importance.
+
+For Hirely:
+
+    Most Important
+          ↓
+    Resume Score
+          ↓
+    Major Issues
+          ↓
+    Key Skills
+          ↓
+    Recommendations
+          ↓
+    Detailed Analysis
+
+Users should be able to understand the main results quickly and then explore additional details.
+
+
+### Avoiding Information Overload
+
+Resume analysis can generate a large amount of information.
+
+For example:
+
+    Many Skills
+    Many Recommendations
+    Experience Observations
+    Education Observations
+
+Showing everything at once can overwhelm the user.
+
+A better approach is:
+
+    Summary
+       ↓
+    Important Issues
+       ↓
+    Top Recommendations
+       ↓
+    Detailed Analysis
+
+This allows users to understand the most important information first.
+
+
+### Navigation
+
+As Hirely grows, navigation will become important.
+
+A future application may contain:
+
+    Dashboard
+    Resumes
+    Analysis
+    Jobs
+    Recommendations
+    Profile
+    Settings
+
+Users should always understand:
+
+- Where they are
+- Where they can go
+- How to return
+- What each section represents
+
+
+### Consistency
+
+The interface should behave consistently.
+
+Consistency should apply to:
+
+- Buttons
+- Colors
+- Typography
+- Spacing
+- Navigation
+- Messages
+- Forms
+
+For example:
+
+    [ Analyze Resume ]
+
+should follow the same design pattern whenever the application presents a primary analysis action.
+
+Consistent interfaces reduce the amount of effort required to learn the application.
+
+
+### Accessibility
+
+Accessibility means designing the application so that as many users as possible can use it effectively.
+
+Important considerations include:
+
+- Readable text
+- Sufficient contrast
+- Clear labels
+- Keyboard accessibility
+- Meaningful error messages
+- Avoiding reliance on color alone
+- Appropriate alternative text where required
+
+For example, instead of communicating only through colors:
+
+    Green = Success
+    Red = Error
+
+the interface should also provide meaningful messages:
+
+    ✓ Analysis completed
+
+    ❌ File format not supported
+
+
+### Responsive Design
+
+Users may access Hirely from different devices.
+
+Potential devices include:
+
+- Desktop
+- Laptop
+- Tablet
+- Mobile
+
+The interface should adapt appropriately.
+
+Conceptually:
+
+    Desktop
+    ┌───────────────────────────────┐
+    │ Dashboard │ Analysis │ Profile│
+    └───────────────────────────────┘
+
+    Mobile
+    ┌──────────────┐
+    │ Hirely       │
+    │              │
+    │ Analysis     │
+    │ Score        │
+    │ Skills       │
+    │ Recommendations
+    └──────────────┘
+
+The exact responsive implementation will depend on the final frontend architecture.
+
+
+### Error Handling
+
+Real applications will encounter errors.
+
+Hirely may encounter:
+
+- Invalid file
+- File too large
+- Corrupted document
+- Parsing failure
+- AI service unavailable
+- Network failure
+- Database failure
+- Timeout
+
+The user should receive a useful message.
+
+For example:
+
+    ❌ We couldn't process this resume.
+
+    Please make sure the file is a valid PDF or DOCX
+    and try again.
+
+Instead of exposing only:
+
+    Internal Server Error
+
+Technical errors can still be logged internally while the user receives a clear explanation.
+
+
+### Empty States
+
+Hirely should also handle situations where there is no data.
+
+For example:
+
+    No resumes yet.
+
+    Upload your first resume to begin analysis.
+
+    [ Upload Resume ]
+
+An empty state should explain:
+
+    What is missing?
+          ↓
+    Why is it empty?
+          ↓
+    What should the user do?
+
+
+### Confirmation and Feedback
+
+Users should receive feedback after important actions.
+
+After uploading:
+
+    ✓ Resume uploaded successfully.
+
+    Resume ready for analysis.
+
+After analysis:
+
+    ✓ Analysis completed.
+
+This confirms that the user's action was successfully processed.
+
+
+### User Control
+
+Users should understand what the application is doing.
+
+For example:
+
+    Upload Resume
+          ↓
+    Review File
+          ↓
+    Analyze
+
+The application should avoid unexpected actions.
+
+For AI processing, users should know when an analysis is being performed.
+
+
+### Privacy Considerations
+
+Resume documents can contain personal information.
+
+The UI should communicate relevant privacy information appropriately.
+
+Depending on the final system architecture, users may need information about:
+
+- How data is stored
+- Whether data is retained
+- Whether external AI services process the data
+
+The detailed privacy and security implementation will be researched later in the Security module.
+
+
+### UI/UX and Hirely Architecture
+
+UI/UX decisions should work with the existing Hirely architecture.
+
+Current concept:
+
+    User
+      ↓
+    React Frontend
+      ↓
+    FastAPI
+      ↓
+    Pydantic
+      ↓
+    Business Logic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+AI workflow:
+
+    User
+      ↓
+    React Frontend
+      ↓
+    FastAPI
+      ↓
+    Document Processing
+      ↓
+    Resume Parser
+      ↓
+    AI / LLM
+      ↓
+    Analysis Result
+      ↓
+    React Frontend
+      ↓
+    User
+
+The UI should hide the technical complexity of this pipeline.
+
+The user should experience:
+
+    Upload
+      ↓
+    Analyze
+      ↓
+    Understand
+      ↓
+    Improve
+
+
+### Hirely Core UX Principle
+
+The complete Hirely experience can be simplified into four stages:
+
+    UPLOAD
+       ↓
+    ANALYZE
+       ↓
+    UNDERSTAND
+       ↓
+    IMPROVE
+
+Each stage should answer a simple question.
+
+#### Upload
+
+> What do I need to provide?
+
+#### Analyze
+
+> What is Hirely doing?
+
+#### Understand
+
+> What does my result mean?
+
+#### Improve
+
+> What should I do next?
+
+
+### UI/UX and Frontend Technology Decision
+
+The three frontend research topics are connected:
+
+    8.1 Streamlit
+          ↓
+    Rapid Python-based UI
+
+    8.2 Alternative Frontend Frameworks
+          ↓
+    React / Next.js / Vue / Angular
+
+    8.3 UI/UX Considerations
+          ↓
+    What does Hirely actually need?
+
+The final frontend decision should consider all three areas.
+
+
+### Frontend Decision for Hirely
+
+After researching Streamlit, alternative frontend frameworks, and UI/UX requirements, **React is selected as the frontend technology for Hirely**.
+
+The main reasons are:
+
+- Greater UI customization
+- Component-based architecture
+- Better support for complex interfaces
+- Responsive design capabilities
+- Strong frontend ecosystem
+- Better suitability for a growing production application
+- Clear separation between frontend and FastAPI backend
+
+Therefore, the Hirely frontend architecture will use:
+
+    React
+       ↓
+    REST API
+       ↓
+    FastAPI
+       ↓
+    Backend Services
+
+
+### Final Hirely Frontend Architecture
+
+The current frontend and backend architecture is:
+
+    User
+      ↓
+    React Frontend
+      ↓
+    REST API
+      ↓
+    FastAPI
+      ↓
+    Pydantic
+      ↓
+    Business Logic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+For AI functionality:
+
+    User
+      ↓
+    React Frontend
+      ↓
+    FastAPI
+      ↓
+    Document Processing
+      ↓
+    Resume Parser
+      ↓
+    AI / LLM
+      ↓
+    Analysis Result
+      ↓
+    React Frontend
+      ↓
+    User
+
+
+### Key Takeaways
+
+Remember the main idea:
+
+> **Good UI makes Hirely easy to interact with, while good UX makes the entire resume-analysis journey simple, understandable, and useful.**
+
+For Hirely:
+
+    Simple Interface
+          +
+    Clear Workflow
+          +
+    Useful Feedback
+          +
+    Understandable AI Results
+          +
+    Actionable Recommendations
+          =
+    Good User Experience
+
+The frontend technology has also been selected based on the research:
+
+    React
+       ↓
+    Hirely Frontend
+
+    FastAPI
+       ↓
+    Hirely Backend
+
+The frontend should simplify the underlying technical complexity and allow users to focus on the actual goal:
+
+    Upload Resume
+          ↓
+    Analyze Resume
+          ↓
+    Understand Results
+          ↓
+    Improve Resume
+
+
+### Final Principle
+
+Frontend development should follow:
+
+    User Requirements
+          ↓
+    UI/UX Research
+          ↓
+    Technology Selection
+          ↓
+    Component Design
+          ↓
+    Implementation
+
+For Hirely, the selected frontend technology is **React**, while FastAPI remains responsible for the backend API and business processing.
