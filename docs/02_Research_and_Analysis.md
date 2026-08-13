@@ -12805,3 +12805,694 @@ And for AI operations:
     SQLAlchemy
        ↓
     Database
+
+# 8 Frontend Technologies
+
+## 8.1 Streamlit
+
+### Background
+
+Hirely needs a frontend through which users can interact with the application.
+
+The frontend will eventually need to support interactions such as:
+
+- Uploading a resume
+- Providing job-related information
+- Starting resume analysis
+- Viewing resume scores
+- Viewing extracted skills
+- Viewing analysis results
+- Viewing recommendations
+
+Since Hirely is being developed primarily with Python-based technologies, Streamlit is one of the frontend technologies worth researching.
+
+Streamlit is a Python framework for creating interactive web applications, particularly for data science, machine learning, and AI applications.
+
+The basic idea is:
+
+    Python Code
+        ↓
+    Streamlit
+        ↓
+    Interactive Web Application
+
+
+### What is Streamlit?
+
+**Streamlit is an open-source Python framework for building interactive web applications using Python.**
+
+Instead of requiring developers to build a traditional frontend using separate HTML, CSS, and JavaScript technologies, Streamlit allows much of the interface to be created directly from Python.
+
+Conceptually:
+
+    Python
+       ↓
+    Streamlit
+       ↓
+    Web Interface
+
+This makes Streamlit particularly useful for quickly creating interfaces around Python-based data and AI applications.
+
+
+### Why Streamlit is Relevant to Hirely
+
+Hirely is an AI-focused application.
+
+The application will need a user interface for workflows such as:
+
+    User
+      ↓
+    Upload Resume
+      ↓
+    Analyze Resume
+      ↓
+    AI Processing
+      ↓
+    Display Results
+
+Streamlit can provide a relatively simple way to create this type of interface while keeping frontend development within the Python ecosystem.
+
+This makes it a candidate for Hirely's frontend, especially during prototyping and MVP development.
+
+
+### Streamlit and Python
+
+One of Streamlit's main advantages for Hirely is its integration with Python.
+
+Our existing technology stack already includes:
+
+    Python
+    FastAPI
+    Pydantic
+    SQLAlchemy
+    AI / LLM Libraries
+    Document Processing
+
+Streamlit can be added to this Python-based ecosystem:
+
+    Python
+       ├── Streamlit
+       ├── FastAPI
+       ├── Pydantic
+       ├── SQLAlchemy
+       └── AI Libraries
+
+This can reduce the need to introduce a completely separate frontend development stack during the early stages of the project.
+
+
+### Streamlit Applications
+
+A Streamlit application is generally created using Python code.
+
+The Python application defines the interface and the interactions that users can perform.
+
+Conceptually:
+
+    Python Application
+          ↓
+       Streamlit
+          ↓
+       Web Browser
+
+This makes the development process relatively straightforward for Python developers.
+
+
+### Streamlit Widgets
+
+Streamlit provides built-in interface components called widgets.
+
+Common examples include:
+
+- Text input
+- Button
+- File uploader
+- Select box
+- Checkbox
+- Radio button
+- Slider
+- Text area
+
+These widgets can be used to create interactive workflows.
+
+For Hirely, possible widgets include:
+
+    File Uploader
+        ↓
+    Resume Upload
+
+    Button
+        ↓
+    Analyze Resume
+
+    Select Box
+        ↓
+    Select Job
+
+    Text Area
+        ↓
+    Additional Information
+
+
+### Resume Upload
+
+Resume upload is one of the most important frontend interactions in Hirely.
+
+A possible workflow is:
+
+    User
+       ↓
+    Streamlit File Uploader
+       ↓
+    Resume File
+       ↓
+    Backend / Processing Layer
+       ↓
+    Document Processing
+       ↓
+    Resume Parser
+
+The frontend can provide the upload interface while the backend and document-processing components handle the actual processing.
+
+
+### Streamlit and FastAPI
+
+Streamlit and FastAPI have different responsibilities.
+
+Streamlit is primarily responsible for:
+
+    User Interface
+    User Interaction
+    Displaying Results
+
+FastAPI is primarily responsible for:
+
+    API
+    Request Handling
+    Backend Services
+    Communication with Business Logic
+
+Therefore, they can work together.
+
+Conceptually:
+
+    User
+       ↓
+    Streamlit
+       ↓
+    FastAPI
+       ↓
+    Backend
+       ↓
+    Database / AI
+
+
+### Streamlit Does Not Replace FastAPI
+
+Streamlit should not automatically be considered a replacement for the backend.
+
+A possible Hirely architecture is:
+
+    Streamlit
+        ↓
+    FastAPI
+        ↓
+    Pydantic
+        ↓
+    Business Logic
+        ↓
+    SQLAlchemy
+        ↓
+    Database
+
+In this architecture:
+
+    Streamlit
+    → Frontend
+
+    FastAPI
+    → Backend API
+
+    Pydantic
+    → Data Validation
+
+    Business Logic
+    → Application Decisions
+
+    SQLAlchemy
+    → Database Interaction
+
+
+### Streamlit and REST APIs
+
+The backend architecture we have already researched uses REST APIs.
+
+A possible flow is:
+
+    Streamlit
+        ↓
+    REST API
+        ↓
+    FastAPI
+        ↓
+    Business Logic
+        ↓
+    Database / AI
+
+The frontend sends requests to the backend, and the backend returns the required data.
+
+This allows the frontend and backend responsibilities to remain separated.
+
+
+### Streamlit and Pydantic
+
+Pydantic is responsible for data validation and structured data.
+
+A possible flow is:
+
+    Streamlit
+        ↓
+    API Request
+        ↓
+    FastAPI
+        ↓
+    Pydantic
+        ↓
+    Validation
+        ↓
+    Business Logic
+
+This ensures that data received by the backend follows the expected structure.
+
+
+### Streamlit and SQLAlchemy
+
+SQLAlchemy is responsible for database interaction.
+
+Streamlit should not directly contain database logic throughout the application.
+
+Instead, a cleaner architecture is:
+
+    Streamlit
+        ↓
+    FastAPI
+        ↓
+    Service Layer
+        ↓
+    SQLAlchemy
+        ↓
+    Database
+
+This keeps the frontend separate from database implementation details.
+
+
+### Streamlit and AI
+
+Hirely will contain AI-powered functionality.
+
+A simplified workflow can be:
+
+    User
+       ↓
+    Streamlit
+       ↓
+    FastAPI
+       ↓
+    AI / LLM
+       ↓
+    Analysis Result
+       ↓
+    Streamlit
+       ↓
+    User
+
+This makes Streamlit useful for creating interfaces around AI functionality.
+
+
+### Resume Analysis Interface
+
+A possible Hirely interface could provide:
+
+    Hirely
+    ─────────────────────
+
+    Upload Resume
+
+    [ Select Resume ]
+
+    Job Description
+
+    [ Enter Job Description ]
+
+    [ Analyze Resume ]
+
+    ─────────────────────
+
+    Resume Score
+
+    Skills
+
+    Experience Analysis
+
+    Missing Skills
+
+    Recommendations
+
+The exact UI will be decided later after researching the frontend requirements and alternatives.
+
+
+### Displaying Analysis Results
+
+Hirely will eventually generate structured results.
+
+For example:
+
+    Resume Score
+         ↓
+    Skills
+         ↓
+    Experience Analysis
+         ↓
+    Missing Skills
+         ↓
+    Recommendations
+
+Streamlit provides components that can be used to display information such as:
+
+- Text
+- Metrics
+- Tables
+- Charts
+- Expandable sections
+- Status information
+
+This can make AI-generated analysis easier for users to understand.
+
+
+### Streamlit for Rapid Prototyping
+
+One of Streamlit's important advantages is rapid development.
+
+Suppose Hirely already has:
+
+    Resume Parser
+          ↓
+    Analysis Engine
+          ↓
+    AI Model
+
+A Streamlit interface can be added relatively quickly:
+
+    Resume Parser
+          ↓
+    Analysis Engine
+          ↓
+    AI Model
+          ↓
+    Streamlit Interface
+
+This allows the team to test the user workflow before investing heavily in a complex frontend.
+
+
+### Streamlit for MVP
+
+Streamlit can be useful for creating an MVP.
+
+An initial Hirely MVP might contain:
+
+    Upload Resume
+         ↓
+    Analyze
+         ↓
+    Resume Score
+         ↓
+    Skills
+         ↓
+    Recommendations
+
+The purpose of an MVP is to validate the core product idea with the minimum necessary functionality.
+
+Streamlit can help reduce the time required to create this initial interface.
+
+
+### Streamlit and AI/ML Applications
+
+Streamlit is particularly suitable for applications involving:
+
+- Data science
+- Machine learning
+- AI
+- Data visualization
+- Model demonstrations
+- Interactive analysis
+
+Hirely falls into the AI application category because it will use AI/LLMs for resume analysis and recommendations.
+
+Therefore, Streamlit is relevant to the project from a prototyping perspective.
+
+
+### Streamlit Advantages
+
+Important advantages include:
+
+- Python-based development
+- Rapid UI development
+- Simple interactive components
+- Easy integration with Python applications
+- Useful for AI/ML applications
+- Useful for prototypes
+- Useful for MVP development
+- Reduced frontend complexity during early development
+
+
+### Streamlit Limitations
+
+Streamlit also has limitations.
+
+Important considerations include:
+
+- Less control over complex frontend behavior
+- Less customization compared with dedicated frontend frameworks
+- Limited control over highly customized user interfaces
+- May not be ideal for every production-scale frontend
+- Traditional frontend frameworks provide greater control over frontend architecture
+
+Therefore, Streamlit should be evaluated against alternative frontend technologies before making the final decision for Hirely.
+
+
+### Streamlit vs Traditional Frontend
+
+A traditional frontend architecture might look like:
+
+    React / Next.js
+          ↓
+       FastAPI
+          ↓
+       Backend
+
+A Streamlit architecture might look like:
+
+    Streamlit
+          ↓
+       FastAPI
+          ↓
+       Backend
+
+The major difference is the development approach.
+
+Traditional frontend frameworks provide greater control over:
+
+    HTML
+    CSS
+    JavaScript
+    Components
+    Routing
+    UI State
+    Animations
+    Frontend Architecture
+
+Streamlit focuses more on making interactive applications quickly using Python.
+
+
+### Streamlit and Hirely Architecture
+
+A possible Hirely architecture using Streamlit is:
+
+                       User
+                         ↓
+                     Streamlit
+                         ↓
+                      FastAPI
+                         ↓
+                     Pydantic
+                         ↓
+               Service / Business Logic
+                    ↙          ↘
+             SQLAlchemy       AI / LLM
+                 ↓                ↓
+             Database       Analysis Result
+                                  ↓
+                              Pydantic
+                                  ↓
+                              Streamlit
+                                  ↓
+                                User
+
+
+### Separation of Responsibilities
+
+The architecture should maintain clear responsibilities.
+
+    Streamlit
+    → User interface
+
+    FastAPI
+    → API layer
+
+    REST API
+    → Frontend/backend communication
+
+    Pydantic
+    → Data validation
+
+    Business Logic
+    → Application decisions
+
+    SQLAlchemy
+    → Database interaction
+
+    AI / LLM
+    → Intelligent analysis
+
+This separation helps keep the system modular and maintainable.
+
+
+### Streamlit and Scalability
+
+Streamlit can be useful for prototypes and early versions of Hirely.
+
+However, the final frontend decision should consider:
+
+- Number of users
+- UI complexity
+- Performance requirements
+- Customization requirements
+- Authentication requirements
+- Application architecture
+- Deployment requirements
+- Long-term maintainability
+
+Therefore, scalability should be considered before selecting Streamlit as the permanent frontend.
+
+
+### Streamlit and MVP vs Production
+
+Streamlit may be a strong choice when the priority is:
+
+    Fast Development
+        ↓
+    Prototype
+        ↓
+    MVP
+        ↓
+    Validate Product Idea
+
+A dedicated frontend framework may become more attractive when the priority becomes:
+
+    Advanced UI
+        ↓
+    High Customization
+        ↓
+    Complex Frontend Architecture
+        ↓
+    Production User Experience
+
+This distinction is important for Hirely because the best technology for the MVP does not necessarily have to be the final production technology.
+
+
+### Decision for Hirely
+
+Based on the current research, **Streamlit is a strong candidate for Hirely's early frontend and MVP development**.
+
+The main reasons are:
+
+- Python-based development
+- Fast development
+- Simple interactive UI
+- Strong suitability for AI applications
+- Easy integration with Python-based AI workflows
+- Useful for validating the Hirely user experience
+
+However, we will not make the final frontend decision yet.
+
+The roadmap also requires researching:
+
+    Alternative Frontend Frameworks
+          ↓
+    UI/UX Considerations
+          ↓
+    Final Frontend Decision
+
+
+### Current Hirely Frontend Concept
+
+The current concept can be represented as:
+
+    User
+      ↓
+    Streamlit
+      ↓
+    FastAPI
+      ↓
+    Pydantic
+      ↓
+    Business Logic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+For AI functionality:
+
+    User
+      ↓
+    Streamlit
+      ↓
+    FastAPI
+      ↓
+    AI / LLM
+      ↓
+    Pydantic
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+
+### Key Takeaways
+
+Remember Streamlit using this simple idea:
+
+> **Streamlit allows us to build interactive web applications using Python, making it particularly useful for AI/ML applications, prototypes, and MVPs.**
+
+For Hirely:
+
+    Streamlit
+    → User Interface
+
+    FastAPI
+    → Backend API
+
+    Pydantic
+    → Data Validation
+
+    SQLAlchemy
+    → Database Interaction
+
+    AI / LLM
+    → Resume Analysis
+
+The most important architectural principle is:
+
+> **The frontend should remain separated from the backend, business logic, and database layers.**
+
+Streamlit is therefore a strong candidate for the early Hirely frontend, but the final decision should be made after comparing it with alternative frontend technologies and considering the required user experience.
