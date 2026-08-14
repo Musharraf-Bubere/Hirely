@@ -14959,3 +14959,697 @@ Frontend development should follow:
     Implementation
 
 For Hirely, the selected frontend technology is **React**, while FastAPI remains responsible for the backend API and business processing.
+
+## 9.1 AI Model Selection
+
+### Background
+
+Choosing an AI model is an important architectural decision for Hirely.
+
+The goal is not to select the biggest or most popular model.
+
+The goal is to select a model that provides the required quality while keeping cost, latency, reliability, privacy, and deployment requirements under control.
+
+For Hirely, AI will be used mainly for:
+
+- Resume understanding
+- Resume analysis
+- Job description analysis
+- Skill identification
+- Gap identification
+- Resume recommendations
+- Structured analysis results
+
+Therefore, model selection must be based on Hirely's actual requirements.
+
+
+### Research Findings
+
+There is no universally best AI model.
+
+Different models provide different trade-offs between:
+
+- Quality
+- Cost
+- Latency
+- Context capacity
+- Reliability
+- Structured output
+- Deployment options
+- Privacy
+- Scalability
+
+Therefore, model selection should be treated as an engineering decision rather than simply choosing the most powerful model.
+
+
+### Hirely AI Workflow
+
+The basic AI workflow for Hirely can be represented as:
+
+    Resume
+       +
+    Job Description
+       ↓
+    Understand Content
+       ↓
+    Analyze Information
+       ↓
+    Compare Requirements
+       ↓
+    Identify Gaps
+       ↓
+    Generate Recommendations
+       ↓
+    Structured Analysis Result
+
+
+### Task Fit
+
+The first question when selecting a model is:
+
+> **Can the model perform the task Hirely requires?**
+
+Different AI models may perform differently depending on the workload.
+
+Common workloads include:
+
+- Classification
+- Summarization
+- Information extraction
+- Reasoning
+- Generation
+- Retrieval-Augmented Generation
+- Multimodal processing
+
+Hirely primarily requires:
+
+- Text understanding
+- Instruction following
+- Analysis
+- Structured generation
+- Recommendation generation
+
+Therefore, the model should be evaluated according to these requirements rather than general popularity.
+
+
+### Quality
+
+Model quality is one of the most important selection criteria.
+
+For Hirely, the model should produce:
+
+- Accurate analysis
+- Relevant recommendations
+- Consistent results
+- Good instruction following
+- Useful explanations
+
+For example, if a resume clearly contains Python experience but the model identifies Python as a missing skill, the analysis becomes unreliable.
+
+Therefore, candidate models must be evaluated using Hirely-specific examples.
+
+
+### Structured Output
+
+Structured output is particularly important for Hirely.
+
+The backend architecture already uses:
+
+    FastAPI
+       ↓
+    Pydantic
+
+Therefore, AI results should ideally follow a predictable structure.
+
+Example:
+
+    {
+        "score": 82,
+        "skills": [
+            "Python",
+            "SQL",
+            "FastAPI"
+        ],
+        "missing_skills": [
+            "Docker"
+        ],
+        "recommendations": [
+            "Add measurable project outcomes"
+        ]
+    }
+
+Structured output makes it easier for the backend to:
+
+- Validate AI results
+- Process results
+- Store results
+- Send results to the frontend
+- Maintain consistent application behavior
+
+Therefore, structured-output capability will be an important model-selection criterion.
+
+
+### Context Window
+
+The context window determines how much information a model can process in a request.
+
+Hirely may need to provide:
+
+    Resume
+       +
+    Job Description
+       +
+    Analysis Instructions
+       +
+    Additional Context
+       ↓
+    AI Model
+
+The selected model must provide sufficient context capacity for the expected Hirely workload.
+
+However, a larger context window does not automatically mean that the model is a better choice.
+
+The required context size should come from the application's actual requirements.
+
+
+### Latency
+
+Latency refers to the time required to receive a model response.
+
+Hirely's workflow may look like:
+
+    User clicks Analyze
+           ↓
+    Processing
+           ↓
+    AI Model
+           ↓
+    Analysis Result
+
+If the model takes too long to respond, the user experience can become poor.
+
+Therefore, model selection must consider the balance between:
+
+    Quality
+       ↕
+    Latency
+
+A more capable model may sometimes provide better results but require more processing time.
+
+
+### Cost
+
+AI model usage can introduce costs depending on factors such as:
+
+- Input tokens
+- Output tokens
+- Number of requests
+- Selected model
+- Compute requirements
+
+There may be a trade-off between model capability and cost.
+
+Conceptually:
+
+    Smaller Model
+        ↓
+    Lower Cost
+        ↓
+    Potentially Lower Capability
+
+    Larger Model
+        ↓
+    Higher Cost
+        ↓
+    Potentially Higher Capability
+
+The goal is not to choose the cheapest model.
+
+The goal is:
+
+> **Choose a model that provides sufficient quality at an acceptable cost.**
+
+
+### Reliability
+
+Hirely requires consistent AI behavior.
+
+For example, if the application expects:
+
+    "score"
+
+the model should consistently produce the expected structure.
+
+Unpredictable output can create problems for the backend.
+
+Therefore, candidate models should be evaluated for:
+
+- Output consistency
+- Instruction following
+- Structured response reliability
+- Stability across repeated requests
+
+
+### Deployment Strategy
+
+AI models can be deployed in different ways.
+
+Two important approaches are:
+
+    Cloud Model
+
+    Local Model
+
+Cloud architecture:
+
+    Hirely
+       ↓
+    API
+       ↓
+    Cloud AI Model
+
+Local architecture:
+
+    Hirely
+       ↓
+    Local AI Runtime
+       ↓
+    Local Model
+
+
+### Cloud Models
+
+Cloud models are hosted by external providers.
+
+Potential advantages include:
+
+- Easy integration
+- No need to manage model infrastructure
+- Access to powerful models
+- Easier scaling
+
+Potential considerations include:
+
+- API costs
+- Network dependency
+- Provider dependency
+- External data processing
+- Privacy requirements
+
+
+### Local Models
+
+Local models run on infrastructure controlled by the application owner.
+
+Conceptually:
+
+    Hirely
+       ↓
+    Local AI Runtime
+       ↓
+    Local Model
+
+Potential advantages include:
+
+- Greater control
+- Potential privacy benefits
+- No per-request cloud API cost
+
+Potential challenges include:
+
+- Hardware requirements
+- Memory requirements
+- Model management
+- Infrastructure complexity
+- Maintenance
+
+
+### Privacy
+
+Resume documents may contain personal information such as:
+
+- Name
+- Email
+- Phone number
+- Education
+- Employment history
+- Skills
+- Projects
+
+Therefore, model selection must consider how user data is processed.
+
+Important questions include:
+
+- Where is the model running?
+- Where does the data go?
+- Is the data retained?
+- Can a local model be used?
+- What provider policies apply?
+
+Privacy requirements may influence whether Hirely uses:
+
+    Cloud
+       ↓
+    Local
+       ↓
+    Hybrid
+
+
+### Scalability
+
+The model should also be evaluated according to expected application growth.
+
+For example:
+
+    10 users
+       ↓
+    100 users
+       ↓
+    1,000 users
+       ↓
+    10,000 users
+
+As usage increases:
+
+- Model cost increases
+- Request volume increases
+- Infrastructure requirements increase
+- Latency becomes more important
+
+Therefore, a model that works well for a small prototype may not necessarily be the best choice for a larger deployment.
+
+
+### Quality vs Cost vs Latency
+
+One of the main model-selection trade-offs is:
+
+    Quality
+       ↕
+    Cost
+       ↕
+    Latency
+
+Ideally, Hirely would want:
+
+- High quality
+- Low cost
+- Low latency
+
+However, real-world model selection often requires balancing these factors.
+
+Therefore, the selected model should meet the required quality level without introducing unnecessary cost or latency.
+
+
+### Bigger Model Does Not Mean Better Model
+
+The most powerful model is not automatically the best choice.
+
+For example:
+
+    Model A
+    → Very powerful
+    → Expensive
+    → Slower
+
+    Model B
+    → Slightly less capable
+    → Cheaper
+    → Faster
+
+If Model B performs Hirely's tasks reliably, Model B may be the better engineering decision.
+
+The goal is:
+
+    Hirely Requirements
+           ↓
+    Required Model Capability
+           ↓
+    Acceptable Cost + Latency
+
+
+### Model Evaluation
+
+Candidate models should not be selected only from general benchmarks.
+
+They should eventually be tested using Hirely-specific examples.
+
+For example:
+
+    Resume + Job Description
+              ↓
+         Candidate Model
+              ↓
+           Analysis
+
+Multiple candidate models can then be compared using the same input.
+
+For example:
+
+    Model A
+    Model B
+    Model C
+
+This provides a more meaningful comparison for Hirely.
+
+
+### Hirely Evaluation Dataset
+
+A small evaluation dataset should eventually be created for model comparison.
+
+It can contain different types of resumes, such as:
+
+- Strong resumes
+- Weak resumes
+- Student resumes
+- Experienced resumes
+- Career-switcher resumes
+- Different skill sets
+- Different job types
+
+Each test case can contain:
+
+    Resume
+       +
+    Job Description
+       ↓
+    Expected Analysis
+
+
+### Evaluation Process
+
+The eventual model-selection process should be:
+
+    Define Hirely Requirements
+              ↓
+    Select Candidate Models
+              ↓
+    Create Evaluation Dataset
+              ↓
+    Run Same Inputs
+              ↓
+    Compare Outputs
+              ↓
+    Measure Quality
+              ↓
+    Measure Latency
+              ↓
+    Estimate Cost
+              ↓
+    Select Model
+
+
+### Single Model vs Multiple Models
+
+Hirely could eventually use either one model or multiple models.
+
+Single-model approach:
+
+    Hirely
+       ↓
+    One AI Model
+
+Advantages:
+
+- Simpler architecture
+- Easier maintenance
+- Easier debugging
+- Easier deployment
+
+Multiple-model approach:
+
+    Document Task
+         ↓
+      Model A
+
+    Resume Analysis
+         ↓
+      Model B
+
+Multiple models can be useful when different tasks require different capabilities.
+
+However, they also increase architectural complexity.
+
+For the initial Hirely version, unnecessary complexity should be avoided.
+
+
+### Provider Lock-in
+
+Directly connecting the entire application to provider-specific implementation can make future changes difficult.
+
+A better architecture is:
+
+    Hirely
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    AI Model
+
+Conceptually:
+
+    AI Service
+        ↓
+    Model Adapter
+        ├── Cloud Model
+        ├── Local Model
+        └── Other Provider
+
+This allows the AI implementation to remain modular.
+
+The exact providers and models will be researched before making the final selection.
+
+
+### Hirely AI Model Architecture
+
+The current conceptual architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    Selected AI Model
+
+The AI Service handles the application-level AI workflow.
+
+The Model Adapter isolates provider-specific implementation.
+
+
+### AI Model Selection Roadmap
+
+The Hirely research roadmap contains:
+
+    9. AI Model Selection
+
+    - OpenAI
+    - Ollama
+    - Local Models
+    - Cloud Models
+    - Cost Comparison
+
+The research process will therefore be:
+
+    Understand Selection Criteria
+              ↓
+    Research OpenAI
+              ↓
+    Research Ollama
+              ↓
+    Research Local Models
+              ↓
+    Research Cloud Models
+              ↓
+    Compare Costs
+              ↓
+    Make Hirely Decision
+
+
+### Analysis
+
+AI model selection should be treated as a measurable engineering decision.
+
+The model should be evaluated according to:
+
+    Task Fit
+       +
+    Quality
+       +
+    Structured Output
+       +
+    Context Capacity
+       +
+    Latency
+       +
+    Cost
+       +
+    Reliability
+       +
+    Privacy
+       +
+    Scalability
+
+The final decision should be based on how well a candidate model performs Hirely's actual workload.
+
+
+### Decision for Hirely
+
+At this stage, **no specific AI model is selected yet**.
+
+The decision is to first research and compare the candidate approaches defined in the roadmap.
+
+Hirely will use a modular AI architecture so that the selected model can be changed without rewriting the entire application.
+
+The current architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    Selected AI Model
+
+The final model will be selected after evaluating candidate models against Hirely's requirements.
+
+
+### Key Takeaways
+
+> **AI model selection is an engineering decision based on application requirements, not a competition to find the biggest or most popular model.**
+
+For Hirely, the main factors are:
+
+    Task Fit
+       +
+    Quality
+       +
+    Structured Output
+       +
+    Context
+       +
+    Latency
+       +
+    Cost
+       +
+    Reliability
+       +
+    Privacy
+       +
+    Scalability
+
+The final selection process will be:
+
+    Hirely Requirements
+           ↓
+    Candidate Models
+           ↓
+    Hirely Evaluation Dataset
+           ↓
+    Quality + Cost + Latency
+           ↓
+    Final Model Decision
