@@ -14960,6 +14960,8 @@ Frontend development should follow:
 
 For Hirely, the selected frontend technology is **React**, while FastAPI remains responsible for the backend API and business processing.
 
+# 9 AI Model Selection
+
 ## 9.1 AI Model Selection
 
 ### Background
@@ -15653,3 +15655,800 @@ The final selection process will be:
     Quality + Cost + Latency
            ↓
     Final Model Decision
+
+
+## 9.2 OpenAI
+
+### Background
+
+OpenAI provides APIs that allow applications to integrate AI models for tasks such as text generation, structured outputs, tool use, and other AI capabilities.
+
+For Hirely, OpenAI is one of the candidate AI providers that will be researched before making the final AI model decision.
+
+The potential Hirely workflow is:
+
+    Resume
+       ↓
+    Document Processing
+       ↓
+    Resume Text
+       ↓
+    FastAPI
+       ↓
+    OpenAI Model
+       ↓
+    Structured Analysis
+       ↓
+    Pydantic Validation
+       ↓
+    Business Logic
+       ↓
+    Database / React
+
+
+### OpenAI API
+
+The OpenAI API allows our backend application to communicate with OpenAI models.
+
+Conceptually:
+
+    Hirely Backend
+          ↓
+      OpenAI API
+          ↓
+      OpenAI Model
+          ↓
+        Response
+          ↓
+    Hirely Backend
+
+For Hirely, the OpenAI API should be accessed from the backend rather than directly from the React frontend.
+
+The architecture should therefore be:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    OpenAI API
+
+This keeps API credentials and AI-related implementation on the server side.
+
+
+### Responses API
+
+The **Responses API** is the current API approach we should focus on for a new Hirely integration.
+
+Conceptually:
+
+    Hirely
+       ↓
+    Responses API
+       ↓
+    OpenAI Model
+       ↓
+    Response
+
+The Responses API provides a unified interface for interacting with models and supports capabilities such as model responses and tools.
+
+
+### OpenAI Models
+
+OpenAI provides different models with different capabilities, performance characteristics, and costs.
+
+Conceptually:
+
+    More Capable Model
+          ↓
+    Potentially Higher Quality
+          ↓
+    Potentially Higher Cost
+
+    Efficient Model
+          ↓
+    Lower Cost
+          ↓
+    Potentially Better for High-Volume Tasks
+
+Therefore, researching OpenAI does not mean immediately selecting the most powerful model.
+
+The model must be evaluated according to Hirely's actual requirements.
+
+
+### OpenAI and Hirely
+
+Hirely may use an OpenAI model for tasks such as:
+
+- Resume understanding
+- Resume analysis
+- Job description analysis
+- Skill identification
+- Missing-skill identification
+- Experience analysis
+- Resume recommendations
+- Structured analysis generation
+
+The workflow can be represented as:
+
+    Resume
+       +
+    Job Description
+       ↓
+    FastAPI
+       ↓
+    OpenAI
+       ↓
+    Resume Analysis
+       ↓
+    Structured Result
+
+
+### Structured Outputs
+
+Structured output is one of the most important OpenAI capabilities for Hirely.
+
+A normal language-model response could look like:
+
+    Here is your resume analysis...
+
+    Score: 82
+
+    Skills:
+    Python, SQL, FastAPI
+
+    Recommendations:
+    Improve project descriptions...
+
+This type of response is difficult for a backend application to process reliably.
+
+Hirely instead needs predictable structured data.
+
+Example:
+
+    {
+        "score": 82,
+        "skills": [
+            "Python",
+            "SQL",
+            "FastAPI"
+        ],
+        "missing_skills": [
+            "Docker"
+        ],
+        "recommendations": [
+            "Add measurable project outcomes"
+        ]
+    }
+
+Structured Outputs are designed to make model responses conform to a developer-defined schema.
+
+
+### Structured Outputs and Pydantic
+
+Structured Outputs are particularly relevant because Hirely already uses Pydantic in the backend.
+
+The architecture can eventually be:
+
+    OpenAI
+       ↓
+    Structured Output
+       ↓
+    JSON Schema
+       ↓
+    Pydantic
+       ↓
+    Validated Python Object
+       ↓
+    Business Logic
+
+This provides a reliable boundary between the AI layer and the backend application.
+
+Conceptually:
+
+    OpenAI
+       ↓
+    ResumeAnalysis
+       ↓
+    Pydantic Validation
+       ↓
+    Database
+
+
+### JSON Mode vs Structured Outputs
+
+JSON Mode and Structured Outputs should not be treated as the same thing.
+
+#### JSON Mode
+
+The main goal is to produce valid JSON.
+
+    Model
+       ↓
+    Valid JSON
+
+However, valid JSON does not necessarily mean that the response follows the exact structure expected by the application.
+
+#### Structured Outputs
+
+The goal is:
+
+    Model
+       ↓
+    JSON matching the defined schema
+
+For Hirely, Structured Outputs are more useful because the backend requires predictable fields.
+
+
+### Function Calling
+
+OpenAI also supports function calling.
+
+Function calling allows a model to request that an application execute a defined function or tool.
+
+Conceptually:
+
+    User
+      ↓
+    Model
+      ↓
+    Function Call
+      ↓
+    External System
+      ↓
+    Result
+      ↓
+    Model
+      ↓
+    Final Response
+
+For example, a future Hirely workflow could allow the AI system to request information from application services.
+
+However, function calling should only be introduced when Hirely actually needs tool-based workflows.
+
+For the initial resume-analysis workflow:
+
+    Resume
+       ↓
+    Analysis
+       ↓
+    Structured Result
+
+may be sufficient.
+
+
+### Structured Outputs vs Function Calling
+
+These features solve different problems.
+
+#### Structured Outputs
+
+Purpose:
+
+> Make the model's output follow a defined structure.
+
+    Model
+       ↓
+    Structured JSON
+
+#### Function Calling
+
+Purpose:
+
+> Allow the model to request execution of an external function or tool.
+
+    Model
+       ↓
+    Function
+       ↓
+    External System
+
+For Hirely, Structured Outputs are immediately relevant to resume analysis.
+
+Function calling may become useful in future workflows.
+
+
+### OpenAI Tools
+
+The Responses API can work with different tools and capabilities.
+
+Conceptually:
+
+    Responses API
+          │
+          ├── Model
+          ├── Web Search
+          ├── File Search
+          └── Function Calling
+
+However, Hirely should not use a feature simply because it is available.
+
+The principle is:
+
+> **Use a feature because Hirely requires it.**
+
+For the initial version, the core requirement is resume analysis and structured results.
+
+
+### Context
+
+The model receives information as input and uses that context to generate its response.
+
+For Hirely, the input may contain:
+
+    Resume Text
+          +
+    Job Description
+          +
+    System Instructions
+          +
+    Analysis Requirements
+          ↓
+       AI Model
+
+The model then produces:
+
+    Resume Analysis
+
+The required context capacity will be considered when comparing specific OpenAI models.
+
+
+### Prompting
+
+OpenAI models follow the instructions and input provided to them.
+
+A Hirely analysis prompt may conceptually contain:
+
+    Analyze the following resume against
+    the provided job description.
+
+    Identify:
+
+    - Relevant skills
+    - Missing skills
+    - Experience gaps
+    - Resume weaknesses
+    - Improvement recommendations
+
+    Return the result according to
+    the required schema.
+
+Prompting is important, but it should not be the only reliability mechanism.
+
+Hirely should combine:
+
+    Good Instructions
+           +
+    Structured Outputs
+           +
+    Pydantic Validation
+           +
+    Application Logic
+
+
+### API Key Security
+
+OpenAI API access requires an API key.
+
+The API key must not be placed inside the React frontend.
+
+Incorrect:
+
+    React
+       ↓
+    OpenAI API Key
+       ↓
+    OpenAI
+
+Correct:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    Environment Variable
+       ↓
+    OpenAI API
+
+The API key should be managed securely through environment variables or an appropriate secret-management mechanism.
+
+Detailed secret management will be covered later in the Security and Deployment research.
+
+
+### Error Handling
+
+External AI APIs can fail.
+
+Possible problems include:
+
+- Invalid API key
+- Rate limit
+- Network failure
+- Timeout
+- Service unavailable
+- Invalid request
+- Model error
+
+The architecture should handle these failures through the backend.
+
+Conceptually:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    OpenAI
+       ↓
+    Error
+       ↓
+    FastAPI handles error
+       ↓
+    User-friendly response
+
+The frontend should not expose raw provider errors directly to users.
+
+
+### Rate Limits
+
+AI APIs have usage limits that can affect applications.
+
+The general workflow is:
+
+    Users
+       ↓
+    Requests
+       ↓
+    OpenAI API
+       ↓
+    Rate Limits
+
+As Hirely grows, we need to consider:
+
+- Number of requests
+- Concurrent requests
+- Token usage
+- Model limits
+- Retry behavior
+
+Rate limits will become more important during production and scaling.
+
+
+### Cost
+
+OpenAI API usage introduces costs based on model usage.
+
+The general workflow is:
+
+    Resume
+       ↓
+    Input Tokens
+       ↓
+    Model
+       ↓
+    Output Tokens
+       ↓
+    API Cost
+
+Different models have different pricing.
+
+Therefore, cost will be an important factor when comparing candidate models.
+
+Detailed pricing research will be performed later in:
+
+    9.6 Cost Comparison
+
+
+### OpenAI and Document Processing
+
+OpenAI should not automatically replace the document-processing layer.
+
+The architecture remains:
+
+    Resume Upload
+          ↓
+    File Validation
+          ↓
+    Document Processing
+          ↓
+    Text Extraction
+          ↓
+    Resume Parser
+          ↓
+    AI Analysis
+
+OpenAI primarily belongs to the AI analysis layer.
+
+This keeps the responsibilities of different components separated.
+
+
+### OpenAI and Resume Parsing
+
+The following concepts should remain distinct:
+
+    Document Processing
+          ↓
+    Extract Content
+
+    Resume Parsing
+          ↓
+    Understand Resume Structure
+
+    AI Analysis
+          ↓
+    Interpret Content
+          ↓
+    Generate Recommendations
+
+An LLM may assist with structured extraction and analysis, but the entire application should not depend on the LLM for every processing stage.
+
+This keeps Hirely modular.
+
+
+### OpenAI Integration Architecture
+
+The current conceptual architecture is:
+
+                         React
+                           ↓
+                        FastAPI
+                           ↓
+                      AI Service
+                           ↓
+                    OpenAI Adapter
+                           ↓
+                      OpenAI API
+                           ↓
+                     OpenAI Model
+                           ↓
+                  Structured Output
+                           ↓
+                       Pydantic
+                           ↓
+                    Business Logic
+                           ↓
+                       Database
+
+
+### AI Service
+
+The AI Service should contain the application-level AI workflow.
+
+For example:
+
+    AI Service
+       ↓
+    Prepare Prompt
+       ↓
+    Send Request
+       ↓
+    Receive Response
+       ↓
+    Validate Result
+       ↓
+    Return Analysis
+
+This keeps AI-specific application logic separated from the rest of the backend.
+
+
+### OpenAI Adapter
+
+The OpenAI Adapter isolates provider-specific implementation.
+
+Conceptually:
+
+    Business Logic
+          ↓
+      AI Service
+          ↓
+      Model Adapter
+          ↓
+        OpenAI
+
+This makes the system easier to change later.
+
+For example, another adapter could eventually be introduced:
+
+    AI Service
+          ↓
+    Model Adapter
+       ├── OpenAI
+       ├── Ollama
+       └── Other Provider
+
+
+### Provider Lock-in
+
+Directly using OpenAI-specific implementation throughout the entire application can make future provider changes difficult.
+
+Instead:
+
+    Business Logic
+          ↓
+      AI Service
+          ↓
+      Model Adapter
+          ↓
+        Provider
+
+This reduces coupling between Hirely's business logic and a specific AI provider.
+
+The goal is not to avoid OpenAI-specific features completely, but to keep them isolated where possible.
+
+
+### Advantages of OpenAI for Hirely
+
+Potential advantages include:
+
+- Strong general-purpose language models
+- Mature API ecosystem
+- Structured Outputs
+- Function calling
+- Tool support
+- Official SDKs
+- Multiple model options
+- Hosted infrastructure
+- Easy backend integration
+
+Structured Outputs are particularly relevant because Hirely requires reliable structured analysis results.
+
+
+### Potential Challenges
+
+Using OpenAI also introduces considerations such as:
+
+- API cost
+- External service dependency
+- Internet dependency
+- Provider lock-in
+- Rate limits
+- Privacy considerations
+- Changing model availability
+- Changing pricing
+
+Therefore, researching OpenAI does not automatically mean that OpenAI will be Hirely's final AI provider.
+
+
+### OpenAI vs Hirely Requirements
+
+Hirely's main AI requirements are:
+
+    Text Understanding
+          +
+    Resume Analysis
+          +
+    Structured Output
+          +
+    Reasonable Latency
+          +
+    Acceptable Cost
+          +
+    Reliable API
+          +
+    Appropriate Privacy
+
+OpenAI will be evaluated against these requirements.
+
+
+### Analysis
+
+OpenAI provides several capabilities that are relevant to Hirely, particularly:
+
+- Text understanding
+- Structured Outputs
+- Tool usage
+- Function calling
+- Multiple model options
+- Hosted API infrastructure
+
+The combination of OpenAI Structured Outputs and Pydantic is particularly useful for creating a reliable AI-to-backend data flow.
+
+However, OpenAI also introduces cost, provider dependency, privacy, and API availability considerations.
+
+Therefore, OpenAI should be treated as a candidate rather than automatically selected.
+
+
+### Decision for Hirely
+
+At this stage, **no specific OpenAI model is selected**.
+
+The current decision is:
+
+> **OpenAI will be evaluated as one of the candidate AI providers for Hirely.**
+
+The final model decision will be made after researching and comparing:
+
+    OpenAI
+       ↓
+    Ollama
+       ↓
+    Local Models
+       ↓
+    Cloud Models
+       ↓
+    Cost
+
+
+### Hirely AI Architecture
+
+The current architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    OpenAI / Other Provider
+       ↓
+    Structured Analysis
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    Database
+
+
+### Key Takeaways
+
+> **OpenAI is a candidate AI provider for Hirely, not yet the final model decision.**
+
+The most important concepts are:
+
+    OpenAI API
+         ↓
+    Responses API
+         ↓
+    OpenAI Model
+         ↓
+    Structured Outputs
+         ↓
+    Pydantic Validation
+         ↓
+    Hirely Business Logic
+
+The main architectural principle is:
+
+> **Keep OpenAI behind the AI Service / Model Adapter layer so that Hirely is not tightly coupled to one AI provider.**
+
+The current Hirely AI architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    AI Provider
+       ↓
+    Structured Analysis
+       ↓
+    Pydantic
+       ↓
+    Database
+
+
+### Final Principle
+
+The model should be selected based on:
+
+    Hirely Requirements
+           ↓
+    Model Capabilities
+           ↓
+    Quality
+           ↓
+    Cost
+           ↓
+    Latency
+           ↓
+    Reliability
+           ↓
+    Privacy
+           ↓
+    Final Decision
+
+OpenAI is therefore **one candidate in the Hirely AI model-selection process**.
