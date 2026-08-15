@@ -17200,3 +17200,853 @@ The key principle is:
 > **Ollama gives Hirely a local-model option, but the final AI architecture will be decided only after comparing quality, cost, latency, privacy, hardware, and scalability.**
 
 Ollama is therefore **one candidate in the Hirely AI model-selection process**.
+
+## 9.4 Local Models
+
+### Background
+
+A **local model** is an AI model whose inference runs on infrastructure controlled by us instead of sending the inference request to an external AI provider.
+
+Cloud approach:
+
+    Hirely
+       ↓
+    Cloud API
+       ↓
+    Remote Model
+       ↓
+    Response
+
+Local approach:
+
+    Hirely
+       ↓
+    Local Runtime
+       ↓
+    Local Model
+       ↓
+    Response
+
+For Hirely, local models are important because they provide an alternative to cloud-based AI providers such as OpenAI.
+
+
+### Local Model vs Local Runtime
+
+These two concepts should not be confused.
+
+    Local Model
+        =
+    Actual AI Model
+
+    Local Runtime
+        =
+    Software used to run the model
+
+For example:
+
+    Local Model
+       ↓
+    Llama / Gemma / Qwen / etc.
+       ↓
+    Ollama
+       ↓
+    Local Execution
+
+Therefore:
+
+> **Ollama is one way to run local models; Ollama itself is not the model.**
+
+
+### How Local Models Work
+
+The basic workflow is:
+
+    User
+      ↓
+    React
+      ↓
+    FastAPI
+      ↓
+    AI Service
+      ↓
+    Local Runtime
+      ↓
+    Local Model
+      ↓
+    Inference
+      ↓
+    Response
+
+For Hirely:
+
+    Resume
+       +
+    Job Description
+       ↓
+    FastAPI
+       ↓
+    Local AI Model
+       ↓
+    Resume Analysis
+
+
+### Inference
+
+**Inference** means using an already-trained model to generate an output from new input.
+
+Training:
+
+    Large Dataset
+         ↓
+    Model Training
+         ↓
+    Trained Model
+
+Inference:
+
+    Resume
+       ↓
+    Trained Model
+       ↓
+    Analysis
+
+For Hirely, we are primarily interested in **inference**, not training our own foundation model.
+
+
+### Training vs Inference
+
+Hirely does not need to train a large language model from scratch.
+
+Training a foundation model requires enormous:
+
+- Datasets
+- Compute
+- GPU resources
+- Time
+- Engineering effort
+
+Instead, Hirely can use an existing trained model:
+
+    Existing Trained Model
+            ↓
+        Local Runtime
+            ↓
+           Hirely
+
+
+### Examples of Local Models
+
+There are many open-weight models that can potentially be run locally.
+
+Examples include model families such as:
+
+- Llama
+- Gemma
+- Qwen
+- Mistral
+- DeepSeek
+
+The exact model should not be selected yet.
+
+The final model will be selected after testing and comparison.
+
+
+### Open-Weight Models
+
+An **open-weight model** generally makes its trained model weights available for use under its applicable license.
+
+This should not automatically be interpreted as:
+
+> "Everything about the model is open source."
+
+A model may have:
+
+- Available weights
+- Specific license restrictions
+- Different training-data policies
+- Different commercial-use conditions
+
+Therefore, the specific model license must be checked before using a model in a production application.
+
+
+### Local Model Architecture
+
+The potential Hirely architecture is:
+
+                         React
+                           ↓
+                        FastAPI
+                           ↓
+                       AI Service
+                           ↓
+                     Model Adapter
+                           ↓
+                    Local Runtime
+                           ↓
+                     Local Model
+                           ↓
+                  Structured Output
+                           ↓
+                       Pydantic
+                           ↓
+                    Business Logic
+                           ↓
+                       Database
+
+This follows the modular architecture established during the AI model-selection research.
+
+
+### Why Use Local Models?
+
+Potential reasons to consider local models for Hirely include:
+
+- Privacy
+- Control
+- Provider independence
+- Local development and testing
+- Different cost structure
+
+However, local inference is not completely free.
+
+There can still be:
+
+- Hardware costs
+- Electricity costs
+- Storage costs
+- Maintenance costs
+- Infrastructure costs
+
+
+### Privacy
+
+Privacy is one of the strongest reasons to consider local inference for Hirely.
+
+Cloud approach:
+
+    Resume
+       ↓
+    Hirely
+       ↓
+    External AI Provider
+       ↓
+    Analysis
+
+Local approach:
+
+    Resume
+       ↓
+    Hirely
+       ↓
+    Local Model
+       ↓
+    Analysis
+
+Local inference can reduce the amount of resume information that needs to leave our controlled environment.
+
+However, local models do not automatically make the complete application private.
+
+We still need to secure:
+
+- Uploaded files
+- Database
+- Logs
+- API
+- Infrastructure
+- Backups
+- Network
+
+
+### Cost
+
+Cloud model:
+
+    Request
+       ↓
+    Tokens
+       ↓
+    API Cost
+
+Local model:
+
+    Request
+       ↓
+    Local Compute
+       ↓
+    Hardware / Electricity / Infrastructure Cost
+
+Therefore, the cost structure is different.
+
+Local models may become attractive for high-volume workloads when suitable infrastructure is already available.
+
+However, purchasing and maintaining powerful hardware can also be expensive.
+
+
+### Hardware Requirements
+
+Local models require local computing resources.
+
+Important resources include:
+
+- CPU
+- RAM
+- GPU
+- VRAM
+- Storage
+
+Generally:
+
+    Larger Model
+         ↓
+    More Resources
+
+    Smaller Model
+         ↓
+    Lower Resource Requirements
+
+For Hirely, we need to find a model that provides an acceptable balance between quality and resource requirements.
+
+
+### GPU and VRAM
+
+GPUs can significantly improve local AI inference.
+
+A simplified architecture is:
+
+    FastAPI
+       ↓
+    Local Runtime
+       ↓
+    GPU
+       ↓
+    Model
+       ↓
+    Inference
+
+VRAM becomes particularly important when running larger models.
+
+If available hardware cannot efficiently hold or process a model, performance may become poor or the model may not run as expected.
+
+
+### CPU-Based Inference
+
+Local models can also run on CPUs.
+
+Conceptually:
+
+    FastAPI
+       ↓
+    Local Runtime
+       ↓
+    CPU
+       ↓
+    Model
+
+CPU inference can be useful when GPU hardware is unavailable.
+
+However, CPU inference may be slower depending on:
+
+- Model size
+- Hardware
+- Quantization
+- Workload
+
+Smaller models can still be useful for local development and testing.
+
+
+### Model Size
+
+Models are available in different sizes.
+
+Conceptually:
+
+    Small Model
+        ↓
+    Lower Resource Requirement
+        ↓
+    Potentially Faster
+
+    Large Model
+        ↓
+    Higher Resource Requirement
+        ↓
+    Potentially Better Capability
+
+Model size alone does not determine quality.
+
+A smaller, newer, or better-designed model may outperform a larger model on a specific task.
+
+Therefore:
+
+> **Models should be evaluated using Hirely's actual tasks rather than choosing only by parameter count.**
+
+
+### Parameters
+
+A model's **parameters** are learned values that influence how the model processes information.
+
+Model sizes may be represented as:
+
+    7B
+    8B
+    14B
+    32B
+    70B
+
+The `B` generally represents billions of parameters.
+
+For example:
+
+    8B
+    ≈
+    8 billion parameters
+
+Parameter count should not be treated as a direct measurement of model quality.
+
+For Hirely, practical performance is more important than simply choosing the largest model.
+
+
+### Quantization
+
+Quantization reduces the numerical precision used to represent model weights.
+
+Conceptually:
+
+    Full Precision Model
+           ↓
+       Quantization
+           ↓
+    Reduced Model Size
+           ↓
+    Lower Memory Requirement
+           ↓
+    Easier Local Deployment
+
+Quantization can make local models more practical to run on consumer hardware.
+
+However, quantization can involve trade-offs in:
+
+- Quality
+- Speed
+- Memory usage
+
+Therefore:
+
+    Memory
+      ↕
+    Speed
+      ↕
+    Quality
+
+must be considered together.
+
+
+### Context Length
+
+Local models have context limitations.
+
+For Hirely, model input may contain:
+
+    Resume
+       +
+    Job Description
+       +
+    Instructions
+
+The selected model must be able to process the required amount of information.
+
+If the context becomes too large, techniques such as chunking may become necessary.
+
+However, we should not introduce unnecessary chunking until the actual resume-processing requirements are known.
+
+
+### Structured Output
+
+Structured output is important for Hirely regardless of whether the model is cloud-based or local.
+
+The desired workflow is:
+
+    Local Model
+        ↓
+    Structured JSON
+        ↓
+    Pydantic
+        ↓
+    Validated Data
+
+Example:
+
+    {
+        "score": 82,
+        "skills": [...],
+        "missing_skills": [...],
+        "recommendations": [...]
+    }
+
+This keeps AI-generated data compatible with our backend architecture.
+
+
+### Local Model + Pydantic
+
+The backend can maintain the same validation approach:
+
+    Local Model
+          ↓
+        JSON
+          ↓
+    Pydantic Schema
+          ↓
+      Validation
+          ↓
+    Business Logic
+
+The model generates the result.
+
+Pydantic validates the structure.
+
+This prevents the backend from blindly trusting the model output.
+
+
+### Model Reliability
+
+A local model can still produce:
+
+- Incorrect information
+- Incomplete information
+- Hallucinations
+- Unexpected output
+- Inconsistent results
+
+Running a model locally does not automatically make it more accurate.
+
+Therefore:
+
+    Local
+      ≠
+    Automatically Better
+
+Reliability should be improved using:
+
+    Good Prompt
+        +
+    Structured Output
+        +
+    Validation
+        +
+    Testing
+        +
+    Application Logic
+
+
+### Model Selection
+
+A local model should be selected according to Hirely's actual requirements.
+
+Important criteria include:
+
+- Quality
+- Accuracy
+- Latency
+- Model Size
+- RAM / VRAM
+- Context Length
+- Structured Output
+- License
+- Cost
+- Scalability
+
+The process should be:
+
+    Candidate Models
+          ↓
+    Hirely Test Dataset
+          ↓
+       Evaluation
+          ↓
+       Comparison
+          ↓
+    Model Selection
+
+
+### Local Model Testing
+
+Instead of selecting a model only from general benchmarks, models should eventually be tested using Hirely-specific examples.
+
+For example:
+
+    Resume A + Job A
+    Resume B + Job B
+    Resume C + Job C
+
+Run the same inputs through:
+
+    Model A
+    Model B
+    Model C
+
+Then compare:
+
+- Accuracy
+- Consistency
+- Response Quality
+- Latency
+- Resource Usage
+
+
+### Local Models vs OpenAI
+
+#### OpenAI
+
+    Hirely
+       ↓
+    FastAPI
+       ↓
+    OpenAI API
+       ↓
+    Cloud Model
+
+#### Local Model
+
+    Hirely
+       ↓
+    FastAPI
+       ↓
+    Local Runtime
+       ↓
+    Local Model
+
+The main difference is:
+
+    OpenAI
+    → Managed Cloud AI
+
+    Local Model
+    → Self-managed AI inference
+
+
+### Local Models vs Ollama
+
+These concepts should remain separate.
+
+    Local Model
+        =
+    Actual AI Model
+
+    Ollama
+        =
+    One Runtime for Running Local Models
+
+Therefore:
+
+    Ollama
+       ↓
+    Local Model
+
+is one possible architecture.
+
+Other runtimes and inference systems can also be used.
+
+
+### Scalability
+
+Local models introduce different scaling requirements.
+
+For example:
+
+    1 User
+       ↓
+    1 Model Instance
+
+As usage increases:
+
+    100 Users
+       ↓
+    More Concurrent Inference
+       ↓
+    More Compute
+
+Eventually, scaling may require:
+
+    Load Balancer
+          ↓
+    Inference Server 1
+    Inference Server 2
+    Inference Server 3
+
+Therefore, local models can scale, but scaling requires infrastructure planning.
+
+
+### Availability
+
+With a cloud provider:
+
+    Hirely
+       ↓
+    Cloud AI Infrastructure
+
+The provider manages much of the underlying infrastructure.
+
+With local inference:
+
+    Hirely
+       ↓
+    Our Infrastructure
+       ↓
+    Our Model
+
+We become responsible for:
+
+- Availability
+- Hardware
+- Monitoring
+- Updates
+- Capacity
+- Recovery
+
+
+### Licensing
+
+Model licensing is an important consideration.
+
+Before using a local model in Hirely:
+
+    Model
+       ↓
+    License
+       ↓
+    Allowed Usage?
+       ↓
+    Commercial Restrictions?
+       ↓
+    Redistribution Requirements?
+
+We should never assume:
+
+    Open / Available
+        =
+    No Restrictions
+
+The exact license must be reviewed for the selected model.
+
+
+### Local Models and Hirely
+
+Local models are potentially useful for Hirely because:
+
+    Resume
+       ↓
+    FastAPI
+       ↓
+    Local Model
+       ↓
+    Analysis
+
+Potential benefits include:
+
+- Greater infrastructure control
+- Potential privacy advantages
+- Provider independence
+- Local development
+- Flexible model selection
+
+Potential challenges include:
+
+- Hardware requirements
+- Infrastructure management
+- Scaling
+- Model maintenance
+- Performance
+- Licensing
+
+
+### Analysis
+
+Local models provide an alternative to cloud-based AI inference.
+
+The major advantages for Hirely are:
+
+    Control
+    Privacy Potential
+    Provider Independence
+    Local Development
+
+The major challenges are:
+
+    Hardware
+    Performance
+    Scaling
+    Maintenance
+    Licensing
+
+Therefore, local models are technically promising but require proper evaluation.
+
+
+### Decision for Hirely
+
+At this stage, **no specific local model is selected**.
+
+The decision is:
+
+> **Local models will be evaluated as a potential AI inference approach for Hirely.**
+
+The evaluation will consider:
+
+    Quality
+       +
+    Cost
+       +
+    Latency
+       +
+    Hardware Requirements
+       +
+    Privacy
+       +
+    License
+       +
+    Reliability
+       +
+    Scalability
+       +
+    Structured Output
+
+The actual model selection will happen after comparing suitable candidates.
+
+
+### Key Takeaways
+
+The most important distinction is:
+
+    Local Model
+        =
+    Actual AI Model
+
+    Ollama
+        =
+    One Runtime for Running Local Models
+
+The potential Hirely architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    Local Runtime
+       ↓
+    Local Model
+       ↓
+    Structured Output
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    Database
+
+The key principle is:
+
+> **A local model gives Hirely greater control over AI inference, but it also makes us responsible for hardware, performance, infrastructure, scaling, and model licensing.**
+
+The final local model should be selected using **Hirely-specific testing**, not simply by choosing the largest or most popular model.
