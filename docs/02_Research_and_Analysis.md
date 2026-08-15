@@ -18050,3 +18050,1044 @@ The key principle is:
 > **A local model gives Hirely greater control over AI inference, but it also makes us responsible for hardware, performance, infrastructure, scaling, and model licensing.**
 
 The final local model should be selected using **Hirely-specific testing**, not simply by choosing the largest or most popular model.
+
+## 9.5 Cloud Models
+
+### Background
+
+A **cloud model** is an AI model hosted and operated by an external provider.
+
+Instead of running the model on our own infrastructure, Hirely communicates with the model through an API.
+
+Cloud approach:
+
+    Hirely
+       ↓
+    Internet
+       ↓
+    AI Provider API
+       ↓
+    Cloud Model
+       ↓
+    Response
+
+Local approach:
+
+    Hirely
+       ↓
+    Local Runtime
+       ↓
+    Local Model
+       ↓
+    Response
+
+For Hirely, cloud models are important because they provide access to powerful AI capabilities without requiring us to manage the underlying model-serving infrastructure ourselves.
+
+
+### Cloud Model vs Cloud Provider
+
+These concepts should not be confused.
+
+    Cloud Provider
+          ↓
+    Hosts / operates
+          ↓
+    Cloud Models
+
+For example:
+
+    OpenAI
+       ↓
+    OpenAI Models
+
+    Google
+       ↓
+    Gemini Models
+
+The provider manages the infrastructure while our application consumes the model through an API.
+
+
+### How Cloud Models Work
+
+The general workflow is:
+
+    User
+      ↓
+    React
+      ↓
+    FastAPI
+      ↓
+    AI Service
+      ↓
+    Cloud AI API
+      ↓
+    Cloud Model
+      ↓
+    Response
+      ↓
+    FastAPI
+      ↓
+    React
+
+For Hirely:
+
+    Resume
+       +
+    Job Description
+       ↓
+    FastAPI
+       ↓
+    Cloud AI Model
+       ↓
+    Resume Analysis
+       ↓
+    Structured Result
+
+
+### API-Based Access
+
+Cloud models are generally accessed through APIs.
+
+Conceptually:
+
+    Hirely Backend
+          ↓
+    HTTP Request
+          ↓
+    Cloud AI API
+          ↓
+    Model
+          ↓
+    HTTP Response
+
+Our application does not need to download or host the complete model.
+
+Instead, the application sends the required input to the provider and receives the model's response.
+
+
+### Why Use Cloud Models?
+
+The major reason to use cloud models is:
+
+> **We can use powerful AI models without managing the underlying model infrastructure ourselves.**
+
+Instead of managing:
+
+    GPU
+    RAM
+    VRAM
+    Model Files
+    Inference Runtime
+    Scaling
+    Monitoring
+
+the cloud provider handles much of the model-serving infrastructure.
+
+Our application primarily needs to manage:
+
+    API
+    Authentication
+    Requests
+    Responses
+    Errors
+    Usage
+
+
+### Cloud Model Architecture for Hirely
+
+Our potential architecture is:
+
+                         React
+                           ↓
+                        FastAPI
+                           ↓
+                       AI Service
+                           ↓
+                     Model Adapter
+                           ↓
+                    Cloud AI Provider
+                           ↓
+                      Cloud Model
+                           ↓
+                  Structured Output
+                           ↓
+                       Pydantic
+                           ↓
+                    Business Logic
+                           ↓
+                       Database
+
+This is similar to our local-model architecture.
+
+The major difference is:
+
+    Local:
+
+    Model Adapter
+         ↓
+    Local Runtime
+         ↓
+    Local Model
+
+
+    Cloud:
+
+    Model Adapter
+         ↓
+    Cloud API
+         ↓
+    Cloud Model
+
+This is why our AI Service and Model Adapter architecture is useful.
+
+
+### Examples of Cloud Model Providers
+
+There are multiple cloud AI providers.
+
+Examples include:
+
+- OpenAI
+- Google Gemini
+- Anthropic
+- Other Cloud AI Providers
+
+Different providers offer different:
+
+- Models
+- APIs
+- Capabilities
+- Pricing
+- Context limits
+- Tooling
+- Availability
+
+Therefore, "cloud model" does not refer to one specific model.
+
+
+### Multiple Model Families
+
+Cloud providers often offer multiple models for different workloads.
+
+Conceptually:
+
+    Cloud Provider
+          ↓
+      ┌───┼───┐
+      ↓   ↓   ↓
+    Fast  Pro  Reasoning
+    Model Model Model
+
+Some models may prioritize:
+
+- Speed
+- Cost
+- Reasoning
+- Multimodal capabilities
+- High-volume workloads
+- Complex tasks
+
+For Hirely, the model should be selected according to our actual requirements rather than simply choosing the most powerful model.
+
+
+### Cloud Models for Hirely
+
+Hirely does not necessarily need the most powerful available model.
+
+Our requirements are:
+
+    Resume Understanding
+            +
+    Job Description Understanding
+            +
+    Skill Extraction
+            +
+    Resume Evaluation
+            +
+    Recommendations
+            +
+    Structured Output
+
+Therefore:
+
+    Most Powerful Model
+            ≠
+    Automatically Best Model for Hirely
+
+We need to balance:
+
+    Quality
+       +
+    Cost
+       +
+    Latency
+       +
+    Reliability
+
+
+### Hosted Infrastructure
+
+One of the biggest advantages of cloud models is that the provider operates the model infrastructure.
+
+Conceptually:
+
+    Cloud Provider
+          ↓
+    GPU Infrastructure
+          ↓
+    Model Server
+          ↓
+    Cloud API
+
+Hirely:
+
+    FastAPI
+       ↓
+    Cloud API
+
+We do not need to directly manage the model-serving hardware.
+
+
+### No Local GPU Requirement
+
+With a cloud model:
+
+    Hirely Server
+          ↓
+    API Request
+          ↓
+    Cloud GPU
+          ↓
+    Model
+
+Our Hirely server does not necessarily need a powerful GPU just to perform model inference.
+
+This can make deployment easier.
+
+With local models:
+
+    Hirely Server
+          ↓
+    Local GPU / CPU
+          ↓
+    Model
+
+we are responsible for the inference hardware.
+
+
+### Scalability
+
+Cloud AI providers generally provide infrastructure designed to serve many users.
+
+Our architecture can be:
+
+    Users
+      ↓
+    Load Balancer
+      ↓
+    Hirely Backend
+      ↓
+    Cloud AI API
+      ↓
+    Cloud Infrastructure
+
+This can simplify scaling compared with operating our own inference servers.
+
+However, scaling still depends on:
+
+- API rate limits
+- Provider capacity
+- Application architecture
+- Usage limits
+- Cost
+
+Therefore:
+
+    Cloud
+      ≠
+    Unlimited
+
+
+### Latency
+
+Cloud inference introduces network communication.
+
+The workflow is:
+
+    Hirely
+       ↓
+    Internet
+       ↓
+    Cloud API
+       ↓
+    Model
+       ↓
+    Internet
+       ↓
+    Hirely
+
+Therefore, latency can come from:
+
+    Network
+       +
+    Model Processing
+       +
+    Output Generation
+
+For Hirely, we need to balance model quality with response speed.
+
+
+### Local vs Cloud Latency
+
+Local:
+
+    Hirely
+       ↓
+    Local Model
+
+Cloud:
+
+    Hirely
+       ↓
+    Network
+       ↓
+    Cloud Model
+
+Neither is automatically faster.
+
+Local inference depends heavily on our hardware.
+
+Cloud inference depends on:
+
+- Network latency
+- Provider infrastructure
+- Model
+- Output length
+- Service configuration
+
+Therefore:
+
+> **Latency should be measured rather than assumed.**
+
+
+### Cost Model
+
+Cloud models generally use usage-based pricing.
+
+Conceptually:
+
+    Request
+       ↓
+    Input Tokens
+       +
+    Output Tokens
+       ↓
+    API Cost
+
+The cost can depend on:
+
+- Model
+- Input tokens
+- Output tokens
+- Request volume
+- Features
+- Service tier
+
+Detailed pricing and cost evaluation will be handled separately in:
+
+    9.6 Cost Comparison
+
+
+### Cloud Model Advantages
+
+Potential advantages for Hirely include:
+
+#### Easy Integration
+
+    FastAPI
+       ↓
+    Cloud API
+
+#### No Model Hosting
+
+We do not have to host the model ourselves.
+
+#### No Dedicated GPU
+
+The AI provider handles the model-serving hardware.
+
+#### Scalability
+
+Cloud infrastructure can support larger workloads.
+
+#### Access to Advanced Models
+
+Cloud providers offer multiple model options and capabilities.
+
+#### Faster Development
+
+We can focus on building Hirely instead of first building and maintaining our own AI inference infrastructure.
+
+
+### Cloud Model Challenges
+
+Cloud models also introduce challenges:
+
+- API cost
+- Internet dependency
+- Provider dependency
+- Rate limits
+- Privacy considerations
+- Network latency
+- Changing model availability
+- Changing pricing
+
+Therefore:
+
+    Cloud
+       ↓
+    Less Infrastructure Responsibility
+       +
+    More External Dependency
+
+
+### Privacy
+
+Privacy is particularly important for Hirely because resumes may contain personal information.
+
+Cloud architecture:
+
+    Resume
+       ↓
+    Hirely
+       ↓
+    Cloud AI Provider
+       ↓
+    Model
+
+This means resume information may be transmitted to an external provider for processing.
+
+Before selecting a provider, we must consider:
+
+- Data handling policies
+- Data retention
+- Privacy requirements
+- Regional requirements
+- Provider terms
+- Security controls
+
+Privacy and security will be studied in more detail during the Security section of the roadmap.
+
+
+### Cloud Models and Structured Outputs
+
+Structured output remains important regardless of where the model runs.
+
+The desired workflow is:
+
+    Cloud Model
+          ↓
+    Structured JSON
+          ↓
+    Pydantic
+          ↓
+    Validated Data
+
+Example:
+
+    {
+        "score": 82,
+        "skills": [...],
+        "missing_skills": [...],
+        "recommendations": [...]
+    }
+
+This allows cloud models to integrate cleanly with our FastAPI backend.
+
+
+### Cloud Models and Pydantic
+
+Our existing backend architecture remains:
+
+    Cloud Model
+          ↓
+    Structured Response
+          ↓
+    Pydantic
+          ↓
+    Validation
+          ↓
+    Business Logic
+
+The model generates the result.
+
+Pydantic validates the structure.
+
+The application processes the validated data.
+
+
+### Cloud Models and FastAPI
+
+FastAPI acts as the boundary between React and the external AI provider.
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Cloud Provider
+
+This provides several benefits:
+
+- API key protection
+- Request validation
+- Error handling
+- Logging
+- Rate limiting
+- Provider abstraction
+
+The React application does not need to know which AI provider is being used.
+
+
+### Cloud Model Adapter
+
+Our architecture can support multiple providers:
+
+    AI Service
+          ↓
+    Model Adapter
+       ├── OpenAI Adapter
+       ├── Gemini Adapter
+       └── Other Provider Adapter
+
+For example:
+
+    ResumeAnalysisService
+            ↓
+        AIService
+            ↓
+       ModelAdapter
+            ↓
+          OpenAI
+
+or:
+
+    ResumeAnalysisService
+            ↓
+        AIService
+            ↓
+       ModelAdapter
+            ↓
+          Gemini
+
+The rest of Hirely can remain largely unchanged.
+
+
+### Provider Lock-in
+
+Cloud models can create **vendor lock-in**.
+
+If Hirely directly uses provider-specific features throughout the application:
+
+    Business Logic
+          ↓
+    Provider-specific Code
+          ↓
+    Cloud Provider
+
+changing providers becomes difficult.
+
+Our preferred architecture is:
+
+    Business Logic
+          ↓
+    AI Service
+          ↓
+    Model Adapter
+          ↓
+    Provider
+
+This reduces coupling.
+
+However, using unique provider features can still create some dependency.
+
+
+### Multi-Provider Architecture
+
+A future architecture could support:
+
+                     AI Service
+                         ↓
+                    Model Adapter
+                  ┌──────┼──────┐
+                  ↓      ↓      ↓
+               OpenAI  Gemini  Other
+
+This can allow us to:
+
+- Compare providers
+- Switch models
+- Perform fallback
+- Optimize cost
+- Test different capabilities
+
+However, we should not build a complex multi-provider architecture prematurely.
+
+For the first version, one well-designed provider adapter may be enough.
+
+
+### Reliability
+
+Cloud providers operate large infrastructure platforms, but external API calls can still fail.
+
+Possible failures include:
+
+- Invalid API Key
+- Rate Limit
+- Timeout
+- Network Failure
+- Provider Error
+- Service Unavailable
+- Invalid Request
+
+Therefore:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    Cloud API
+       ↓
+    Error
+       ↓
+    FastAPI Error Handling
+       ↓
+    User-Friendly Response
+
+Our backend must handle these cases gracefully.
+
+
+### Rate Limits
+
+Cloud providers impose rate limits and usage restrictions.
+
+Conceptually:
+
+    Users
+       ↓
+    Requests
+       ↓
+    Cloud API
+       ↓
+    Rate Limit
+
+When Hirely grows, we need to consider:
+
+- Requests per minute
+- Tokens per minute
+- Concurrent requests
+- Retry strategies
+- Backoff
+- Provider quotas
+
+This is another reason the AI integration should remain behind our backend service.
+
+
+### Model Availability
+
+Cloud model catalogs can change over time.
+
+Providers can:
+
+- Release new models
+- Deprecate older models
+- Change model aliases
+- Change capabilities
+- Change pricing
+
+Therefore, production systems should avoid blindly depending on unstable model aliases.
+
+The selected production model should be explicitly configured and managed.
+
+
+### Cloud Models vs Local Models
+
+This is one of the most important comparisons.
+
+#### Cloud
+
+    Hirely
+       ↓
+    Cloud API
+       ↓
+    Cloud Model
+
+#### Local
+
+    Hirely
+       ↓
+    Local Runtime
+       ↓
+    Local Model
+
+#### Cloud Advantages
+
+    Managed Infrastructure
+    Easy Scaling
+    No Dedicated GPU
+    Advanced Hosted Models
+    Simpler Initial Deployment
+
+#### Local Advantages
+
+    More Control
+    Potential Privacy Benefits
+    Provider Independence
+    Local Execution
+
+
+### Cloud Models vs Ollama
+
+Remember:
+
+    Ollama
+       =
+    Local Runtime
+
+while:
+
+    Cloud Model
+       =
+    Hosted AI Model
+
+Therefore:
+
+    Ollama
+       ↓
+    Local Model
+
+versus:
+
+    Cloud API
+       ↓
+    Cloud Model
+
+They represent different deployment approaches.
+
+
+### Cloud Models and Hirely Requirements
+
+Hirely needs:
+
+    Resume Understanding
+            +
+    Job Description Understanding
+            +
+    Structured Output
+            +
+    Reliable API
+            +
+    Reasonable Latency
+            +
+    Acceptable Cost
+
+Cloud models can satisfy these requirements, but the specific provider and model must still be evaluated.
+
+
+### Model Selection
+
+The cloud model should not be selected simply because it is popular.
+
+We should evaluate:
+
+    Quality
+    Accuracy
+    Latency
+    Cost
+    Context Length
+    Structured Output
+    Reliability
+    Privacy
+    Rate Limits
+    Provider Stability
+
+The process should be:
+
+    Candidate Models
+           ↓
+    Hirely Test Cases
+           ↓
+       Evaluation
+           ↓
+       Comparison
+           ↓
+       Final Model
+
+
+### Cloud Models and Hirely Testing
+
+We should eventually test candidate cloud models using the same Hirely dataset.
+
+For example:
+
+    Resume A + Job A
+    Resume B + Job B
+    Resume C + Job C
+
+Run the same inputs through:
+
+    OpenAI Model
+    Gemini Model
+    Other Cloud Model
+
+Then compare:
+
+    Accuracy
+    Quality
+    Consistency
+    Latency
+    Cost
+    Structured Output
+
+This provides a fair comparison.
+
+
+### Cloud Models and Development
+
+Cloud models are useful during early development because we can focus on building Hirely's application rather than first building a complete local inference infrastructure.
+
+Potential development workflow:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Cloud Provider
+       ↓
+    Model
+
+Later, we can evaluate whether a local model provides enough quality and efficiency.
+
+
+### Cloud Models and Production
+
+A cloud-based production architecture could be:
+
+    User
+      ↓
+    React
+      ↓
+    FastAPI
+      ↓
+    AI Service
+      ↓
+    Cloud Provider
+      ↓
+    Model
+      ↓
+    Structured Output
+      ↓
+    Pydantic
+      ↓
+    Database
+
+Deployment infrastructure would mainly need to handle our application backend, while model-serving infrastructure remains with the AI provider.
+
+
+### Analysis
+
+Cloud models provide a convenient way to integrate powerful AI capabilities into Hirely without managing model-serving infrastructure ourselves.
+
+The biggest advantages are:
+
+    Easy Integration
+    Managed Infrastructure
+    Scalability
+    Advanced Model Access
+    No Dedicated AI Hardware
+
+The main challenges are:
+
+    Cost
+    Privacy
+    Provider Dependency
+    Network Dependency
+    Rate Limits
+    Changing Model Availability
+
+Therefore, cloud models are a strong candidate for Hirely, but they must be compared against local alternatives.
+
+
+### Decision for Hirely
+
+At this stage, **we will not select a specific cloud provider or model**.
+
+The decision is:
+
+> **Cloud models will be evaluated as a potential AI inference approach for Hirely.**
+
+The evaluation criteria will include:
+
+    Quality
+       +
+    Cost
+       +
+    Latency
+       +
+    Reliability
+       +
+    Privacy
+       +
+    Structured Output
+       +
+    Context Length
+       +
+    Rate Limits
+       +
+    Scalability
+       +
+    Provider Stability
+
+The final decision will be made after comparing suitable cloud and local options.
+
+
+### Key Takeaways
+
+The most important concept is:
+
+    Cloud Model
+         =
+    AI Model hosted by an external provider
+         ↓
+    Accessed through API
+
+For Hirely:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    Cloud Provider
+       ↓
+    Cloud Model
+       ↓
+    Structured Output
+       ↓
+    Pydantic
+       ↓
+    Business Logic
+       ↓
+    Database
+
+The main principle is:
+
+> **Cloud models reduce our responsibility for AI infrastructure, but introduce external dependency, API costs, privacy considerations, and provider-specific limitations.**
+
+We will therefore select the final cloud/local approach based on **Hirely-specific testing and comparison**, not assumptions.
