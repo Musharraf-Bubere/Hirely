@@ -16452,3 +16452,751 @@ The model should be selected based on:
     Final Decision
 
 OpenAI is therefore **one candidate in the Hirely AI model-selection process**.
+
+## 9.3 Ollama
+
+### Background
+
+Ollama is a local AI runtime that allows applications to run and manage Large Language Models (LLMs) on their own machine.
+
+For Hirely, Ollama is important because it provides an alternative to cloud AI providers such as OpenAI.
+
+The basic comparison is:
+
+    Cloud AI
+       ↓
+    OpenAI
+
+    Local AI
+       ↓
+    Ollama
+
+
+### What is Ollama?
+
+Ollama can be understood as:
+
+    Local AI Runtime
+          +
+    Model Management
+          +
+    API Layer
+
+It allows developers to download, run, manage, and interact with local AI models.
+
+Therefore:
+
+    Ollama
+       ↓
+    Runs / manages
+       ↓
+    LLM
+
+
+### Ollama Is Not the Model
+
+Ollama itself is not the Large Language Model.
+
+Instead:
+
+    Ollama
+       ↓
+    Runtime / Management Layer
+       ↓
+    AI Model
+
+Models such as Llama, Gemma, and DeepSeek can be used through Ollama.
+
+Therefore:
+
+> **Ollama is the runtime and management layer, while the LLM is the actual AI model.**
+
+
+### Why Ollama Matters for Hirely
+
+The main reason to research Ollama is local model execution.
+
+The potential Hirely workflow is:
+
+    Resume
+       ↓
+    Hirely Backend
+       ↓
+    Ollama
+       ↓
+    Local Model
+       ↓
+    Resume Analysis
+
+This gives Hirely an alternative to sending every inference request to an external cloud AI provider.
+
+Potential benefits include:
+
+- More local control
+- Potential privacy benefits
+- Local development and testing
+- Reduced dependence on cloud APIs
+- No per-request cloud inference fee
+
+
+### Local Model Architecture
+
+The potential Hirely architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Ollama
+       ↓
+    Local Model
+       ↓
+    Structured Result
+       ↓
+    Pydantic
+
+This is similar to our OpenAI architecture.
+
+The major difference is where the model runs.
+
+OpenAI:
+
+    Hirely
+       ↓
+    OpenAI API
+       ↓
+    Cloud Model
+
+Ollama:
+
+    Hirely
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+
+### Ollama API
+
+Ollama provides a REST API that allows applications to interact with locally running models.
+
+Conceptually:
+
+    FastAPI
+       ↓
+    HTTP Request
+       ↓
+    Ollama
+       ↓
+    Local Model
+       ↓
+    HTTP Response
+
+The default local Ollama server runs on:
+
+    http://localhost:11434
+
+The API provides capabilities for model interaction and model management.
+
+
+### Chat API
+
+Ollama provides a chat API for interacting with models.
+
+Conceptually:
+
+    Model
+       +
+    Messages
+       ↓
+    Ollama
+       ↓
+    Response
+
+The chat workflow can be used when Hirely needs conversational or instruction-based model interaction.
+
+
+### Generate API
+
+Ollama also provides a generation API.
+
+Conceptually:
+
+    Prompt
+       ↓
+    Ollama
+       ↓
+    Local Model
+       ↓
+    Generated Response
+
+The API can support streaming responses as well as non-streaming responses.
+
+For Hirely, the exact interaction style will be decided during implementation.
+
+
+### Model Management
+
+Ollama provides commands for managing models.
+
+Common commands include:
+
+    ollama pull
+    ollama run
+    ollama list
+    ollama show
+    ollama rm
+    ollama ps
+
+These allow developers to:
+
+- Download models
+- Run models
+- List models
+- Inspect models
+- Remove models
+- View running models
+
+
+### Model Pulling
+
+A model can be downloaded to the local machine through Ollama.
+
+Conceptually:
+
+    Ollama Model Library
+            ↓
+        ollama pull
+            ↓
+       Local Model
+            ↓
+        ollama run
+            ↓
+      Running Model
+
+Once the model is available locally, applications can interact with it through Ollama.
+
+
+### Hardware Requirements
+
+Local models require local computing resources.
+
+Depending on the model, requirements can include:
+
+    RAM
+     +
+    Storage
+     +
+    CPU
+     +
+    GPU / VRAM
+
+Larger models generally require more resources.
+
+Therefore:
+
+> **A model being available through Ollama does not mean every computer can run it efficiently.**
+
+Hardware requirements are an important consideration when evaluating local models.
+
+
+### Quantization
+
+Quantization reduces the resource requirements of a model by using a more compact numerical representation.
+
+Conceptually:
+
+    Original Model
+          ↓
+      Quantization
+          ↓
+    Smaller Representation
+          ↓
+    Lower Resource Requirement
+
+Ollama supports different quantization formats.
+
+For Hirely, quantization is mainly relevant when evaluating whether a local model can run efficiently on available hardware.
+
+Detailed local-model optimization will be considered in the Local Models research.
+
+
+### Structured Outputs
+
+Structured output is important for Hirely because our backend expects predictable data.
+
+Ollama supports structured responses using JSON or a defined JSON Schema.
+
+Conceptually:
+
+    Ollama
+       ↓
+    Structured JSON
+       ↓
+    Pydantic
+       ↓
+    Hirely Backend
+
+Example:
+
+    Resume Analysis
+          ↓
+    {
+        "score": 82,
+        "skills": [...],
+        "missing_skills": [...],
+        "recommendations": [...]
+    }
+          ↓
+       Pydantic
+          ↓
+    Validated Object
+
+This allows the local-model approach to fit into our existing backend architecture.
+
+
+### Ollama + Pydantic
+
+The potential integration is:
+
+    Ollama
+       ↓
+    JSON Schema
+       ↓
+    Structured Response
+       ↓
+    Pydantic
+       ↓
+    Validated Data
+
+This provides a reliable boundary between the AI layer and the backend application.
+
+
+### Embeddings
+
+Ollama also supports embedding models.
+
+Conceptually:
+
+    Text
+      ↓
+    Embedding Model
+      ↓
+    Vector
+
+Embeddings can be useful for:
+
+- Semantic search
+- Similarity
+- Retrieval
+- RAG
+
+However, Hirely does not need to introduce embeddings immediately.
+
+They should only be added if the later architecture requires them.
+
+
+### Python Integration
+
+Ollama provides Python integration.
+
+The potential architecture is:
+
+    FastAPI
+       ↓
+    Python
+       ↓
+    Ollama Python Library
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+This fits naturally with Hirely because our backend is being built with Python and FastAPI.
+
+
+### Ollama + FastAPI
+
+The potential Hirely architecture is:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+FastAPI remains responsible for Hirely's application API.
+
+Ollama remains responsible for local AI model execution.
+
+This separation keeps the system modular.
+
+
+### Ollama vs OpenAI
+
+The main architectural difference is:
+
+#### OpenAI
+
+    Hirely
+       ↓
+    FastAPI
+       ↓
+    OpenAI API
+       ↓
+    Cloud Model
+
+#### Ollama
+
+    Hirely
+       ↓
+    FastAPI
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+OpenAI provides hosted models and managed infrastructure.
+
+Ollama provides local model execution and greater control over the local runtime.
+
+Neither is automatically the better choice.
+
+
+### Potential Advantages for Hirely
+
+Ollama may provide:
+
+#### Local Execution
+
+    Hirely
+       ↓
+    Local Ollama
+       ↓
+    Local Model
+
+#### More Control
+
+The model and runtime can be managed within our own environment.
+
+#### Potential Privacy Benefits
+
+Inference can happen locally rather than being sent to an external inference provider, depending on the complete architecture.
+
+#### Development and Testing
+
+Local models can be useful for experimentation and testing.
+
+#### No Per-Request Cloud Inference Fee
+
+Running locally avoids cloud inference charges per request.
+
+However, local execution still has hardware, electricity, and infrastructure costs.
+
+
+### Potential Challenges
+
+Ollama also introduces challenges.
+
+#### Hardware
+
+    Larger Model
+        ↓
+    More RAM / VRAM / Storage
+
+#### Performance
+
+Local inference performance depends on:
+
+- Hardware
+- Model size
+- Quantization
+- Workload
+
+#### Infrastructure
+
+With local inference, we are responsible for:
+
+- Hardware
+- Model files
+- Runtime
+- Updates
+- Availability
+
+#### Scaling
+
+A single machine may not be sufficient when application usage grows.
+
+For example:
+
+    10 Users
+       ↓
+    100 Users
+       ↓
+    1,000 Users
+
+Scaling local inference requires additional infrastructure planning.
+
+
+### Privacy Consideration
+
+Resume documents can contain personal information such as:
+
+- Name
+- Email
+- Phone number
+- Education
+- Employment history
+- Skills
+- Projects
+
+With local inference, the model processing can remain within our own environment.
+
+Conceptually:
+
+    Resume
+       ↓
+    FastAPI
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+However, Ollama alone does not guarantee complete application privacy.
+
+Privacy depends on the complete system, including:
+
+- File storage
+- Database
+- Logs
+- Network configuration
+- External services
+- Deployment environment
+
+Therefore:
+
+> **Ollama can support a privacy-oriented architecture, but privacy must be designed across the entire application.**
+
+
+### Ollama and Provider Lock-in
+
+Ollama allows us to experiment with different local models while keeping our application architecture relatively independent of a specific model.
+
+The architecture can remain:
+
+    Hirely
+       ↓
+    AI Service
+       ↓
+    Model Adapter
+       ↓
+    Ollama
+       ↓
+    Local Model
+
+The underlying model can potentially be changed without rewriting the entire application.
+
+This supports the modular architecture established in 9.1 AI Model Selection.
+
+
+### Ollama and AI Adapter
+
+Our architecture can eventually support both cloud and local providers:
+
+    AI Service
+         ↓
+    Model Adapter
+       ├── OpenAI Adapter
+       └── Ollama Adapter
+
+OpenAI:
+
+    OpenAI Adapter
+          ↓
+      OpenAI API
+
+Ollama:
+
+    Ollama Adapter
+          ↓
+        Ollama
+          ↓
+      Local Model
+
+This allows Hirely to experiment with both approaches without tightly coupling the entire application to one provider.
+
+
+### Ollama Is a Candidate, Not the Final Decision
+
+Ollama should not automatically become Hirely's final AI solution.
+
+The decision process is:
+
+    OpenAI
+       +
+    Ollama
+       +
+    Other Cloud Models
+       +
+    Local Models
+            ↓
+        Evaluation
+            ↓
+      Final Decision
+
+The final choice should be based on Hirely's actual requirements.
+
+
+### Hirely Evaluation
+
+If OpenAI and Ollama are compared, both should receive the same Hirely test cases.
+
+For example:
+
+    Resume A
+       +
+    Job Description A
+          ↓
+        OpenAI
+          ↓
+       Result
+
+    Resume A
+       +
+    Job Description A
+          ↓
+        Ollama
+          ↓
+       Result
+
+The results can then be compared using:
+
+- Quality
+- Accuracy
+- Consistency
+- Latency
+- Cost
+- Structured Output
+- Resource Usage
+
+
+### Ollama Architecture for Hirely
+
+The conceptual local architecture is:
+
+                         React
+                           ↓
+                        FastAPI
+                           ↓
+                       AI Service
+                           ↓
+                     Ollama Adapter
+                           ↓
+                         Ollama
+                           ↓
+                      Local Model
+                           ↓
+                  Structured Output
+                           ↓
+                       Pydantic
+                           ↓
+                    Business Logic
+                           ↓
+                       Database
+
+
+### Analysis
+
+Ollama provides a practical way to run and manage LLMs locally.
+
+The most relevant capabilities for Hirely are:
+
+    Local Model Execution
+            +
+    Model Management
+            +
+    REST API
+            +
+    Python Integration
+            +
+    Structured Outputs
+            +
+    Embeddings
+
+The major trade-off is:
+
+    More Local Control
+           ↕
+    More Infrastructure Responsibility
+
+Ollama therefore represents an important alternative to cloud AI providers.
+
+
+### Decision for Hirely
+
+At this stage, **Ollama is not selected as the final AI solution**.
+
+The decision is:
+
+> **Ollama will be evaluated as the local-model runtime option for Hirely.**
+
+It will be compared with cloud and other local approaches using Hirely-specific requirements.
+
+The main evaluation criteria are:
+
+    Quality
+       +
+    Cost
+       +
+    Latency
+       +
+    Privacy
+       +
+    Hardware Requirements
+       +
+    Reliability
+       +
+    Scalability
+       +
+    Structured Output
+
+
+### Key Takeaways
+
+> **Ollama is a local AI runtime and model-management layer, not an LLM itself.**
+
+The core architecture is:
+
+    Ollama
+       ↓
+    Local AI Model
+
+For Hirely:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Ollama Adapter
+       ↓
+    Ollama
+       ↓
+    Local Model
+       ↓
+    Structured Output
+       ↓
+    Pydantic
+
+The key principle is:
+
+> **Ollama gives Hirely a local-model option, but the final AI architecture will be decided only after comparing quality, cost, latency, privacy, hardware, and scalability.**
+
+Ollama is therefore **one candidate in the Hirely AI model-selection process**.
