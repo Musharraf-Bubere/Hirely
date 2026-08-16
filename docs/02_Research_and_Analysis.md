@@ -19954,3 +19954,733 @@ For Hirely, we need to optimize:
     Scalability
 
 The final architecture should be selected based on **total cost of ownership and actual Hirely requirements**, not just the price per API request.
+
+# Database Design
+
+## 10.1 SQLite
+
+### Background
+
+SQLite is a lightweight, relational database engine that stores the complete database in a single file.
+
+Conceptually:
+
+    Hirely
+      ↓
+    SQLAlchemy
+      ↓
+    SQLite
+      ↓
+    hirely.db
+
+Unlike PostgreSQL, SQLite does not require a separate database server for normal usage.
+
+---
+
+### Why SQLite is Popular
+
+SQLite is useful because it is:
+
+- Lightweight
+- Simple
+- Easy to set up
+- Serverless
+- Zero-configuration
+- File-based
+- Relational
+- Suitable for development and small applications
+
+For a project like Hirely during development, this simplicity is valuable.
+
+---
+
+### How SQLite Works
+
+With SQLite, the database can simply be a file:
+
+    Hirely Project
+          ↓
+      database/
+          ↓
+       hirely.db
+
+Inside this database file we can have multiple tables:
+
+    hirely.db
+       │
+       ├── users
+       ├── resumes
+       ├── jobs
+       ├── applications
+       ├── skills
+       └── analyses
+
+So:
+
+> **One SQLite database file can contain the complete relational database.**
+
+---
+
+### SQLite is Relational
+
+SQLite supports relational database concepts such as:
+
+    Tables
+    Rows
+    Columns
+    Primary Keys
+    Foreign Keys
+    Relationships
+    SQL Queries
+    Constraints
+    Indexes
+
+Example:
+
+    users
+    -------------------------
+    id | name | email
+    -------------------------
+    1  | A    | a@email.com
+    2  | B    | b@email.com
+
+And:
+
+    resumes
+    -------------------------
+    id | user_id | filename
+    -------------------------
+    1  | 1       | resume.pdf
+    2  | 1       | cv.pdf
+    3  | 2       | resume.pdf
+
+The `user_id` connects the resume to the user.
+
+---
+
+### SQLite vs Traditional Database Server
+
+With PostgreSQL:
+
+    Hirely
+       ↓
+    Database Connection
+       ↓
+    PostgreSQL Server
+       ↓
+    Database
+
+With SQLite:
+
+    Hirely
+       ↓
+    SQLite Library
+       ↓
+    hirely.db
+
+SQLite is therefore much simpler to start with.
+
+---
+
+### SQLite and SQLAlchemy
+
+We already learned SQLAlchemy in our Backend Technologies section.
+
+Our architecture can be:
+
+    FastAPI
+       ↓
+    Service Layer
+       ↓
+    SQLAlchemy
+       ↓
+    SQLite
+
+SQLAlchemy handles much of the database interaction from our Python application.
+
+The application does not need to manually manage every SQL statement.
+
+---
+
+### SQLite Connection
+
+Conceptually, SQLAlchemy connects to a SQLite database using a database URL.
+
+Example:
+
+    sqlite:///hirely.db
+
+This means:
+
+    sqlite
+       ↓
+    SQLite database
+       ↓
+    hirely.db
+
+For a file inside a project directory, we can configure the database location accordingly.
+
+---
+
+### SQLite in Development
+
+SQLite is particularly useful during development.
+
+Our development architecture can be:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    SQLAlchemy
+       ↓
+    SQLite
+
+This allows us to build and test database functionality without first setting up a separate PostgreSQL server.
+
+---
+
+### SQLite for Hirely
+
+During early Hirely development, we may have:
+
+    Few Users
+    Few Resumes
+    Few Job Applications
+    Few AI Analyses
+
+SQLite can handle this type of workload conveniently.
+
+Therefore, SQLite can be a good choice for:
+
+    Development
+    Testing
+    Prototype
+    Early MVP
+
+---
+
+### Advantages of SQLite
+
+#### Simple Setup
+
+No separate database server is required.
+
+    Install SQLite
+          ↓
+    Create Database File
+          ↓
+    Use Database
+
+#### Lightweight
+
+SQLite has a very small operational footprint.
+
+#### Portable
+
+The database is stored in a file, making it easy to move or copy during development.
+
+#### Easy Development
+
+Developers can quickly create a working database without configuring a database server.
+
+#### Relational
+
+SQLite still provides the relational database concepts we need for Hirely.
+
+---
+
+### Limitations of SQLite
+
+SQLite is not automatically the best choice for every production application.
+
+Important limitations include:
+
+- Concurrency limitations
+- Write-heavy workload limitations
+- Limited distributed architecture
+- Server-level database features are not its focus
+- Scaling to large multi-user workloads can become difficult
+
+Therefore:
+
+    SQLite
+       ≠
+    Best database for every situation
+
+---
+
+### SQLite Concurrency
+
+One important consideration is concurrent access.
+
+Suppose many users perform database operations simultaneously:
+
+    User 1 ──┐
+    User 2 ──┤
+    User 3 ──┼──→ SQLite
+    User 4 ──┤
+    User 5 ──┘
+
+SQLite can support concurrent reads well, but write concurrency is more limited than database systems designed around a server architecture.
+
+This becomes important as Hirely grows.
+
+---
+
+### SQLite and Multiple Users
+
+For a small application:
+
+    Few Users
+       ↓
+    SQLite
+       ↓
+    Works Well
+
+For a heavily concurrent production application:
+
+    Many Users
+       ↓
+    Many Writes
+       ↓
+    Higher Database Concurrency
+       ↓
+    PostgreSQL may be more appropriate
+
+This is one reason we are researching PostgreSQL separately.
+
+---
+
+### SQLite and FastAPI
+
+SQLite can work very well with our FastAPI backend:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    SQLite
+
+FastAPI handles the API.
+
+SQLAlchemy handles database interaction.
+
+SQLite stores the data.
+
+Each component has a clear responsibility.
+
+---
+
+### SQLite and AI Analysis
+
+Hirely's AI analysis results can also be stored in SQLite.
+
+For example:
+
+    Resume
+       ↓
+    AI Model
+       ↓
+    Analysis
+       ↓
+    SQLAlchemy
+       ↓
+    SQLite
+
+Potential table:
+
+    resume_analyses
+    -------------------------
+    id
+    resume_id
+    score
+    summary
+    created_at
+
+This allows us to preserve previous analysis results.
+
+---
+
+### SQLite and File Storage
+
+One important distinction:
+
+> **SQLite is a database, not a general file-storage system.**
+
+Hirely may process PDF resumes.
+
+We should conceptually separate:
+
+    Resume PDF
+       ↓
+    File Storage
+
+    Resume Metadata
+       ↓
+    Database
+
+The database can store information about the file:
+
+    filename
+    path
+    size
+    uploaded_at
+    user_id
+
+rather than necessarily storing every uploaded file directly inside the database.
+
+The exact storage strategy will be decided during implementation.
+
+---
+
+### SQLite and Transactions
+
+SQLite supports database transactions.
+
+A transaction groups database operations into a logical unit.
+
+Conceptually:
+
+    Begin Transaction
+          ↓
+    Operation 1
+          ↓
+    Operation 2
+          ↓
+    Operation 3
+          ↓
+    Commit
+
+If something goes wrong:
+
+    Rollback
+
+This helps maintain data consistency.
+
+---
+
+### SQLite and Data Integrity
+
+SQLite supports constraints such as:
+
+    PRIMARY KEY
+    FOREIGN KEY
+    UNIQUE
+    NOT NULL
+    CHECK
+
+Example:
+
+    users
+    -------------------------
+    id       → PRIMARY KEY
+    email    → UNIQUE
+    name     → NOT NULL
+
+These constraints help prevent invalid data from entering the database.
+
+---
+
+### SQLite and Indexes
+
+Indexes improve the efficiency of database lookups.
+
+For example, Hirely may frequently search users by email:
+
+    Find user
+       ↓
+    email
+
+An index on the email column can make such queries more efficient.
+
+Conceptually:
+
+    Table
+      ↓
+    Index
+      ↓
+    Faster Lookup
+
+Indexes should be used intentionally because they also have storage and write-maintenance costs.
+
+---
+
+### SQLite and Database Migrations
+
+As Hirely develops, our database structure will change.
+
+For example:
+
+    Version 1
+    users
+
+    Version 2
+    users
+    resumes
+
+    Version 3
+    users
+    resumes
+    jobs
+
+We should manage these changes through database migrations rather than manually modifying the database each time.
+
+Since we are using SQLAlchemy, a migration tool such as Alembic can eventually be used.
+
+Conceptually:
+
+    Model Changes
+         ↓
+    Migration
+         ↓
+    Database Schema Updated
+
+We will handle migrations during implementation.
+
+---
+
+### SQLite and Deployment
+
+For a simple deployment:
+
+    Hirely Server
+        ↓
+    FastAPI
+        ↓
+    SQLite
+        ↓
+    hirely.db
+
+This can be convenient.
+
+However, production deployment introduces questions about:
+
+- Persistent storage
+- Backups
+- Multiple application instances
+- Concurrent writes
+- Scaling
+
+These factors influence whether SQLite remains appropriate.
+
+---
+
+### SQLite and Docker
+
+If Hirely is eventually containerized:
+
+    Docker Container
+          ↓
+       FastAPI
+          ↓
+       SQLite
+
+we must ensure the SQLite database file is stored in persistent storage.
+
+Otherwise, removing the container could remove the database file.
+
+Conceptually:
+
+    Container
+       ↓
+    Persistent Volume
+       ↓
+    hirely.db
+
+This is an important deployment consideration.
+
+---
+
+### SQLite Backup
+
+Because SQLite is file-based, backing up the database requires protecting the database file properly.
+
+Conceptually:
+
+    hirely.db
+        ↓
+      Backup
+        ↓
+     Recovery
+
+For production, backup strategy becomes increasingly important.
+
+---
+
+### SQLite Security
+
+SQLite itself does not provide a server authentication layer like PostgreSQL.
+
+The application is responsible for protecting access to the database file.
+
+For Hirely:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    SQLite
+
+The SQLite file should not be exposed directly to users.
+
+---
+
+### When SQLite is a Good Choice
+
+SQLite is a good candidate when we have:
+
+    Small Application
+    Development
+    Testing
+    Prototype
+    MVP
+    Low Database Concurrency
+    Simple Deployment
+
+---
+
+### When SQLite May Not Be Enough
+
+We may eventually need a server-based database when Hirely has:
+
+    Many Users
+    High Concurrent Writes
+    Multiple Application Instances
+    Large Production Workload
+    Advanced Database Requirements
+
+Then:
+
+    SQLite
+       ↓
+    Potential Limitation
+       ↓
+    PostgreSQL
+
+may become the better direction.
+
+---
+
+### SQLite vs PostgreSQL
+
+At a high level:
+
+    ┌──────────────────┬─────────────┬──────────────┐
+    │                  │ SQLite      │ PostgreSQL   │
+    ├──────────────────┼─────────────┼──────────────┤
+    │ Architecture     │ Embedded    │ Client/Server│
+    │ Setup             │ Very Simple │ More Setup   │
+    │ Server            │ Not Required│ Required     │
+    │ Development      │ Excellent   │ Excellent    │
+    │ MVP               │ Excellent   │ Excellent    │
+    │ Concurrency       │ Limited     │ Strong       │
+    │ Scaling           │ Limited     │ Better       │
+    │ Production        │ Depends     │ Strong Option│
+    └──────────────────┴─────────────┴──────────────┘
+
+This is not a final decision.
+
+We still need to research PostgreSQL.
+
+---
+
+### SQLite for Hirely — Initial Analysis
+
+SQLite has several advantages for the current stage of Hirely:
+
+    Simple
+    Lightweight
+    Easy Setup
+    Easy Development
+    Relational
+    Works with SQLAlchemy
+    Works with FastAPI
+
+It allows us to focus on building Hirely's functionality instead of spending unnecessary effort configuring database infrastructure.
+
+However:
+
+    Future Growth
+          ↓
+    More Users
+          ↓
+    More Concurrent Operations
+          ↓
+    SQLite Limitations
+
+must be considered.
+
+---
+
+### Decision for Hirely
+
+At this stage:
+
+> **SQLite is a strong candidate for Hirely's development and early-stage environment.**
+
+However, we will not make the final production database decision yet.
+
+We first need to understand:
+
+    10.1 SQLite       ✅
+    10.2 PostgreSQL   ⏳
+    10.3 Data Models  ⏳
+    10.4 Scalability  ⏳
+
+After researching all four topics, we will decide whether Hirely should use:
+
+    SQLite
+
+or:
+
+    PostgreSQL
+
+for the appropriate environment.
+
+---
+
+### Key Takeaways
+
+The most important points are:
+
+    SQLite
+       ↓
+    Lightweight Relational Database
+       ↓
+    Single Database File
+       ↓
+    No Separate Database Server
+
+For Hirely:
+
+    React
+       ↓
+    FastAPI
+       ↓
+    SQLAlchemy
+       ↓
+    SQLite
+
+SQLite is excellent for:
+
+    Development
+    Testing
+    Prototype
+    Early MVP
+
+But we must consider:
+
+    Concurrency
+    Scalability
+    Production Workload
+    Deployment
+    Backups
+
+before choosing it as the final production database.
+
+> **Hirely will evaluate SQLite for development and early-stage use, while PostgreSQL will be researched before making the final production database decision.**
