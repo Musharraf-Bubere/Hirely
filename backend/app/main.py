@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.api.health import router as health_router
 
 app = FastAPI(
     title="Hirely API",
@@ -7,9 +8,4 @@ app = FastAPI(
 )
 
 
-@app.get("/health")
-def health_check():
-    return {
-        "status": "healthy",
-        "service": "Hirely API",
-    }
+app.include_router(health_router)
