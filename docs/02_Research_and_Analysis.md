@@ -23754,3 +23754,1395 @@ The complete Database Design research section is now:
     10.4 Scalability
 
 All four topics are now covered.
+
+## 11. Deployment
+
+### Background
+
+**Deployment** is the process of making an application available in an environment where users can access and use it.
+
+For Hirely, deployment means taking our application:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+      ↓
+    AI Services
+
+and running it in a production environment.
+
+The development environment and production environment have different requirements.
+
+---
+
+### Development vs Production
+
+#### Development
+
+During development, we may run:
+
+    React → Local Machine
+    FastAPI → Local Machine
+    PostgreSQL → Local Machine
+
+This is suitable for building and testing the application.
+
+#### Production
+
+In production:
+
+    User
+      ↓
+    Internet
+      ↓
+    Frontend
+      ↓
+    Backend
+      ↓
+    Database
+      ↓
+    AI Services
+
+The application needs proper:
+
+    Configuration
+    Security
+    Reliability
+    Monitoring
+    Scalability
+
+---
+
+### Docker
+
+**Docker** is a platform used to package applications and their dependencies into containers.
+
+A container provides an isolated environment in which an application can run consistently.
+
+Without Docker:
+
+    Application
+        ↓
+    Dependencies
+        ↓
+    Operating System
+        ↓
+    Configuration Problems
+
+With Docker:
+
+    Docker Container
+        ├── Application
+        ├── Dependencies
+        └── Runtime
+
+This helps reduce the common:
+
+> "It works on my machine."
+
+problem.
+
+---
+
+### Why Docker for Hirely?
+
+Hirely contains multiple components:
+
+    React
+    FastAPI
+    PostgreSQL
+    AI Services
+    Background Workers
+    File Storage
+
+Docker allows these components to be packaged and deployed consistently.
+
+Conceptually:
+
+    Hirely
+      ├── Frontend Container
+      ├── Backend Container
+      ├── Database Container
+      └── Worker Container
+
+---
+
+### Docker Image
+
+A **Docker image** is a packaged blueprint containing everything required to create a container.
+
+Conceptually:
+
+    Dockerfile
+        ↓
+    Docker Image
+        ↓
+    Docker Container
+
+An image contains things such as:
+
+    Application Code
+    Dependencies
+    Runtime
+    Configuration Instructions
+
+---
+
+### Docker Container
+
+A **container** is a running instance of a Docker image.
+
+Conceptually:
+
+    Image
+      ↓
+    Container
+      ↓
+    Running Application
+
+For Hirely:
+
+    Backend Image
+          ↓
+    Backend Container
+          ↓
+    FastAPI Application
+
+---
+
+### Dockerfile
+
+A **Dockerfile** contains instructions for building a Docker image.
+
+Typical flow:
+
+    Dockerfile
+        ↓
+    Install Dependencies
+        ↓
+    Copy Application
+        ↓
+    Configure Environment
+        ↓
+    Start Application
+        ↓
+    Docker Image
+
+For Hirely, we can create separate Dockerfiles where appropriate for application components.
+
+---
+
+### Docker Compose
+
+**Docker Compose** is used to define and run multiple Docker containers as a single application.
+
+Hirely may have:
+
+    React
+    FastAPI
+    PostgreSQL
+
+Instead of manually starting each service, Docker Compose can define them together.
+
+Conceptually:
+
+    docker-compose.yml
+
+        ├── frontend
+        ├── backend
+        └── database
+
+Then the application can be started as a group.
+
+---
+
+### Why Docker Compose for Hirely?
+
+Hirely contains multiple services that need to communicate.
+
+For example:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    PostgreSQL
+
+Docker Compose allows us to define:
+
+    Services
+    Networks
+    Environment Variables
+    Volumes
+    Dependencies
+
+in one configuration.
+
+---
+
+### Docker Volumes
+
+Containers are generally designed to be replaceable.
+
+Therefore, important persistent data should not depend only on the container filesystem.
+
+A **Docker volume** provides persistent storage.
+
+Conceptually:
+
+    PostgreSQL Container
+            ↓
+        Docker Volume
+            ↓
+        Persistent Data
+
+If the container is removed, the volume can preserve the database data.
+
+For Hirely:
+
+    PostgreSQL
+        ↓
+    Persistent Volume
+        ↓
+    Database Data
+
+---
+
+### Docker Networks
+
+Docker containers can communicate through Docker networks.
+
+For example:
+
+    React Container
+          ↓
+    Backend Container
+          ↓
+    PostgreSQL Container
+
+The services can communicate through the internal Docker network.
+
+This helps keep service communication organized.
+
+---
+
+### AWS EC2
+
+**Amazon EC2** provides virtual servers in the cloud.
+
+Conceptually:
+
+    AWS Cloud
+       ↓
+      EC2
+       ↓
+    Server
+       ↓
+    Hirely Application
+
+EC2 can be used to host Hirely's backend and other required services.
+
+---
+
+### Why EC2 for Hirely?
+
+EC2 provides control over the server environment.
+
+We can configure:
+
+    Operating System
+    CPU
+    RAM
+    Storage
+    Network
+    Security Rules
+    Docker
+    Application
+
+A possible deployment approach:
+
+    AWS EC2
+       ↓
+    Docker
+       ↓
+    Hirely Containers
+
+---
+
+### EC2 Deployment Flow
+
+A simplified deployment flow:
+
+    Developer
+        ↓
+    GitHub
+        ↓
+    EC2 Server
+        ↓
+    Docker
+        ↓
+    Hirely Application
+        ↓
+    Internet
+
+The actual production architecture may evolve later.
+
+---
+
+### Environment Variables
+
+Environment variables store configuration outside the application code.
+
+Examples:
+
+    DATABASE_URL
+    API_KEY
+    SECRET_KEY
+    ENVIRONMENT
+    MODEL_NAME
+
+Instead of:
+
+    API_KEY = "actual-secret"
+
+we use:
+
+    API_KEY = environment_variable
+
+This prevents configuration and secrets from being hard-coded.
+
+---
+
+### Why Environment Variables Matter
+
+Different environments require different configuration.
+
+Development:
+
+    DATABASE_URL = development_database
+
+Production:
+
+    DATABASE_URL = production_database
+
+The application code can remain the same while configuration changes.
+
+---
+
+### Secrets
+
+Sensitive values should never be committed directly to GitHub.
+
+Examples:
+
+    API Keys
+    Database Passwords
+    Secret Keys
+    Authentication Credentials
+
+Bad:
+
+    SECRET_KEY = "my-secret-key"
+
+Better:
+
+    SECRET_KEY = os.getenv("SECRET_KEY")
+
+The actual secret is supplied through the environment.
+
+---
+
+### Production Deployment
+
+A simplified Hirely production architecture:
+
+                         Users
+                           ↓
+                       Internet
+                           ↓
+                    Production Server
+                           ↓
+                         Docker
+                           ↓
+              ┌────────────┼────────────┐
+              ↓            ↓            ↓
+           Frontend     FastAPI     Background
+                                    Worker
+                           ↓
+                      PostgreSQL
+                           ↓
+                      AI Services
+
+This is a conceptual architecture and can evolve as the project grows.
+
+---
+
+### Deployment Process
+
+A simplified deployment workflow:
+
+    Develop
+       ↓
+    Test
+       ↓
+    Git Commit
+       ↓
+    GitHub
+       ↓
+    Build Docker Image
+       ↓
+    Deploy
+       ↓
+    Run Application
+       ↓
+    Monitor
+
+---
+
+### Production Configuration
+
+Production should use appropriate configuration for:
+
+    Database
+    API Keys
+    Logging
+    Security
+    CORS
+    Allowed Hosts
+    Debug Mode
+    File Storage
+
+Important:
+
+    DEBUG = False
+
+should generally be used in production.
+
+---
+
+### Deployment and Scalability
+
+Our scalability research showed that deployment should allow the system to grow.
+
+Initial:
+
+    EC2
+      ↓
+    Docker
+      ↓
+    FastAPI
+      ↓
+    PostgreSQL
+
+Future:
+
+    Load Balancer
+          ↓
+    ┌─────┼─────┐
+    ↓     ↓     ↓
+    API   API   API
+          ↓
+      PostgreSQL
+
+Additional workers can be introduced for AI workloads.
+
+---
+
+### Decision for Hirely
+
+Our deployment approach is:
+
+    Development
+        ↓
+    Dockerize Application
+        ↓
+    Docker Compose
+        ↓
+    Test Locally
+        ↓
+    AWS EC2
+        ↓
+    Production Deployment
+
+We will keep the initial deployment simple and introduce more infrastructure only when required.
+
+---
+
+### Key Takeaways
+
+    Docker
+    → Package applications into containers
+
+    Docker Image
+    → Blueprint used to create containers
+
+    Docker Container
+    → Running instance of an image
+
+    Docker Compose
+    → Manage multiple containers together
+
+    Docker Volume
+    → Persistent container storage
+
+    AWS EC2
+    → Cloud virtual server
+
+    Environment Variables
+    → External application configuration
+
+    Production Deployment
+    → Make the application available to real users
+
+Main Hirely deployment idea:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    PostgreSQL
+      ↓
+    Docker
+      ↓
+    AWS EC2
+
+
+## 12. Security
+
+### Background
+
+**Security** protects Hirely's application, users, data, APIs, credentials, and infrastructure from unauthorized access and attacks.
+
+Hirely will handle potentially sensitive information such as:
+
+    User Information
+    Resume Data
+    Job Applications
+    API Credentials
+    AI Requests
+    Authentication Data
+
+Therefore, security must be considered throughout the system.
+
+---
+
+### Security Goals
+
+The major security goals are:
+
+    Confidentiality
+    Integrity
+    Availability
+
+#### Confidentiality
+
+Only authorized users should access protected information.
+
+#### Integrity
+
+Data should not be modified by unauthorized users.
+
+#### Availability
+
+The application should remain available to legitimate users.
+
+These are commonly represented as the:
+
+    CIA Triad
+
+---
+
+### API Security
+
+Hirely's backend exposes APIs through FastAPI.
+
+Example:
+
+    React
+      ↓
+    API
+      ↓
+    FastAPI
+      ↓
+    Database
+
+APIs must verify that requests are valid and authorized.
+
+Security concerns include:
+
+    Authentication
+    Authorization
+    Input Validation
+    Rate Limiting
+    Secure Error Handling
+    HTTPS
+
+---
+
+### Authentication
+
+**Authentication** verifies who the user is.
+
+Example:
+
+    User
+      ↓
+    Login
+      ↓
+    Credentials Verified
+      ↓
+    Authenticated User
+
+Authentication answers:
+
+> Who are you?
+
+Possible authentication mechanisms include:
+
+    Session Authentication
+    Token Authentication
+    JWT
+
+The exact mechanism will be selected during implementation based on Hirely's requirements.
+
+---
+
+### Authorization
+
+**Authorization** determines what an authenticated user is allowed to do.
+
+Authentication:
+
+    Who are you?
+
+Authorization:
+
+    What are you allowed to access?
+
+Example:
+
+    User A
+       ↓
+    Resume A
+
+User A should not automatically be able to access:
+
+    Resume B
+
+Therefore, Hirely APIs must verify resource ownership and permissions.
+
+---
+
+### Authentication vs Authorization
+
+    Authentication
+    → Verify identity
+
+    Authorization
+    → Verify permissions
+
+Example:
+
+    Login
+      ↓
+    Authentication
+      ↓
+    User Identified
+      ↓
+    Authorization
+      ↓
+    Permission Checked
+      ↓
+    Resource Access
+
+---
+
+### Password Security
+
+Passwords should never be stored as plain text.
+
+Bad:
+
+    password = "mypassword"
+
+Better:
+
+    password
+       ↓
+    Password Hashing
+       ↓
+    Stored Hash
+
+During login:
+
+    Entered Password
+          ↓
+    Hash Verification
+          ↓
+    Stored Password Hash
+
+A dedicated password hashing algorithm/library should be used rather than implementing cryptographic hashing manually.
+
+---
+
+### Secret Management
+
+Secrets include:
+
+    API Keys
+    Database Passwords
+    Secret Keys
+    Authentication Credentials
+
+Secrets should not be hard-coded.
+
+Bad:
+
+    OPENAI_API_KEY = "actual-key"
+
+Better:
+
+    OPENAI_API_KEY = environment_variable
+
+---
+
+### GitHub and Secrets
+
+Secrets should never be committed to GitHub.
+
+Files such as:
+
+    .env
+
+may contain sensitive configuration.
+
+A `.gitignore` file should prevent sensitive local configuration from being committed.
+
+Example:
+
+    .env
+    __pycache__/
+    .venv/
+
+The actual secret should be provided securely in the deployment environment.
+
+---
+
+### Data Privacy
+
+Hirely may process resumes containing personal information.
+
+Examples:
+
+    Name
+    Email
+    Phone Number
+    Address
+    Education
+    Employment History
+    Skills
+
+Therefore:
+
+> Resume data should be treated as sensitive user data.
+
+Only required data should be collected and stored.
+
+---
+
+### Data Minimization
+
+**Data minimization** means collecting and retaining only the data required by the application.
+
+Instead of storing unnecessary information:
+
+    Required Data
+         ↓
+    Store Only What Is Needed
+
+Benefits:
+
+    Reduced Risk
+    Less Storage
+    Better Privacy
+    Easier Data Management
+
+---
+
+### Secure File Handling
+
+Hirely will process resume files.
+
+Potential risks include:
+
+    Malicious Files
+    Unexpected File Types
+    Excessively Large Files
+    Path Traversal
+    Unauthorized File Access
+
+Therefore, uploaded files should be validated before processing.
+
+Important checks can include:
+
+    File Type
+    File Size
+    Filename
+    Storage Location
+
+---
+
+### Input Validation
+
+All user-provided input should be treated as untrusted.
+
+Examples:
+
+    Name
+    Email
+    Resume
+    Job Search
+    API Parameters
+
+FastAPI and Pydantic provide validation capabilities.
+
+Conceptually:
+
+    User Input
+        ↓
+    Pydantic Validation
+        ↓
+    Valid Data
+        ↓
+    Application Logic
+
+Invalid input should be rejected appropriately.
+
+---
+
+### SQL Injection
+
+SQL Injection occurs when untrusted input is incorrectly incorporated into SQL queries.
+
+Unsafe approach:
+
+    User Input
+       ↓
+    String Concatenation
+       ↓
+    SQL Query
+
+Better approach:
+
+    User Input
+       ↓
+    Parameterized Query / ORM
+       ↓
+    Database
+
+SQLAlchemy helps reduce SQL injection risk when used correctly.
+
+---
+
+### Cross-Origin Resource Sharing
+
+Hirely has a React frontend and FastAPI backend.
+
+For example:
+
+    React
+    http://frontend
+         ↓
+    FastAPI
+    http://backend
+
+CORS controls which origins are allowed to communicate with the backend.
+
+Production should allow only the required trusted origins rather than allowing everything unnecessarily.
+
+---
+
+### HTTPS
+
+Production communication should use HTTPS.
+
+Without HTTPS:
+
+    User
+      ↓
+    HTTP
+      ↓
+    Server
+
+With HTTPS:
+
+    User
+      ↓
+    HTTPS
+      ↓
+    Server
+
+HTTPS protects data transmitted between the client and server.
+
+---
+
+### Rate Limiting
+
+Rate limiting restricts how many requests a client can make within a period.
+
+Example:
+
+    User
+      ↓
+    Too Many Requests
+      ↓
+    Rate Limit
+      ↓
+    Request Rejected
+
+This can help protect APIs from:
+
+    Abuse
+    Excessive Requests
+    Brute Force Attempts
+    Resource Exhaustion
+
+Rate limiting becomes particularly important for expensive AI endpoints.
+
+---
+
+### Secure Error Handling
+
+Errors should not expose sensitive internal information.
+
+Bad production response:
+
+    Database password
+    File paths
+    Stack traces
+    Internal configuration
+
+Better:
+
+    Generic Error Message
+
+Detailed error information should be available through secure server-side logging rather than exposed to users.
+
+---
+
+### Logging
+
+Logging helps identify:
+
+    Errors
+    Failed Requests
+    Security Events
+    Application Problems
+
+However, logs should not contain sensitive information unnecessarily.
+
+Avoid logging:
+
+    Passwords
+    API Keys
+    Tokens
+    Sensitive Resume Content
+
+---
+
+### Dependency Security
+
+Hirely will depend on external Python and JavaScript packages.
+
+Examples:
+
+    FastAPI
+    SQLAlchemy
+    Pydantic
+    React
+    AI Libraries
+
+Dependencies should be:
+
+    Regularly Updated
+    Reviewed
+    Pinned/Controlled Where Appropriate
+    Scanned for Known Vulnerabilities
+
+Unused dependencies should be removed.
+
+---
+
+### Authentication Security
+
+Authentication endpoints are sensitive.
+
+Important protections include:
+
+    Strong Password Hashing
+    Secure Tokens
+    HTTPS
+    Rate Limiting
+    Proper Session/Token Expiration
+    Secure Cookie Configuration where applicable
+
+Authentication logic should not be implemented casually.
+
+---
+
+### Resource Authorization
+
+Every protected resource should verify ownership or permission.
+
+Example:
+
+    GET /resumes/101
+
+The backend should verify:
+
+    Does this resume belong to the authenticated user?
+
+Conceptually:
+
+    Request
+      ↓
+    Authentication
+      ↓
+    User Identity
+      ↓
+    Resource Ownership Check
+      ↓
+    Allow / Deny
+
+This is especially important for resumes and applications.
+
+---
+
+### Database Security
+
+The database should not be directly exposed to the public internet unnecessarily.
+
+Preferred architecture:
+
+    Internet
+       ↓
+    FastAPI
+       ↓
+    PostgreSQL
+
+rather than:
+
+    Internet
+       ↓
+    PostgreSQL
+
+Database credentials should also be stored securely.
+
+---
+
+### Secure Deployment
+
+Production deployment should include:
+
+    HTTPS
+    Secure Environment Variables
+    Firewall Rules
+    Restricted Database Access
+    Authentication
+    Authorization
+    Secure File Storage
+    Regular Updates
+    Monitoring
+    Logging
+
+Security should be part of deployment rather than something added afterward.
+
+---
+
+### AWS Security
+
+When using AWS EC2, security considerations include:
+
+    Security Groups
+    SSH Access
+    Firewall Rules
+    IAM Permissions
+    Environment Secrets
+    Network Configuration
+
+Only required ports should be exposed.
+
+For example, public access may be needed for:
+
+    HTTPS
+
+while PostgreSQL should generally remain restricted to trusted services.
+
+---
+
+### Secure Architecture for Hirely
+
+A conceptual secure architecture:
+
+                         User
+                           ↓
+                         HTTPS
+                           ↓
+                        React
+                           ↓
+                     FastAPI API
+                           ↓
+                Authentication /
+                 Authorization
+                           ↓
+                      SQLAlchemy
+                           ↓
+                      PostgreSQL
+
+For files:
+
+    User
+      ↓
+    FastAPI
+      ↓
+    Secure File Storage
+
+For AI:
+
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    Analysis Result
+       ↓
+    PostgreSQL
+
+Secrets remain outside application source code.
+
+---
+
+### Defense in Depth
+
+**Defense in depth** means using multiple layers of security instead of relying on one security mechanism.
+
+For Hirely:
+
+    HTTPS
+      ↓
+    Authentication
+      ↓
+    Authorization
+      ↓
+    Input Validation
+      ↓
+    Secure Database Access
+      ↓
+    Secure File Handling
+      ↓
+    Monitoring
+
+If one security layer fails, other layers can still provide protection.
+
+---
+
+### Security by Design
+
+Security should be considered during development.
+
+Instead of:
+
+    Build Application
+          ↓
+    Add Security Later
+
+we should use:
+
+    Requirements
+         ↓
+    Design
+         ↓
+    Development
+         ↓
+    Security Considerations
+         ↓
+    Testing
+         ↓
+    Deployment
+
+Security is part of the architecture.
+
+---
+
+### Secure Development Principles
+
+For Hirely:
+
+    Never Trust User Input
+    Never Store Plaintext Passwords
+    Never Hard-Code Secrets
+    Validate Uploaded Files
+    Verify Resource Ownership
+    Use HTTPS
+    Restrict Database Access
+    Keep Dependencies Updated
+    Avoid Sensitive Logs
+    Use Least Privilege
+
+---
+
+### Least Privilege
+
+**Least privilege** means giving users, applications, and services only the permissions they actually need.
+
+Example:
+
+    Application
+       ↓
+    Database
+       ↓
+    Only Required Permissions
+
+An application should not receive unnecessary administrative privileges.
+
+This reduces the impact of a potential compromise.
+
+---
+
+### Security Testing
+
+Before production deployment, Hirely should be tested for common security issues.
+
+Areas include:
+
+    Authentication
+    Authorization
+    Input Validation
+    API Security
+    File Upload Security
+    SQL Injection
+    CORS Configuration
+    Secret Exposure
+    Dependency Vulnerabilities
+    Error Handling
+
+Security testing should continue as the application evolves.
+
+---
+
+### Decision for Hirely
+
+Our security approach is:
+
+    Secure Development
+          ↓
+    Input Validation
+          ↓
+    Authentication
+          ↓
+    Authorization
+          ↓
+    Secure Database Access
+          ↓
+    Secret Management
+          ↓
+    Data Privacy
+          ↓
+    Secure Deployment
+          ↓
+    Monitoring
+
+Security will be implemented progressively according to the actual features of Hirely.
+
+---
+
+### Key Takeaways
+
+    Authentication
+    → Who are you?
+
+    Authorization
+    → What are you allowed to access?
+
+    Secret Management
+    → Protect API keys, passwords and credentials
+
+    Data Privacy
+    → Protect user and resume information
+
+    Input Validation
+    → Never trust user input
+
+    HTTPS
+    → Protect data in transit
+
+    Rate Limiting
+    → Control excessive requests
+
+    Least Privilege
+    → Give only required permissions
+
+    Secure Deployment
+    → Protect application and infrastructure
+
+Main security principle:
+
+> **Never trust input, protect secrets, verify authorization, minimize sensitive data, and secure every layer of the application.**
+
+---
+
+### Hirely Security Architecture
+
+    User
+      ↓
+    HTTPS
+      ↓
+    React
+      ↓
+    FastAPI
+      ↓
+    Authentication
+      ↓
+    Authorization
+      ↓
+    Pydantic Validation
+      ↓
+    Service Layer
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+Additional protection:
+
+    Secure File Storage
+    Environment Variables
+    Rate Limiting
+    Logging
+    Monitoring
+    Dependency Security
+    AWS Security
+
+---
+
+### Research Roadmap Completion
+
+After completing these two sections:
+
+    1. Career Domain Research       ✅
+    2. ATS                          ✅
+    3. Resume Analysis              ✅
+    4. LLMs                         ✅
+    5. AI Frameworks                ✅
+    6. Backend Technologies         ✅
+    7. Frontend Technologies        ✅
+    8. Document Processing          ✅
+    9. AI Model Selection           ✅
+    10. Database Design             ✅
+    11. Deployment                  ✅
+    12. Security                    ✅
+
+The complete Hirely research and analysis phase is covered.
