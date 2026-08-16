@@ -22697,3 +22697,1060 @@ And our application architecture remains:
     Database
 
 > The Hirely data model should be simple, normalized where appropriate, relationship-driven, and flexible enough to evolve as the project grows.
+
+## 10.4 Scalability
+
+### Background
+
+**Scalability** is the ability of a system to handle increasing workload without unacceptable degradation in performance, reliability, or availability.
+
+For Hirely, growth can mean:
+
+    More Users
+        ↓
+    More Resumes
+        ↓
+    More Jobs
+        ↓
+    More Applications
+        ↓
+    More AI Requests
+        ↓
+    More Database Operations
+
+A scalable system should be able to handle this growth.
+
+---
+
+### Why Scalability Matters for Hirely
+
+Initially, Hirely may have:
+
+    10 Users
+    100 Resumes
+    50 Jobs
+
+As the application grows, it may have:
+
+    10,000 Users
+    100,000 Resumes
+    50,000 Jobs
+
+The architecture that works for a small application may not work efficiently at a larger scale.
+
+Therefore:
+
+> Hirely should be designed so that it can evolve as usage grows.
+
+---
+
+### Scalability vs Performance
+
+#### Performance
+
+Performance asks:
+
+> How fast can the system handle the current workload?
+
+Example:
+
+    API Request
+        ↓
+    200 ms Response
+
+#### Scalability
+
+Scalability asks:
+
+> What happens when the workload increases?
+
+Example:
+
+    100 Users
+        ↓
+    Good Performance
+
+    10,000 Users
+        ↓
+    Can the system still perform well?
+
+Therefore:
+
+    Performance
+    → Current efficiency
+
+    Scalability
+    → Ability to handle growth
+
+---
+
+### Types of Scalability
+
+The two fundamental approaches are:
+
+    Vertical Scaling
+    Horizontal Scaling
+
+---
+
+### Vertical Scaling
+
+**Vertical scaling** means increasing the resources of an existing machine.
+
+For example:
+
+    Server
+      ↓
+    More CPU
+    More RAM
+    More Storage
+
+Example:
+
+    Before:
+
+    CPU: 2 cores
+    RAM: 4 GB
+
+          ↓
+
+    After:
+
+    CPU: 8 cores
+    RAM: 16 GB
+
+The machine becomes more powerful.
+
+#### Advantages
+
+    Simple
+    Easy to implement
+    No major architecture changes
+
+#### Limitations
+
+There are physical and infrastructure limits.
+
+    More CPU
+        ↓
+    More RAM
+        ↓
+    More Expensive Hardware
+        ↓
+    Infrastructure Limit
+
+Therefore, vertical scaling alone may not be sufficient for a rapidly growing application.
+
+---
+
+### Horizontal Scaling
+
+**Horizontal scaling** means adding more machines or application instances.
+
+Instead of:
+
+    One Server
+
+we use:
+
+    Server 1
+    Server 2
+    Server 3
+
+Conceptually:
+
+                    Load Balancer
+                         ↓
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+           Server 1   Server 2   Server 3
+
+Traffic can be distributed across multiple instances.
+
+#### Key Idea
+
+    Vertical Scaling
+    → Scale Up
+    → Increase resources of one machine
+
+    Horizontal Scaling
+    → Scale Out
+    → Add more machines/instances
+
+---
+
+### Hirely Application Scaling
+
+Our current architecture is:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+If Hirely grows:
+
+                    Load Balancer
+                         ↓
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+           FastAPI    FastAPI    FastAPI
+              └──────────┼──────────┘
+                         ↓
+                     Database
+
+Multiple backend instances can handle requests.
+
+---
+
+### Stateless Application Design
+
+Horizontal scaling works better when application servers are **stateless**.
+
+A stateless backend does not depend on information stored only inside one particular server instance.
+
+Instead:
+
+    FastAPI Instance
+          ↓
+    Shared Database / Storage
+
+For example:
+
+    Request 1 → FastAPI 1
+    Request 2 → FastAPI 2
+    Request 3 → FastAPI 3
+
+The application should not require the same server to handle every request.
+
+#### Why Statelessness Matters
+
+Suppose Hirely has:
+
+    FastAPI 1
+    FastAPI 2
+    FastAPI 3
+
+If important application state exists only inside FastAPI 1, a request handled by FastAPI 2 may fail or behave incorrectly.
+
+Shared state should generally be placed in appropriate shared systems such as:
+
+    Database
+    Cache
+    Object Storage
+    External Services
+
+depending on the use case.
+
+---
+
+### Database Scalability
+
+The database is one of the most important scalability concerns for Hirely.
+
+Initially:
+
+    FastAPI
+       ↓
+    SQLite
+
+For production:
+
+    FastAPI
+       ↓
+    PostgreSQL
+
+As usage grows:
+
+    Multiple FastAPI Instances
+              ↓
+          PostgreSQL
+
+The database must handle increasing:
+
+    Reads
+    Writes
+    Connections
+    Queries
+    Storage
+
+---
+
+### Database Connection Pooling
+
+When many requests access a database, repeatedly creating new database connections can be inefficient.
+
+A **connection pool** maintains reusable database connections.
+
+Conceptually:
+
+    FastAPI Requests
+          ↓
+    Connection Pool
+       ┌──┼──┐
+       ↓  ↓  ↓
+       C1 C2 C3
+       └──┼──┘
+          ↓
+      PostgreSQL
+
+Connections can be reused instead of creating a new connection for every request.
+
+SQLAlchemy supports connection pooling.
+
+---
+
+### Database Indexing
+
+Indexes can improve query performance.
+
+Suppose Hirely frequently searches users by email:
+
+    SELECT user
+    WHERE email = ...
+
+An index on the appropriate column can make the lookup faster.
+
+Conceptually:
+
+    Database Table
+          ↓
+        Index
+          ↓
+      Faster Lookup
+
+However, indexes are not free.
+
+They consume storage and can add overhead to inserts and updates.
+
+Therefore:
+
+> Add indexes based on actual query patterns rather than indexing everything.
+
+---
+
+### Query Optimization
+
+A scalable application needs efficient database queries.
+
+#### Bad Approach
+
+    Fetch unnecessary data
+          ↓
+    Process everything
+          ↓
+    Return small result
+
+#### Better Approach
+
+    Database
+       ↓
+    Filter required records
+       ↓
+    Return required data
+
+The database should perform appropriate filtering instead of unnecessarily retrieving large amounts of data into Python.
+
+---
+
+### Pagination
+
+Suppose Hirely has:
+
+    100,000 Jobs
+
+We should not return all 100,000 jobs in one API response.
+
+Instead:
+
+    Page 1
+    Jobs 1–20
+
+    Page 2
+    Jobs 21–40
+
+    Page 3
+    Jobs 41–60
+
+This is called **pagination**.
+
+#### Benefits
+
+Pagination reduces:
+
+    Database Load
+    Network Traffic
+    Memory Usage
+    API Response Size
+
+Conceptually:
+
+    100,000 Records
+          ↓
+    20 Records / Request
+
+---
+
+### Caching
+
+Some data may be requested repeatedly.
+
+Without caching:
+
+    Request
+      ↓
+    Database
+      ↓
+    Response
+
+With caching:
+
+    Request
+      ↓
+    Cache
+      ↓
+    If available → Response
+
+    If not available
+      ↓
+    Database
+      ↓
+    Cache
+      ↓
+    Response
+
+A common caching technology is Redis.
+
+However:
+
+> We should not introduce caching prematurely.
+
+For the initial Hirely version, caching should only be added when there is an actual performance requirement.
+
+---
+
+### AI Workload Scalability
+
+Hirely is not only a CRUD application.
+
+It also performs AI processing.
+
+For example:
+
+    Resume Upload
+          ↓
+    PDF Processing
+          ↓
+    LLM Request
+          ↓
+    Resume Analysis
+          ↓
+    Database
+
+AI operations can be slower and more resource-intensive than normal API requests.
+
+Therefore, AI workload scalability is important.
+
+---
+
+### Synchronous AI Processing
+
+A simple implementation:
+
+    User
+      ↓
+    FastAPI
+      ↓
+    Upload Resume
+      ↓
+    Call AI Model
+      ↓
+    Wait
+      ↓
+    Return Result
+
+This can be acceptable for small workloads.
+
+---
+
+### Asynchronous AI Processing
+
+For longer-running operations, background processing can be used.
+
+Conceptually:
+
+    User
+      ↓
+    FastAPI
+      ↓
+    Create Analysis Job
+      ↓
+    Queue
+      ↓
+    Worker
+      ↓
+    AI Model
+      ↓
+    Database
+
+The API can respond quickly:
+
+    "Analysis started"
+
+while the worker performs the expensive operation.
+
+---
+
+### Background Workers
+
+A worker is a process responsible for executing tasks outside the main request-response cycle.
+
+For Hirely:
+
+    FastAPI
+       ↓
+    Task Queue
+       ↓
+    Worker
+       ↓
+    AI Processing
+       ↓
+    PostgreSQL
+
+If AI workload increases:
+
+    Worker 1
+    Worker 2
+    Worker 3
+    Worker 4
+
+can process tasks concurrently.
+
+This is a future scalability direction for Hirely.
+
+---
+
+### Queue-Based Architecture
+
+A queue separates request handling from expensive processing.
+
+Example:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    Task Queue
+      ↓
+    ┌───────────────┐
+    │ AI Worker     │
+    │ AI Worker     │
+    │ AI Worker     │
+    └───────────────┘
+           ↓
+       PostgreSQL
+
+This prevents long AI tasks from blocking normal API requests.
+
+---
+
+### File Storage Scalability
+
+Hirely will deal with resumes and potentially other documents.
+
+#### Development
+
+For development:
+
+    FastAPI
+       ↓
+    Local File System
+
+#### Production
+
+For production and larger scale:
+
+    FastAPI
+       ↓
+    Object Storage
+
+The database can store metadata such as:
+
+    filename
+    file_path / object key
+    user_id
+    uploaded_at
+
+while the actual file is stored separately.
+
+---
+
+### Database vs File Storage
+
+A useful separation is:
+
+    PostgreSQL
+        ↓
+    Metadata
+        ↓
+    User
+    Resume Information
+    Analysis Results
+
+and:
+
+    Object Storage
+        ↓
+    Actual Resume File
+
+Conceptually:
+
+    User
+      ↓
+    Resume Record ───────→ PostgreSQL
+      ↓
+    File Reference
+      ↓
+    Resume File ─────────→ Object Storage
+
+This can make file storage easier to scale.
+
+---
+
+### Load Balancer
+
+A **load balancer** distributes incoming traffic across multiple backend instances.
+
+Example:
+
+                    Users
+                      ↓
+                Load Balancer
+                      ↓
+          ┌───────────┼───────────┐
+          ↓           ↓           ↓
+      FastAPI 1   FastAPI 2   FastAPI 3
+
+#### Benefits
+
+    Distribute Traffic
+    Improve Availability
+    Support Horizontal Scaling
+
+---
+
+### Availability
+
+Scalability is closely related to availability.
+
+If one server fails:
+
+    FastAPI 1
+        ❌
+
+other instances can potentially continue serving requests:
+
+    FastAPI 2
+    FastAPI 3
+
+Multiple instances can therefore improve resilience.
+
+True high availability, however, requires more than simply running multiple servers.
+
+---
+
+### Single Point of Failure
+
+A **Single Point of Failure (SPOF)** is a component whose failure can bring down the entire system.
+
+Example:
+
+    Users
+      ↓
+    Single Server
+      ↓
+    Database
+
+If the only server fails:
+
+    Application
+         ❌
+
+As systems grow, important single points of failure should be reduced.
+
+---
+
+### Scalability and Docker
+
+Docker makes it easier to package and run application components consistently.
+
+For example:
+
+    Docker
+     ├── FastAPI
+     ├── PostgreSQL
+     └── Worker
+
+Later, multiple application containers can be deployed:
+
+    FastAPI Container 1
+    FastAPI Container 2
+    FastAPI Container 3
+
+Important:
+
+> Docker itself does not automatically make an application scalable.
+
+It makes deployment and replication easier.
+
+---
+
+### Future Hirely Architecture
+
+A possible future architecture:
+
+                         Users
+                           ↓
+                     Load Balancer
+                           ↓
+              ┌────────────┼────────────┐
+              ↓            ↓            ↓
+          FastAPI 1    FastAPI 2    FastAPI 3
+              │            │            │
+              └────────────┼────────────┘
+                           ↓
+                       PostgreSQL
+                           │
+                           ↓
+                     Object Storage
+
+For AI workloads:
+
+                         FastAPI
+                            ↓
+                        Task Queue
+                            ↓
+                 ┌──────────┼──────────┐
+                 ↓          ↓          ↓
+              Worker 1   Worker 2   Worker 3
+                 └──────────┼──────────┘
+                            ↓
+                         AI Model
+                            ↓
+                        PostgreSQL
+
+This is a possible future architecture, not something we need to implement immediately.
+
+---
+
+### Progressive Scaling Strategy
+
+Hirely should scale progressively.
+
+#### Stage 1 — Development
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLite
+
+Simple and easy to develop.
+
+#### Stage 2 — MVP
+
+    React
+      ↓
+    FastAPI
+      ↓
+    PostgreSQL
+
+Move to a production-capable relational database.
+
+#### Stage 3 — Growing Application
+
+    React
+      ↓
+    Load Balancer
+      ↓
+    Multiple FastAPI Instances
+      ↓
+    PostgreSQL
+
+#### Stage 4 — High AI Workload
+
+    React
+      ↓
+    Load Balancer
+      ↓
+    FastAPI Instances
+      ↓
+    Task Queue
+      ↓
+    AI Workers
+      ↓
+    PostgreSQL
+
+This progressive approach avoids premature complexity.
+
+---
+
+### Avoiding Premature Scaling
+
+A very important principle:
+
+> **Do not introduce complex scaling infrastructure before the application actually needs it.**
+
+We don't immediately need:
+
+    Multiple Servers
+    Load Balancer
+    Redis
+    Task Queues
+    Multiple Workers
+    Complex Caching
+    Database Replication
+
+during the first development stage.
+
+Instead:
+
+    Build
+      ↓
+    Measure
+      ↓
+    Identify Bottleneck
+      ↓
+    Optimize
+      ↓
+    Scale
+
+---
+
+### Identifying Bottlenecks
+
+When performance decreases, identify where the bottleneck exists.
+
+Possible bottlenecks:
+
+    Frontend
+       ↓
+    API
+       ↓
+    Database
+       ↓
+    File Processing
+       ↓
+    AI Model
+       ↓
+    Network
+
+We should measure before changing the architecture.
+
+---
+
+### Monitoring
+
+A scalable system needs monitoring.
+
+Important metrics may include:
+
+    CPU Usage
+    Memory Usage
+    API Latency
+    Request Rate
+    Error Rate
+    Database Performance
+    Database Connections
+    AI Processing Time
+    Queue Length
+    Storage Usage
+
+Monitoring helps us understand when scaling is actually necessary.
+
+---
+
+### Scalability and Cost
+
+Scaling usually increases infrastructure cost.
+
+For example:
+
+    1 Server
+       ↓
+    Low Cost
+
+    3 Servers
+       ↓
+    Higher Cost
+
+    10 Servers
+       ↓
+    Higher Cost
+
+Therefore, scalability should balance:
+
+    Performance
+        +
+    Reliability
+        +
+    Cost
+
+The goal is not to use as many servers as possible.
+
+The goal is:
+
+> Use enough infrastructure to meet the application's requirements efficiently.
+
+---
+
+### Hirely's Initial Scalability Strategy
+
+At the beginning, Hirely should remain simple:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+Then introduce additional components only when required.
+
+#### Need more API capacity?
+
+    Multiple FastAPI Instances
+
+#### Need faster repeated reads?
+
+    Caching
+
+#### Need long AI tasks?
+
+    Background Workers / Task Queue
+
+#### Need large file storage?
+
+    Object Storage
+
+#### Need more database capacity?
+
+    Database Scaling
+
+---
+
+### Decision for Hirely
+
+Our scalability strategy is:
+
+    Start Simple
+         ↓
+    Build MVP
+         ↓
+    Measure Usage
+         ↓
+    Identify Bottlenecks
+         ↓
+    Scale Specific Components
+         ↓
+    Avoid Premature Complexity
+
+#### Initial Architecture
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+#### Future Possibilities
+
+    Load Balancer
+    Multiple FastAPI Instances
+    Connection Pooling
+    Caching
+    Task Queue
+    Background Workers
+    Object Storage
+    Database Scaling
+
+These should be introduced based on actual requirements.
+
+---
+
+### Key Takeaways
+
+#### Scalability
+
+    Scalability
+    → Ability to handle increasing workload
+
+#### Vertical Scaling
+
+    Scale Up
+    → More CPU/RAM on one machine
+
+#### Horizontal Scaling
+
+    Scale Out
+    → More machines/instances
+
+#### Hirely
+
+Current:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+Future:
+
+                    Load Balancer
+                         ↓
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+          FastAPI     FastAPI     FastAPI
+              └──────────┼──────────┘
+                         ↓
+                     PostgreSQL
+
+For AI-heavy workloads:
+
+    FastAPI
+       ↓
+    Task Queue
+       ↓
+    AI Workers
+       ↓
+    AI Model
+       ↓
+    PostgreSQL
+
+### Final Principle
+
+> **Build the simplest architecture that satisfies the current requirements, measure real bottlenecks, and scale only where necessary.**
+
+---
+
+### Database Design Research Completion
+
+The complete Database Design research section is now:
+
+    10. Database Design
+
+    10.1 SQLite
+    10.2 PostgreSQL
+    10.3 Data Models
+    10.4 Scalability
+
+All four topics are now covered.
