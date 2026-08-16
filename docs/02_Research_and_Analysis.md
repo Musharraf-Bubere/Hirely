@@ -20684,3 +20684,949 @@ But we must consider:
 before choosing it as the final production database.
 
 > **Hirely will evaluate SQLite for development and early-stage use, while PostgreSQL will be researched before making the final production database decision.**
+
+## 10.2 PostgreSQL
+
+### Background
+
+PostgreSQL is a powerful, open-source, object-relational database management system (ORDBMS).
+
+Unlike SQLite, PostgreSQL normally runs as a database server.
+
+Conceptually:
+
+    Hirely
+       ↓
+    FastAPI
+       ↓
+    SQLAlchemy
+       ↓
+    PostgreSQL Server
+       ↓
+    Database
+
+PostgreSQL is designed for applications that need:
+
+- Multiple users
+- Concurrent operations
+- Strong data integrity
+- Complex queries
+- Reliable transactions
+- Scalability
+- Production workloads
+
+---
+
+### PostgreSQL Architecture
+
+With PostgreSQL, the database is separate from the application process.
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+      ↓
+    Database
+
+PostgreSQL runs as a database service/server.
+
+The application connects to that server using a database connection.
+
+---
+
+### PostgreSQL Database Structure
+
+A PostgreSQL server can contain multiple databases.
+
+Conceptually:
+
+    PostgreSQL Server
+           │
+           ├── Database 1
+           │
+           ├── Database 2
+           │
+           └── Hirely Database
+                  │
+                  ├── users
+                  ├── resumes
+                  ├── jobs
+                  ├── applications
+                  ├── skills
+                  └── analyses
+
+For Hirely, we would have a dedicated database containing our application tables.
+
+---
+
+### PostgreSQL is Relational
+
+PostgreSQL is a relational database.
+
+It works with:
+
+    Tables
+    Rows
+    Columns
+    Primary Keys
+    Foreign Keys
+    Relationships
+    Constraints
+    Indexes
+    Transactions
+    SQL
+
+Example:
+
+    users
+    -------------------------
+    id | name | email
+    -------------------------
+    1  | A    | a@email.com
+    2  | B    | b@email.com
+
+And:
+
+    resumes
+    -------------------------
+    id | user_id | filename
+    -------------------------
+    1  | 1       | resume.pdf
+    2  | 1       | cv.pdf
+    3  | 2       | resume.pdf
+
+Here:
+
+    resumes.user_id
+           ↓
+        users.id
+
+creates the relationship.
+
+---
+
+### PostgreSQL and SQLAlchemy
+
+We already studied SQLAlchemy in our Backend Technologies section.
+
+Our architecture becomes:
+
+    FastAPI
+       ↓
+    Service Layer
+       ↓
+    SQLAlchemy
+       ↓
+    PostgreSQL
+
+SQLAlchemy acts as the application's database interaction layer.
+
+This allows us to work with PostgreSQL from our Python backend without writing every database operation manually.
+
+---
+
+### PostgreSQL Connection
+
+Conceptually, a PostgreSQL connection contains information such as:
+
+    Database Type
+    Host
+    Port
+    Username
+    Password
+    Database Name
+
+Example:
+
+    postgresql://username:password@host:port/database
+
+In Hirely, sensitive database credentials should not be hardcoded in source code.
+
+Instead:
+
+    Environment Variables
+            ↓
+    Database Configuration
+            ↓
+    SQLAlchemy
+            ↓
+    PostgreSQL
+
+---
+
+### PostgreSQL and FastAPI
+
+Our backend architecture can be:
+
+    React
+      ↓
+    HTTP Request
+      ↓
+    FastAPI
+      ↓
+    Pydantic Validation
+      ↓
+    Service Layer
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+This fits naturally with the backend technologies we have already researched.
+
+---
+
+### PostgreSQL Concurrency
+
+One of PostgreSQL's important strengths is handling concurrent database operations.
+
+Imagine many Hirely users accessing the application:
+
+    User 1 ──┐
+    User 2 ──┤
+    User 3 ──┼──→ FastAPI ──→ PostgreSQL
+    User 4 ──┤
+    User 5 ──┘
+
+Multiple users can perform database operations concurrently.
+
+This makes PostgreSQL more suitable for production applications with many simultaneous users than a simple embedded database such as SQLite.
+
+---
+
+### PostgreSQL Transactions
+
+PostgreSQL provides strong transaction support.
+
+A transaction groups multiple database operations into one logical unit.
+
+Conceptually:
+
+    BEGIN
+       ↓
+    Operation 1
+       ↓
+    Operation 2
+       ↓
+    Operation 3
+       ↓
+    COMMIT
+
+If something goes wrong:
+
+    ROLLBACK
+
+This helps protect database consistency.
+
+---
+
+### ACID Properties
+
+PostgreSQL provides strong transactional guarantees based on the ACID principles.
+
+#### Atomicity
+
+A transaction is treated as a complete unit.
+
+    All Operations
+          ↓
+    Success → COMMIT
+
+    Failure
+          ↓
+    ROLLBACK
+
+#### Consistency
+
+The database moves from one valid state to another valid state.
+
+#### Isolation
+
+Concurrent transactions are isolated according to the configured transaction behavior.
+
+#### Durability
+
+Once a transaction is successfully committed, the database is designed to preserve that committed data.
+
+For Hirely, these properties are important when handling operations involving users, applications, resumes, and analysis records.
+
+---
+
+### PostgreSQL Data Integrity
+
+PostgreSQL supports constraints such as:
+
+    PRIMARY KEY
+    FOREIGN KEY
+    UNIQUE
+    NOT NULL
+    CHECK
+
+Example:
+
+    users
+    -------------------------
+    id       → PRIMARY KEY
+    email    → UNIQUE
+    name     → NOT NULL
+
+These constraints help prevent invalid or inconsistent data.
+
+---
+
+### Primary Keys
+
+A primary key uniquely identifies a record.
+
+Example:
+
+    users
+
+    id
+    ---
+    1
+    2
+    3
+
+Here:
+
+    id
+    ↓
+    Primary Key
+
+Each user can be uniquely identified.
+
+---
+
+### Foreign Keys
+
+A foreign key creates a relationship between tables.
+
+Example:
+
+    users
+    ----------------
+    id
+    1
+    2
+    3
+
+And:
+
+    resumes
+    -------------------------
+    id    user_id
+    101      1
+    102      1
+    103      2
+
+Here:
+
+    resumes.user_id
+           ↓
+        users.id
+
+This allows Hirely to associate resumes with their owners.
+
+---
+
+### Indexes
+
+PostgreSQL supports indexes to improve query performance.
+
+For example, Hirely may frequently search for a user using an email address:
+
+    Find User
+        ↓
+      Email
+        ↓
+    Database Lookup
+
+An appropriate index can make the lookup much more efficient.
+
+Conceptually:
+
+    Table
+      ↓
+    Index
+      ↓
+    Faster Query
+
+Indexes should be designed carefully because they also consume storage and add overhead to data modifications.
+
+---
+
+### PostgreSQL and Complex Queries
+
+PostgreSQL is suitable for more complex database queries.
+
+Hirely may eventually need queries such as:
+
+    Find all applications
+    for a particular user
+    that are associated with jobs
+    matching certain criteria.
+
+With multiple related tables:
+
+    Users
+      ↓
+    Applications
+      ↓
+    Jobs
+      ↓
+    Companies
+
+PostgreSQL can efficiently handle relational querying across these structures.
+
+---
+
+### PostgreSQL and Hirely
+
+Potential Hirely entities could include:
+
+    users
+    profiles
+    resumes
+    jobs
+    applications
+    skills
+    resume_analyses
+    recommendations
+
+Relationships might look like:
+
+    User
+     │
+     ├── Profile
+     │
+     ├── Resume
+     │      ↓
+     │   Analysis
+     │      ↓
+     │   Skills
+     │
+     └── Applications
+             ↓
+            Jobs
+
+PostgreSQL is well suited to this type of relational structure.
+
+---
+
+### PostgreSQL and AI Analysis
+
+Hirely's AI pipeline may eventually look like:
+
+    Resume
+       ↓
+    FastAPI
+       ↓
+    AI Service
+       ↓
+    AI Model
+       ↓
+    Analysis Result
+       ↓
+    SQLAlchemy
+       ↓
+    PostgreSQL
+
+For example, we might store:
+
+    resume_analyses
+    -------------------------
+    id
+    resume_id
+    score
+    summary
+    created_at
+
+This allows previous AI analysis results to be retrieved later.
+
+---
+
+### PostgreSQL and Scalability
+
+One major reason PostgreSQL is being considered for Hirely is future growth.
+
+Imagine:
+
+    Development
+         ↓
+       MVP
+         ↓
+    More Users
+         ↓
+    More Resumes
+         ↓
+    More Applications
+         ↓
+    More AI Analyses
+         ↓
+     Production
+
+As database activity increases, PostgreSQL provides a stronger foundation for a production database than SQLite in many application scenarios.
+
+However, scalability is a broader topic that we will study separately in:
+
+    10.4 Scalability
+
+---
+
+### PostgreSQL and Multiple Application Instances
+
+A production application may eventually run multiple backend instances:
+
+                 Load Balancer
+                      ↓
+            ┌─────────┼─────────┐
+            ↓         ↓         ↓
+         FastAPI   FastAPI   FastAPI
+            └─────────┼─────────┘
+                      ↓
+                 PostgreSQL
+
+A centralized database server fits naturally into this architecture.
+
+This is one important difference from a simple SQLite file tied to one application environment.
+
+---
+
+### PostgreSQL and Docker
+
+PostgreSQL can also run as a Docker container.
+
+Conceptually:
+
+    Docker Compose
+          │
+          ├── FastAPI
+          │
+          ├── React
+          │
+          └── PostgreSQL
+
+This can make local development environments reproducible.
+
+Later, when we study deployment, we will examine Docker and Docker Compose in more detail.
+
+---
+
+### PostgreSQL and Security
+
+PostgreSQL provides database-level access controls and authentication mechanisms.
+
+Conceptually:
+
+    Application
+         ↓
+    Database Credentials
+         ↓
+    PostgreSQL
+         ↓
+    Authorized Database Access
+
+However, application security is still our responsibility.
+
+We must protect:
+
+    Database Credentials
+    Passwords
+    Connection Strings
+    Network Access
+    Sensitive Data
+
+These topics will connect with our later Security section.
+
+---
+
+### PostgreSQL and Environment Variables
+
+We should avoid doing this:
+
+    DATABASE_PASSWORD = "my-secret-password"
+
+inside application source code.
+
+Instead:
+
+    Environment Variables
+            ↓
+        DATABASE_URL
+            ↓
+        Application
+            ↓
+        SQLAlchemy
+            ↓
+        PostgreSQL
+
+This keeps sensitive configuration outside the source code.
+
+---
+
+### PostgreSQL and Migrations
+
+As Hirely evolves, our database schema will change.
+
+For example:
+
+    Version 1
+    users
+
+          ↓
+
+    Version 2
+    users
+    resumes
+
+          ↓
+
+    Version 3
+    users
+    resumes
+    jobs
+
+          ↓
+
+    Version 4
+    users
+    resumes
+    jobs
+    applications
+
+We should manage these changes using database migrations.
+
+Since we are already using SQLAlchemy, Alembic is a natural migration tool to consider.
+
+Conceptually:
+
+    SQLAlchemy Models
+           ↓
+    Alembic Migration
+           ↓
+    PostgreSQL Schema
+
+We will deal with migrations during implementation.
+
+---
+
+### PostgreSQL Backup
+
+For production, database backups are important.
+
+Conceptually:
+
+    PostgreSQL
+        ↓
+      Backup
+        ↓
+      Storage
+        ↓
+     Recovery
+
+If Hirely stores:
+
+    User Data
+    Resume Metadata
+    Applications
+    AI Analysis
+    Recommendations
+
+losing the database could mean losing important application data.
+
+Therefore, backup and recovery must eventually be part of the deployment strategy.
+
+---
+
+### PostgreSQL vs SQLite
+
+Now we can compare the two databases at a high level:
+
+    ┌──────────────────┬─────────────┬──────────────┐
+    │                  │ SQLite      │ PostgreSQL   │
+    ├──────────────────┼─────────────┼──────────────┤
+    │ Architecture     │ Embedded    │ Client/Server│
+    │ Setup             │ Very Simple │ More Setup   │
+    │ Server            │ Not Required│ Required     │
+    │ Development      │ Excellent   │ Excellent    │
+    │ MVP               │ Excellent   │ Excellent    │
+    │ Concurrency       │ More Limited│ Strong       │
+    │ Transactions     │ Supported   │ Strong       │
+    │ Scalability      │ Limited     │ Better       │
+    │ Production       │ Depends     │ Strong Option│
+    │ Multi-Instance   │ Limited     │ Better Fit   │
+    └──────────────────┴─────────────┴──────────────┘
+
+Neither database is universally "better."
+
+The correct choice depends on the application's requirements.
+
+---
+
+### SQLite for Early Hirely
+
+SQLite is attractive because:
+
+    Simple
+    Lightweight
+    Easy Setup
+    Fast Development
+    No Separate Server
+
+Therefore:
+
+    Development
+          ↓
+        SQLite
+
+can be very convenient.
+
+---
+
+### PostgreSQL for Production Hirely
+
+PostgreSQL becomes attractive when we need:
+
+    Multiple Users
+    Concurrent Operations
+    Production Workload
+    Centralized Database
+    Multiple Backend Instances
+    More Advanced Database Requirements
+
+Conceptually:
+
+    Production Hirely
+           ↓
+        FastAPI
+           ↓
+        SQLAlchemy
+           ↓
+        PostgreSQL
+
+---
+
+### PostgreSQL Cost Consideration
+
+PostgreSQL itself is open-source, but running it in production still has infrastructure costs.
+
+Potential costs include:
+
+    Server
+    Storage
+    Backup
+    Monitoring
+    Maintenance
+    Cloud Infrastructure
+
+Therefore:
+
+    PostgreSQL
+       ≠
+    Zero Production Cost
+
+The database software may be open-source, but the infrastructure running it still costs money.
+
+This connects with our earlier Cost Comparison research.
+
+---
+
+### PostgreSQL Operational Responsibility
+
+Using PostgreSQL means we need to think about:
+
+    Database Setup
+    Configuration
+    Backups
+    Monitoring
+    Updates
+    Security
+    Performance
+    Scaling
+
+Managed PostgreSQL services can reduce some of this operational burden.
+
+---
+
+### When PostgreSQL is a Good Choice
+
+PostgreSQL is a strong candidate when an application requires:
+
+    Production Database
+    Multiple Users
+    Concurrent Operations
+    Complex Relationships
+    Strong Transactions
+    Data Integrity
+    Scalability
+    Centralized Database
+
+---
+
+### When SQLite May Still Be Better
+
+PostgreSQL is not automatically necessary for every environment.
+
+For:
+
+    Local Development
+    Small Prototype
+    Testing
+    Simple MVP
+
+SQLite may be simpler and more convenient.
+
+Therefore, we can potentially use different databases for different environments if the architecture supports it.
+
+---
+
+### Development vs Production
+
+A possible Hirely strategy is:
+
+    Development
+         ↓
+       SQLite
+
+    Production
+         ↓
+      PostgreSQL
+
+This is a common architectural pattern.
+
+However, before making this our final decision, we need to consider whether differences between the two database engines could affect our application.
+
+Our SQLAlchemy layer can help keep much of the application database interaction consistent, but database-specific behavior still needs testing.
+
+---
+
+### PostgreSQL and Hirely Architecture
+
+Our possible production architecture becomes:
+
+                             React
+                               ↓
+                            FastAPI
+                               ↓
+                        Pydantic Validation
+                               ↓
+                         Service Layer
+                               ↓
+                           SQLAlchemy
+                               ↓
+                          PostgreSQL
+
+AI processing can connect through the service layer:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    Service Layer
+      ├──────────────→ AI Service
+      │                    ↓
+      │                 AI Model
+      │                    ↓
+      │              Analysis Result
+      │
+      └──────────────→ SQLAlchemy
+                           ↓
+                       PostgreSQL
+
+This gives Hirely a clear separation between application logic, AI processing, and data persistence.
+
+---
+
+### Initial Analysis for Hirely
+
+Compared with SQLite, PostgreSQL provides a stronger foundation for a growing production application.
+
+Its main advantages for Hirely are:
+
+    Strong Concurrency
+    Strong Transactions
+    Data Integrity
+    Complex Queries
+    Production Suitability
+    Centralized Database
+    Scalability
+
+But it also introduces:
+
+    More Setup
+    More Infrastructure
+    More Operational Responsibility
+
+---
+
+### Decision for Hirely
+
+At this stage, we should not immediately finalize PostgreSQL as the production database.
+
+Our current understanding is:
+
+    SQLite
+       ↓
+    Excellent for Development / Early MVP
+
+    PostgreSQL
+       ↓
+    Strong Candidate for Production
+
+The final decision will be made after completing:
+
+    10.1 SQLite       ✅
+    10.2 PostgreSQL   ✅
+    10.3 Data Models  ⏳
+    10.4 Scalability  ⏳
+
+We will use the remaining research to determine the actual database architecture for Hirely.
+
+---
+
+### Key Takeaways
+
+The most important concepts are:
+
+    PostgreSQL
+         ↓
+    Server-Based Relational Database
+         ↓
+    Strong Transactions
+         ↓
+    Strong Data Integrity
+         ↓
+    Concurrent Access
+         ↓
+    Production-Friendly
+
+For Hirely:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    SQLAlchemy
+      ↓
+    PostgreSQL
+
+The major comparison is:
+
+    SQLite
+    → Simple
+    → Lightweight
+    → Development / MVP
+
+    PostgreSQL
+    → Production-oriented
+    → Strong concurrency
+    → Better scaling
+    → More infrastructure
+
+Our current direction is:
+
+> **Use SQLite where simplicity is valuable during development, while PostgreSQL is a strong candidate for Hirely's production environment. The final decision will be made after researching Data Models and Scalability.**
