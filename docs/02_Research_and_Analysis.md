@@ -19955,7 +19955,7 @@ For Hirely, we need to optimize:
 
 The final architecture should be selected based on **total cost of ownership and actual Hirely requirements**, not just the price per API request.
 
-# Database Design
+# 10 Database Design
 
 ## 10.1 SQLite
 
@@ -21630,3 +21630,1070 @@ The major comparison is:
 Our current direction is:
 
 > **Use SQLite where simplicity is valuable during development, while PostgreSQL is a strong candidate for Hirely's production environment. The final decision will be made after researching Data Models and Scalability.**
+
+## 10.3 Data Models
+
+### Background
+
+A **data model** defines how the application's data is structured, stored, and related.
+
+In simple terms:
+
+> A data model describes what data we store and how different pieces of data are connected.
+
+For Hirely:
+
+    User
+      ↓
+    Resume
+      ↓
+    Resume Analysis
+      ↓
+    Skills
+
+And:
+
+    User
+      ↓
+    Application
+      ↓
+    Job
+
+These relationships form part of our data model.
+
+---
+
+### Why Data Models Matter
+
+Before creating database tables, we need to understand:
+
+    What data do we need?
+            ↓
+    What entities exist?
+            ↓
+    What attributes do they have?
+            ↓
+    How are entities related?
+            ↓
+    How should they be stored?
+
+Without a proper data model, we may end up with:
+
+    Duplicate Data
+    Poor Relationships
+    Inconsistent Data
+    Difficult Queries
+    Difficult Maintenance
+
+A good data model provides:
+
+    Organized Data
+          ↓
+    Clear Relationships
+          ↓
+    Data Integrity
+          ↓
+    Maintainability
+
+---
+
+### Entity
+
+An **entity** represents something about which we want to store information.
+
+For Hirely, possible entities include:
+
+    User
+    Profile
+    Resume
+    Job
+    Application
+    Skill
+    Resume Analysis
+    Recommendation
+
+Each entity may eventually become a database table.
+
+Conceptually:
+
+    Entity
+      ↓
+    Database Table
+
+For example:
+
+    User
+      ↓
+    users table
+
+---
+
+### Attributes
+
+An attribute describes a property of an entity.
+
+For example, a User may have:
+
+    User
+    ----------------
+    id
+    name
+    email
+    created_at
+
+Here:
+
+    id
+    name
+    email
+    created_at
+
+are attributes of the User entity.
+
+In a relational database, these usually become columns.
+
+    User Entity
+         ↓
+    users Table
+         ↓
+       Columns
+
+---
+
+### Records
+
+A record represents one instance of an entity.
+
+For example:
+
+    users
+
+    id | name | email
+    ---------------------------
+    1  | A    | a@email.com
+    2  | B    | b@email.com
+
+Each row represents one user record.
+
+Therefore:
+
+    Table
+      ↓
+    Rows
+      ↓
+    Records
+
+---
+
+### Entity vs Attribute vs Record
+
+It is important to distinguish them.
+
+    Entity
+      ↓
+    User
+
+    Attributes
+      ↓
+    id
+    name
+    email
+
+    Record
+      ↓
+    1 | A | a@email.com
+
+So:
+
+    Entity      → What we are storing
+    Attribute   → Property of that entity
+    Record      → One stored instance
+
+---
+
+### Primary Key
+
+Every important entity generally needs a way to uniquely identify each record.
+
+This is the purpose of a **primary key**.
+
+Example:
+
+    users
+
+    id | name
+    ---------
+    1  | A
+    2  | B
+    3  | C
+
+Here:
+
+    id
+    ↓
+    Primary Key
+
+Each value must uniquely identify a user.
+
+For Hirely:
+
+    User
+      ↓
+    user_id
+
+can be used to uniquely identify users.
+
+---
+
+### Foreign Key
+
+A **foreign key** is used to establish a relationship between tables.
+
+Suppose:
+
+    users
+
+    id
+    ---
+    1
+    2
+
+and:
+
+    resumes
+
+    id | user_id
+    -----------
+    101 | 1
+    102 | 1
+    103 | 2
+
+Here:
+
+    resumes.user_id
+          ↓
+       users.id
+
+The `user_id` in the resumes table is a foreign key referencing the user.
+
+---
+
+### Relationships
+
+Relationships describe how entities are connected.
+
+For Hirely:
+
+    User
+      ↓
+    Resume
+
+means a resume belongs to a user.
+
+Another relationship:
+
+    User
+      ↓
+    Application
+      ↓
+    Job
+
+means a user can apply to jobs.
+
+Relationships are one of the most important parts of our data model.
+
+---
+
+### One-to-One Relationship
+
+A **one-to-one** relationship means one record is associated with one record from another entity.
+
+Conceptually:
+
+    User
+      ↓
+    Profile
+
+For example:
+
+    User 1
+      ↓
+    Profile 1
+
+If Hirely requires exactly one profile for each user, this can be modeled as a one-to-one relationship.
+
+---
+
+### One-to-Many Relationship
+
+A **one-to-many** relationship means one record can be associated with multiple records.
+
+This is very common in Hirely.
+
+For example:
+
+    User
+     ├── Resume 1
+     ├── Resume 2
+     └── Resume 3
+
+One user can have multiple resumes.
+
+Database structure:
+
+    users
+    ----------------
+    id
+    1
+
+    resumes
+    ----------------
+    id | user_id
+    101 | 1
+    102 | 1
+    103 | 1
+
+Here:
+
+    One User
+       ↓
+    Many Resumes
+
+---
+
+### Many-to-Many Relationship
+
+A **many-to-many** relationship means many records on one side can be associated with many records on the other side.
+
+Skills are a good example.
+
+A resume can contain many skills:
+
+    Resume
+     ├── Python
+     ├── SQL
+     └── FastAPI
+
+And the same skill can appear in many resumes:
+
+    Python
+     ├── Resume 1
+     ├── Resume 2
+     └── Resume 3
+
+Therefore:
+
+    Resume
+       ↕
+    Skills
+
+is potentially a many-to-many relationship.
+
+Usually, a separate junction/association table is used.
+
+Conceptually:
+
+    resumes
+        ↓
+    resume_skills
+        ↓
+    skills
+
+---
+
+### Hirely Entity Relationship Overview
+
+Our initial Hirely data model could look approximately like:
+
+                        User
+                         │
+              ┌──────────┼──────────┐
+              ↓          ↓          ↓
+           Profile     Resume    Application
+                         │             │
+                         ↓             ↓
+                  Resume Analysis     Job
+                         │
+                         ↓
+                       Skills
+
+This is an initial conceptual model.
+
+We will refine it during implementation.
+
+---
+
+### User Model
+
+A possible User model:
+
+    User
+    ----------------
+    id
+    name
+    email
+    password_hash
+    created_at
+
+The exact fields will depend on Hirely's authentication and application requirements.
+
+Important point:
+
+> We should store only the data that Hirely actually needs.
+
+---
+
+### Profile Model
+
+A possible profile:
+
+    Profile
+    ----------------
+    id
+    user_id
+    headline
+    location
+    bio
+    created_at
+
+Relationship:
+
+    User
+      ↓
+    Profile
+
+The `user_id` connects the profile to its user.
+
+---
+
+### Resume Model
+
+A possible Resume model:
+
+    Resume
+    ----------------
+    id
+    user_id
+    filename
+    file_path
+    uploaded_at
+
+Relationship:
+
+    User
+      ↓
+    Resume
+
+One user may have multiple resumes:
+
+    User
+     ├── Resume 1
+     ├── Resume 2
+     └── Resume 3
+
+---
+
+### Job Model
+
+A possible Job model:
+
+    Job
+    ----------------
+    id
+    title
+    company
+    description
+    location
+    created_at
+
+This represents a job opportunity stored in Hirely.
+
+---
+
+### Application Model
+
+An application connects a user with a job.
+
+    Application
+    ----------------
+    id
+    user_id
+    job_id
+    status
+    applied_at
+
+Relationships:
+
+    User
+      ↓
+    Application
+      ↓
+    Job
+
+This is useful because the Application entity represents the relationship between the user and the job.
+
+---
+
+### Resume Analysis Model
+
+Hirely's AI functionality will generate analysis for resumes.
+
+A possible model:
+
+    ResumeAnalysis
+    ----------------
+    id
+    resume_id
+    score
+    summary
+    created_at
+
+Relationship:
+
+    Resume
+       ↓
+    Resume Analysis
+
+Potentially:
+
+    Resume
+     ├── Analysis 1
+     ├── Analysis 2
+     └── Analysis 3
+
+This could allow Hirely to maintain analysis history.
+
+The exact relationship will depend on how we design the analysis workflow.
+
+---
+
+### Skill Model
+
+A possible Skill entity:
+
+    Skill
+    ----------------
+    id
+    name
+
+Examples:
+
+    Python
+    SQL
+    FastAPI
+    React
+    Machine Learning
+
+Skills can be connected to resumes.
+
+Conceptually:
+
+    Resume
+       ↓
+    Resume Skills
+       ↓
+    Skill
+
+---
+
+### Recommendation Model
+
+Hirely may eventually generate recommendations.
+
+For example:
+
+    Recommendation
+    ----------------
+    id
+    user_id
+    type
+    content
+    created_at
+
+Conceptually:
+
+    User
+      ↓
+    Recommendation
+
+The exact structure will depend on the final AI features.
+
+---
+
+### Normalization
+
+**Normalization** is the process of organizing data to reduce unnecessary duplication and improve data integrity.
+
+Consider a bad design:
+
+    Applications
+
+    user_name
+    user_email
+    job_title
+    company
+    application_status
+
+If the same user applies to 20 jobs, their information may be repeated many times.
+
+Instead, we can separate entities:
+
+    Users
+    Jobs
+    Applications
+
+and connect them through IDs.
+
+    Users
+      ↓
+    Applications
+      ↓
+    Jobs
+
+This reduces unnecessary duplication.
+
+---
+
+### Why Normalization Matters for Hirely
+
+Without proper structure:
+
+    Duplicate User Data
+            ↓
+    Repeated Updates
+            ↓
+    Inconsistency
+
+With better normalization:
+
+    Users
+    Jobs
+    Applications
+          ↓
+    Relationships
+          ↓
+    Consistent Data
+
+We don't need to over-normalize everything, but we should avoid unnecessary duplication.
+
+---
+
+### Data Integrity
+
+A data model should help maintain correct data.
+
+For example:
+
+    Application
+
+should reference a valid:
+
+    User
+
+and:
+
+    Job
+
+Therefore:
+
+    application.user_id
+            ↓
+       valid users.id
+
+    application.job_id
+            ↓
+       valid jobs.id
+
+Foreign keys help enforce these relationships.
+
+---
+
+### Constraints
+
+Database constraints help prevent invalid data.
+
+Common constraints include:
+
+    PRIMARY KEY
+    FOREIGN KEY
+    UNIQUE
+    NOT NULL
+    CHECK
+
+For example:
+
+    User
+    ----------------
+    id       → PRIMARY KEY
+    email    → UNIQUE
+    name     → NOT NULL
+
+This protects the database from invalid states.
+
+---
+
+### Data Model vs Database Schema
+
+These concepts are related but not exactly the same.
+
+#### Data Model
+
+Describes:
+
+    Entities
+    Attributes
+    Relationships
+    Rules
+
+Example:
+
+    User
+      ↓
+    Resume
+
+#### Database Schema
+
+Describes how those concepts are actually implemented in the database.
+
+For example:
+
+    users
+    resumes
+    applications
+    jobs
+
+with columns, constraints, indexes, and relationships.
+
+Conceptually:
+
+    Requirements
+         ↓
+    Data Model
+         ↓
+    Database Schema
+         ↓
+    Database
+
+---
+
+### SQLAlchemy Models
+
+Our application will use SQLAlchemy.
+
+Conceptually:
+
+    Data Model
+        ↓
+    SQLAlchemy Models
+        ↓
+    Database Tables
+
+For example:
+
+    User Model
+        ↓
+    users table
+
+    Resume Model
+        ↓
+    resumes table
+
+This connects the conceptual data model with the actual implementation.
+
+---
+
+### Pydantic vs SQLAlchemy Models
+
+We have already studied Pydantic.
+
+It is important not to confuse Pydantic models with database models.
+
+#### Pydantic
+
+Primarily used for:
+
+    API Data
+    Validation
+    Serialization
+    Request/Response Schemas
+
+#### SQLAlchemy
+
+Primarily used for:
+
+    Database Models
+    Database Operations
+    Relationships
+    Persistence
+
+Conceptually:
+
+    React
+      ↓
+    JSON
+      ↓
+    Pydantic
+      ↓
+    Service Layer
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+This separation is important in Hirely.
+
+---
+
+### Data Flow in Hirely
+
+A typical request may look like:
+
+    React
+      ↓
+    API Request
+      ↓
+    FastAPI
+      ↓
+    Pydantic Validation
+      ↓
+    Service Layer
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+For a resume upload:
+
+    User
+      ↓
+    React
+      ↓
+    FastAPI
+      ↓
+    Validate Request
+      ↓
+    Store Resume
+      ↓
+    Create Resume Record
+      ↓
+    Database
+
+Then AI analysis:
+
+    Resume
+      ↓
+    AI Processing
+      ↓
+    Analysis Result
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+---
+
+### Avoiding Over-Design
+
+We should not create dozens of tables just because we can.
+
+For Hirely, the goal is:
+
+    Required Data
+         ↓
+    Clear Models
+         ↓
+    Simple Relationships
+         ↓
+    Future Extensibility
+
+We should avoid premature complexity.
+
+If a feature is not part of the current Hirely requirements, we don't need to create a complex database structure for it now.
+
+---
+
+### Initial Hirely Data Model
+
+Our initial conceptual model is:
+
+    User
+     │
+     ├── Profile
+     │
+     ├── Resume
+     │      │
+     │      └── Resume Analysis
+     │               │
+     │               └── Skills
+     │
+     └── Application
+              │
+              └── Job
+
+This gives us a starting point for implementation.
+
+---
+
+### Important Relationships
+
+The most important relationships currently identified are:
+
+    User → Profile
+            ↓
+         One-to-One
+
+    User → Resume
+            ↓
+         One-to-Many
+
+    User → Application
+            ↓
+         One-to-Many
+
+    Job → Application
+            ↓
+         One-to-Many
+
+    Resume ↔ Skill
+            ↓
+       Many-to-Many
+
+The exact relationships can be adjusted during implementation based on actual requirements.
+
+---
+
+### Data Model and Scalability
+
+A good data model should also consider future growth.
+
+Current:
+
+    Few Users
+    Few Resumes
+    Few Jobs
+
+Future:
+
+    Many Users
+    Many Resumes
+    Many Jobs
+    Many Applications
+    Many AI Analyses
+
+Therefore, the data model should be:
+
+    Simple
+       +
+    Well Structured
+       +
+    Maintainable
+       +
+    Extensible
+
+This connects directly to our next topic:
+
+    10.4 Scalability
+
+---
+
+### Decision for Hirely
+
+Our current approach is:
+
+    Identify Entities
+          ↓
+    Define Attributes
+          ↓
+    Define Relationships
+          ↓
+    Define Keys
+          ↓
+    Apply Constraints
+          ↓
+    Create SQLAlchemy Models
+          ↓
+    Create Database Schema
+
+The initial Hirely entities are:
+
+    User
+    Profile
+    Resume
+    Job
+    Application
+    Skill
+    Resume Analysis
+    Recommendation
+
+The model will remain intentionally simple at the beginning and can evolve as actual features are implemented.
+
+---
+
+### Key Takeaways
+
+The most important concepts are:
+
+    Data Model
+        ↓
+    Defines how application data is structured
+        ↓
+    Entities
+        ↓
+    Attributes
+        ↓
+    Relationships
+        ↓
+    Keys
+        ↓
+    Constraints
+
+For Hirely:
+
+    User
+     │
+     ├── Profile
+     ├── Resume
+     │      ↓
+     │   Analysis
+     │      ↓
+     │    Skills
+     │
+     └── Application
+              ↓
+             Job
+
+Remember:
+
+    Entity
+    → What we store
+
+    Attribute
+    → Property of an entity
+
+    Record
+    → One instance of an entity
+
+    Primary Key
+    → Uniquely identifies a record
+
+    Foreign Key
+    → Connects records between tables
+
+    Relationship
+    → Defines how entities are connected
+
+And our application architecture remains:
+
+    React
+      ↓
+    FastAPI
+      ↓
+    Pydantic
+      ↓
+    Service Layer
+      ↓
+    SQLAlchemy
+      ↓
+    Database
+
+> The Hirely data model should be simple, normalized where appropriate, relationship-driven, and flexible enough to evolve as the project grows.
