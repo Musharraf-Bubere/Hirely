@@ -1,10 +1,14 @@
 from fastapi import FastAPI
+
 from app.api.health import router as health_router
+from app.core.config import settings
+
 
 app = FastAPI(
-    title="Hirely API",
+    title=settings.app_name,
     description="Backend API for Hirely",
-    version="0.1.0"
+    version=settings.app_version,
+    debug=settings.debug,
 )
 
 
