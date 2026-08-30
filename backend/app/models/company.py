@@ -1,50 +1,36 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-
-class Recruiter(Base):
-    __tablename__ = "recruiters"
+class Company(Base):
+    __tablename__ = "companies"
 
     id: Mapped[UUID] = mapped_column(
         primary_key=True,
         default=uuid4,
     )
 
-    user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id"),
-        unique=True,
+    name: Mapped[str] = mapped_column(
+        String(255),
         nullable=False,
-        index=True,
     )
 
-    company_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("companies.id"),
+    description: Mapped[str | None] = mapped_column(
+        Text,
         nullable=True,
-        index=True,
     )
 
-    first_name: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    last_name: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    job_title: Mapped[str | None] = mapped_column(
+    website: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
     )
 
-    company_name: Mapped[str | None] = mapped_column(
-        String(255),
+    industry: Mapped[str | None] = mapped_column(
+        String(100),
         nullable=True,
     )
 
