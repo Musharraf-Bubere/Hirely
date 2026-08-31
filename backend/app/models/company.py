@@ -2,9 +2,14 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.recruiter import Recruiter
 
 class Company(Base):
     __tablename__ = "companies"
@@ -12,6 +17,10 @@ class Company(Base):
     id: Mapped[UUID] = mapped_column(
         primary_key=True,
         default=uuid4,
+    )
+
+    recruiters: Mapped[list["Recruiter"]] = relationship(
+        back_populates="company",
     )
 
     name: Mapped[str] = mapped_column(

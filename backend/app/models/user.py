@@ -3,9 +3,15 @@ from enum import Enum
 from uuid import UUID, uuid4
 
 from sqlalchemy import Boolean, DateTime, Enum as SQLENUM, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.candidate import Candidate
+    from app.models.recruiter import Recruiter
 
 
 class UserRole(str, Enum):
@@ -55,4 +61,14 @@ class User(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         nullable=False,
+    )
+
+    candidate: Mapped["Candidate | None"] = relationship(
+        back_populates="user",
+        uselist=False,
+    )
+
+    recruiter: Mapped["Recruiter | None"] = relationship(
+        back_populates="user",
+        uselist=False,
     )

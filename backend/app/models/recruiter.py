@@ -2,9 +2,15 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.company import Company
 
 
 class Recruiter(Base):
@@ -28,6 +34,10 @@ class Recruiter(Base):
         index=True,
     )
 
+    company: Mapped["Company | None"] = relationship(
+        back_populates="recruiters",
+    )
+
     first_name: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -39,11 +49,6 @@ class Recruiter(Base):
     )
 
     job_title: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
-
-    company_name: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
     )
@@ -64,4 +69,8 @@ class Recruiter(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="recruiter",
     )
