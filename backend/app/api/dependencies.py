@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
 from app.db.session import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 
+from collections.abc import Callable
 
 bearer_scheme = HTTPBearer()
 
@@ -54,3 +55,32 @@ def get_current_user(
         )
 
     return user
+
+def require_role(required_role: UserRole) -> Callable:
+    def role_checker(
+        current_user: User = Depends(get_current_user),
+    ) -> User:
+        if current_user.role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+
+        return current_user
+
+    return role_checker
+
+def require_candidate(
+    current_user: User = Depends(
+        require_role(UserRole.CANDIDATE)
+    ),
+) -> User:
+    return current_user
+
+
+def require_recruiter(
+    current_user: User = Depends(
+        require_role(UserRole.RECRUITER)
+    ),
+) -> User:
+    return current_user
