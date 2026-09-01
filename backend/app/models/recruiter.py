@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.company import Company
+    from app.models.job import Job
 
 
 class Recruiter(Base):
@@ -72,5 +73,9 @@ class Recruiter(Base):
     )
 
     user: Mapped["User"] = relationship(
+        back_populates="recruiter",
+    )
+
+    jobs: Mapped[list["Job"]] = relationship(
         back_populates="recruiter",
     )
