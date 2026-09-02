@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.application import Application
+    from app.models.candidate_skill import CandidateSkill
 
 
 class Candidate(Base):
@@ -71,5 +72,9 @@ class Candidate(Base):
     )
 
     applications: Mapped[list["Application"]] = relationship(
+        back_populates="candidate",
+    )
+
+    candidate_skills: Mapped[list["CandidateSkill"]] = relationship(
         back_populates="candidate",
     )
