@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 from pydantic import ValidationError
 
-from app.ai.parsers.schemas import CandidateSummary
+from app.ai.parsers.schemas import ResumeData
 from app.ai.services.gemini_service import GeminiService
 
 
@@ -24,17 +24,17 @@ def test_generate_structured_returns_pydantic_model():
 
     result = service.generate_structured(
         "Extract candidate information",
-        CandidateSummary,
+        ResumeData,
     )
 
-    assert isinstance(result, CandidateSummary)
+    assert isinstance(result, ResumeData)
     assert result.name == "John Smith"
     assert result.skills == ["Python", "FastAPI"]
 
 
 def test_generate_structured_rejects_invalid_response():
     fake_response = Mock()
-    fake_response.text = '{"name": "John Smith", "skill": ["Python", "FastAPI"]}'
+    fake_response.text = '{"name": 123, "skills": "Python"}'
 
     with patch.object(
         GeminiService,
@@ -51,7 +51,7 @@ def test_generate_structured_rejects_invalid_response():
     try:
         service.generate_structured(
             "Extract candidate information",
-            CandidateSummary
+            ResumeData,
         )
         assert False, "Expected Pydantic ValidationError"
     except ValidationError:

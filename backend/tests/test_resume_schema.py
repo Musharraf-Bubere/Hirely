@@ -1,4 +1,9 @@
-from app.ai.parsers.schemas import ResumeData
+from app.ai.parsers.schemas import (
+    Certification,
+    Education,
+    Project,
+    ResumeData,
+)
 
 
 def test_resume_data_accepts_complete_resume():
@@ -47,3 +52,40 @@ def test_resume_data_allows_missing_optional_fields():
     assert data.phone is None
     assert data.experience == []
     assert data.education == []
+
+
+def test_resume_data_supports_projects_and_certifications():
+    resume = ResumeData(
+        name="Musharraf Bubere",
+        skills=["Python", "SQL"],
+        projects=[
+            Project(
+                name="HR Data Analytics Dashboard",
+                description="Built an interactive HR analytics dashboard.",
+                technologies=["Power BI", "DAX"],
+            )
+        ],
+        certifications=[
+            Certification(
+                name="Data Analysis with Python",
+                issuer="IBM",
+                date="Nov 2025",
+            )
+        ],
+        education=[
+            Education(
+                institution="IT Vedant - Private Institute",
+                degree="Master's",
+                field_of_study="Data Science, Analytics & Artificial Intelligence",
+                end_date="2025",
+            )
+        ],
+    )
+
+    assert resume.projects[0].name == "HR Data Analytics Dashboard"
+    assert resume.projects[0].technologies == ["Power BI", "DAX"]
+
+    assert resume.certifications[0].name == "Data Analysis with Python"
+    assert resume.certifications[0].issuer == "IBM"
+
+    assert resume.education[0].institution == "IT Vedant - Private Institute"

@@ -10,11 +10,23 @@ class WorkExperience(BaseModel):
 
 
 class Education(BaseModel):
-    instituition: str | None = None
+    institution: str | None = None
     degree: str | None = None
     field_of_study: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+
+
+class Project(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    technologies: list[str] = []
+
+
+class Certification(BaseModel):
+    name: str | None = None
+    issuer: str | None = None
+    date: str | None = None
 
 
 class ResumeData(BaseModel):
@@ -27,6 +39,7 @@ class ResumeData(BaseModel):
     summary: str | None = None
 
     skills: list[str] = []
-
     experience: list[WorkExperience] = []
+    projects: list[Project] = []
     education: list[Education] = []
+    certifications: list[Certification] = []
