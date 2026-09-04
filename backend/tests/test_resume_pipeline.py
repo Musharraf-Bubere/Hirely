@@ -1,3 +1,5 @@
+import pytest
+
 from pathlib import Path
 
 from app.ai.parsers.resume_parser import ResumeParserService
@@ -9,7 +11,7 @@ RESUME_PATH = (
     / "Musharraf_Resume.pdf"
 )
 
-
+@pytest.mark.integration
 def test_real_resume_pipeline():
     parser = ResumeParserService()
 
