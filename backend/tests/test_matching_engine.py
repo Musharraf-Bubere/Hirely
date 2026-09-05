@@ -1,9 +1,10 @@
 from uuid import uuid4
 
+import pytest
+
 from app.ai.matching.engine import MatchingEngine
 from app.ai.matching.scoring import MatchingConfig
 from app.ai.matching.skill_matching import SkillMatcher
-import pytest
 
 
 def test_matching_engine():
@@ -23,11 +24,17 @@ def test_matching_engine():
         job_embedding=[1.0, 0.0],
     )
 
-    assert result.candidate_id == candidate_id
-    assert result.required_skill_score == 0.5
-    assert result.preferred_skill_score == 0.0
-    assert result.semantic_similarity == 1.0
-    assert result.overall_score == 0.55
+    assert result.score.candidate_id == candidate_id
+    assert result.score.required_skill_score == 0.5
+    assert result.score.preferred_skill_score == 0.0
+    assert result.score.semantic_similarity == 1.0
+    assert result.score.overall_score == 0.55
+
+    assert result.skills.required_matched == ["Python"]
+    assert result.skills.required_missing == ["FastAPI"]
+    assert result.skills.preferred_matched == []
+    assert result.skills.preferred_missing == ["Docker"]
+
 
 def test_matching_engine_with_no_preferred_skills():
     candidate_id = uuid4()
@@ -46,11 +53,16 @@ def test_matching_engine_with_no_preferred_skills():
         job_embedding=[1.0, 0.0],
     )
 
-    assert result.candidate_id == candidate_id
-    assert result.required_skill_score == 1.0
-    assert result.preferred_skill_score == 1.0
-    assert result.semantic_similarity == 1.0
-    assert result.overall_score == 1.0
+    assert result.score.candidate_id == candidate_id
+    assert result.score.required_skill_score == 1.0
+    assert result.score.preferred_skill_score == 1.0
+    assert result.score.semantic_similarity == 1.0
+    assert result.score.overall_score == 1.0
+
+    assert result.skills.required_matched == ["Python"]
+    assert result.skills.required_missing == []
+    assert result.skills.preferred_matched == []
+    assert result.skills.preferred_missing == []
 
 
 def test_matching_engine_with_unavailable_preferred_skills():
@@ -70,11 +82,16 @@ def test_matching_engine_with_unavailable_preferred_skills():
         job_embedding=[1.0, 0.0],
     )
 
-    assert result.candidate_id == candidate_id
-    assert result.required_skill_score == 1.0
-    assert result.preferred_skill_score is None
-    assert result.semantic_similarity == 1.0
-    assert result.overall_score == 1.0
+    assert result.score.candidate_id == candidate_id
+    assert result.score.required_skill_score == 1.0
+    assert result.score.preferred_skill_score is None
+    assert result.score.semantic_similarity == 1.0
+    assert result.score.overall_score == 1.0
+
+    assert result.skills.required_matched == ["Python"]
+    assert result.skills.required_missing == []
+    assert result.skills.preferred_matched == []
+    assert result.skills.preferred_missing == []
 
 
 def test_matching_engine_rejects_different_embedding_dimensions():
@@ -132,7 +149,12 @@ def test_matching_engine_normalizes_negative_semantic_similarity():
         job_embedding=[-1.0, 0.0],
     )
 
-    assert result.candidate_id == candidate_id
-    assert result.semantic_similarity == 0.0
-    assert result.required_skill_score == 1.0
-    assert result.preferred_skill_score == 1.0
+    assert result.score.candidate_id == candidate_id
+    assert result.score.semantic_similarity == 0.0
+    assert result.score.required_skill_score == 1.0
+    assert result.score.preferred_skill_score == 1.0
+
+    assert result.skills.required_matched == ["Python"]
+    assert result.skills.required_missing == []
+    assert result.skills.preferred_matched == []
+    assert result.skills.preferred_missing == []

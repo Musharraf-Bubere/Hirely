@@ -49,7 +49,7 @@ def test_matching_engine_to_ranking_pipeline():
         job_embedding=[-1.0, 0.0],
     )
 
-    ranked = matching_service.rank_matches(
+    ranked = matching_service.rank_complete_matches(
         [result_a, result_b, result_c]
     )
 

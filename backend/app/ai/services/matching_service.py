@@ -3,6 +3,7 @@ from app.ai.matching.ranking import (
     RankedCandidate,
     candidate_ranker,
 )
+from app.ai.matching.results import CompleteMatchResult
 from app.ai.matching.scoring import MatchScoreResult
 
 
@@ -26,6 +27,17 @@ class MatchingService:
         ]
 
         return candidate_ranker.rank(candidate_matches)
+
+    def rank_complete_matches(
+        self,
+        results: list[CompleteMatchResult],
+    ) -> list[RankedCandidate]:
+        score_results = [
+            result.score
+            for result in results
+        ]
+
+        return self.rank_matches(score_results)
 
 
 matching_service = MatchingService()

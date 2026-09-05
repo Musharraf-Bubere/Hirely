@@ -9,6 +9,7 @@ from app.ai.matching.scoring import (
     calculate_match_score,
     normalize_semantic_similarity,
 )
+from app.ai.matching.results import CompleteMatchResult
 
 
 class MatchingEngine:
@@ -28,7 +29,7 @@ class MatchingEngine:
         preferred_skills: list[str] | None,
         candidate_embedding: list[float],
         job_embedding: list[float],
-    ) -> MatchScoreResult:
+    ) -> CompleteMatchResult:
         if preferred_skills is None:
             preferred_skill_score = None
             skill_result = self.skill_matcher.match(
@@ -59,10 +60,15 @@ class MatchingEngine:
             semantic_similarity=semantic_similarity,
         )
 
-        return calculate_match_score(
+        score_result = calculate_match_score(
             candidate_id=candidate_id,
             signals=signals,
             config=self.scoring_config,
+        )
+
+        return CompleteMatchResult(
+            score=score_result,
+            skills=skill_result,
         )
 
 

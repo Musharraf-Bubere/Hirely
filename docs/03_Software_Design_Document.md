@@ -2285,3 +2285,1173 @@ This separation forms the foundation for Hirely's recruiter-facing AI candidate 
 - Ranking is deterministic and does not require an LLM.
 - Equal scores preserve their original input order in the initial implementation.
 - Future ranking improvements can introduce additional signals or learned ranking models.
+
+# Match Explanation
+
+## Purpose
+
+The Match Explanation component converts the structured evidence produced by the matching system into a concise, human-readable explanation.
+
+The purpose is not to make a new hiring decision.
+
+The purpose is to communicate **why the matching system produced its result** using the evidence that has already been calculated.
+
+The Match Explanation component therefore follows the core Hirely principle:
+
+**Deterministic System → Calculates Evidence**
+
+**LLM → Explains Evidence**
+
+The explanation layer should not independently evaluate the entire resume or job description when the required matching evidence is already available.
+
+---
+
+## Why Hirely Needs Match Explanation
+
+A numerical match score alone is difficult for recruiters to interpret.
+
+For example:
+
+Candidate A → 0.78
+
+The score indicates the degree of compatibility calculated by Hirely, but it does not immediately communicate:
+
+- Which required skills matched
+- Which required skills are missing
+- Which preferred skills matched
+- Which preferred skills are missing
+- How strong the semantic similarity signal was
+- What the recruiter should understand from the result
+
+A recruiter therefore needs supporting information alongside the score.
+
+The Match Explanation component provides this supporting information in a human-readable form.
+
+---
+
+## Explanation Architecture
+
+The implemented explanation workflow is:
+
+    Matching Engine
+
+            |
+
+            v
+
+    CompleteMatchResult
+
+        +-----------+
+
+        |           |
+
+        v           v
+
+      Score       Skills
+
+        |           |
+
+        +-----+-----+
+
+              |
+
+              v
+
+    MatchExplanationInput
+
+              |
+
+              v
+
+    ExplanationPromptBuilder
+
+              |
+
+              v
+
+        GeminiService
+
+              |
+
+              v
+
+       MatchExplanation
+
+The Matching Engine calculates the matching evidence once.
+
+The CompleteMatchResult keeps both the score information and skill-matching information together.
+
+The explanation layer then consumes this existing evidence instead of recalculating it.
+
+---
+
+## Complete Match Result
+
+The Matching Engine produces a `CompleteMatchResult`.
+
+The result contains two major categories of information:
+
+### Match Score
+
+The score portion contains:
+
+- Candidate ID
+- Overall match score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+
+### Skill Evidence
+
+The skill portion contains:
+
+- Matched required skills
+- Missing required skills
+- Matched preferred skills
+- Missing preferred skills
+
+Conceptually:
+
+    CompleteMatchResult
+
+            |
+
+            +-- MatchScoreResult
+
+            |      +-- Candidate ID
+
+            |      +-- Overall Score
+
+            |      +-- Required Skill Score
+
+            |      +-- Preferred Skill Score
+
+            |      +-- Semantic Similarity
+
+            |
+
+            +-- SkillMatchResult
+
+                   +-- Required Matched
+
+                   +-- Required Missing
+
+                   +-- Preferred Matched
+
+                   +-- Preferred Missing
+
+This provides the explanation system with a single structured source of matching evidence.
+
+---
+
+## Match Explanation Input
+
+The explanation layer uses a dedicated `MatchExplanationInput`.
+
+The input contains the evidence required to generate an explanation:
+
+- Candidate ID
+- Overall match score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+- Required matched skills
+- Required missing skills
+- Preferred matched skills
+- Preferred missing skills
+
+The explanation input intentionally does not contain the complete raw resume or complete job description.
+
+This is an important architectural decision.
+
+The explanation model does not need to independently rediscover the matching evidence because the Matching Engine has already calculated it.
+
+---
+
+## Why the LLM Does Not Receive the Entire Resume and Job Description
+
+A possible design would be:
+
+    Resume
+
+       +
+
+    Job Description
+
+       |
+
+       v
+
+      LLM
+
+       |
+
+       v
+
+    Match Explanation
+
+Hirely does not use this as the primary explanation design.
+
+Instead, Hirely uses:
+
+    Matching Evidence
+
+          |
+
+          v
+
+    Explanation LLM
+
+          |
+
+          v
+
+    Human-readable Explanation
+
+This provides stronger grounding.
+
+The LLM is given the information that the deterministic matching system has already established.
+
+This reduces unnecessary re-evaluation and lowers the risk that the explanation introduces unsupported claims.
+
+---
+
+## Evidence-Grounded Explanation
+
+The explanation must be grounded in the actual matching evidence.
+
+The LLM should use:
+
+- Overall match score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+- Matched required skills
+- Missing required skills
+- Matched preferred skills
+- Missing preferred skills
+
+The explanation should not introduce unsupported candidate information.
+
+For example, if the evidence says:
+
+    Required matched:
+    Python
+    FastAPI
+
+the explanation can state that Python and FastAPI are matched required skills.
+
+It should not automatically claim:
+
+    The candidate is an expert in Python.
+
+A matched skill indicates that the skill is present in the matching evidence.
+
+It does not automatically establish:
+
+- Proficiency
+- Expertise
+- Depth of knowledge
+- Years of experience
+
+This distinction is important for preventing unsupported AI claims.
+
+---
+
+## Explanation Prompt Builder
+
+Hirely uses a dedicated `ExplanationPromptBuilder`.
+
+Its responsibility is to transform the structured matching evidence into a controlled prompt for the LLM.
+
+The prompt provides:
+
+- Matching evidence
+- Grounding rules
+- Explanation requirements
+- Output expectations
+
+The prompt explicitly instructs the model to use only the supplied evidence.
+
+This keeps prompt construction separate from the Gemini provider implementation.
+
+The architecture is therefore:
+
+    MatchExplanationInput
+
+            |
+
+            v
+
+    ExplanationPromptBuilder
+
+            |
+
+            v
+
+          Prompt
+
+            |
+
+            v
+
+       GeminiService
+
+---
+
+## Grounding Rules
+
+The explanation system follows several grounding rules.
+
+### Do Not Recalculate the Match Score
+
+The LLM must not calculate or modify the overall match score.
+
+The score is produced by the deterministic Matching Engine.
+
+The explanation layer communicates that score.
+
+### Use Only Provided Evidence
+
+The model must use the evidence supplied in `MatchExplanationInput`.
+
+It should not invent additional candidate or job information.
+
+### Do Not Invent Skills
+
+The model must not introduce skills that are not present in the supplied matching evidence.
+
+### Do Not Invent Experience
+
+The model must not invent:
+
+- Years of experience
+- Job responsibilities
+- Achievements
+- Qualifications
+- Expertise
+- Seniority
+
+unless such information is explicitly supported by the supplied evidence.
+
+### Matched Skills Do Not Establish Proficiency
+
+A matched skill only indicates skill presence.
+
+It does not prove that the candidate is:
+
+- Expert
+- Highly skilled
+- Proficient
+- Advanced
+
+unless such information is explicitly supported.
+
+### Missing Skills Must Remain Missing
+
+If a required skill is missing from the matching evidence, the explanation should communicate that gap rather than attempting to justify or hide it.
+
+### Unavailable Signals Are Not Zero
+
+If a signal is unavailable, it must not automatically be interpreted as a score of zero.
+
+For example:
+
+    Preferred Skill Score = Unavailable
+
+is different from:
+
+    Preferred Skill Score = 0.0
+
+The explanation should preserve this distinction.
+
+### Do Not Make Hiring Decisions
+
+The LLM should explain the match.
+
+It should not independently decide:
+
+- Hire
+- Reject
+- Interview
+- Promote
+- Disqualify
+
+The recruiter remains responsible for the final recruitment decision.
+
+---
+
+## Structured Explanation Output
+
+The LLM produces a structured `MatchExplanation`.
+
+The output contains:
+
+- Summary
+- Strengths
+- Gaps
+- Evidence
+- Caveats
+
+Conceptually:
+
+    MatchExplanation
+
+        |
+
+        +-- Summary
+
+        +-- Strengths
+
+        +-- Gaps
+
+        +-- Evidence
+
+        |     +-- Required Skill Score
+
+        |     +-- Preferred Skill Score
+
+        |     +-- Semantic Similarity
+
+        |
+
+        +-- Caveats
+
+This output is validated using Pydantic before it is treated as a valid application result.
+
+---
+
+## Summary
+
+The summary provides a concise explanation of the candidate-job match.
+
+It should communicate the overall matching situation using the supplied evidence.
+
+For example, it may describe:
+
+- Strong required skill alignment
+- Partial required skill alignment
+- Strong semantic similarity
+- Missing requirements
+
+The summary should remain factual and concise.
+
+---
+
+## Strengths
+
+Strengths should be derived from positive matching evidence.
+
+Examples include:
+
+- Matched required skills
+- Matched preferred skills
+- Strong semantic similarity
+
+The system should not transform a matched skill into an unsupported claim about expertise.
+
+---
+
+## Gaps
+
+Gaps should be derived from missing matching evidence.
+
+Examples include:
+
+- Missing required skills
+- Missing preferred skills
+
+Required skill gaps should remain clearly distinguishable from preferred skill gaps.
+
+This distinction helps recruiters understand which gaps are more important according to the job requirements.
+
+---
+
+## Evidence
+
+The explanation output includes the numerical evidence used by the matching system:
+
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+
+These values should correspond to the values supplied to the explanation model.
+
+The LLM is therefore not responsible for creating a new score.
+
+The explanation preserves the evidence calculated by the Matching Engine.
+
+---
+
+## Caveats
+
+The explanation may contain caveats that help prevent overinterpretation.
+
+For example:
+
+- Matched skills indicate skill presence only.
+- Skill matching does not establish proficiency level.
+- Missing required skills should be considered when reviewing the candidate.
+- Semantic similarity is a matching signal rather than a hiring probability.
+
+Caveats are especially useful because recruitment matching results should not be interpreted as absolute judgments about a candidate.
+
+---
+
+## Pydantic Validation
+
+The Match Explanation output is validated through a Pydantic schema.
+
+The flow is:
+
+    Gemini
+
+       |
+
+       v
+
+    Structured JSON
+
+       |
+
+       v
+
+    MatchExplanation Schema
+
+       |
+
+       v
+
+    Validation
+
+       |
+
+       +---- Invalid → Reject
+
+       |
+
+       v
+
+    Valid MatchExplanation
+
+This prevents arbitrary model output from being accepted as a valid structured explanation.
+
+The explanation schema also validates numerical evidence ranges.
+
+Scores must remain within:
+
+    0.0 ≤ score ≤ 1.0
+
+The summary must contain meaningful content.
+
+---
+
+## Separation of Responsibilities
+
+Hirely separates matching, ranking, and explanation.
+
+### Matching Engine
+
+Determines:
+
+> How well does this candidate match this job?
+
+It calculates the matching evidence and produces `CompleteMatchResult`.
+
+### Ranking Component
+
+Determines:
+
+> Among multiple candidates, who ranks higher?
+
+It orders candidates using the existing match scores.
+
+### Explanation Component
+
+Determines:
+
+> How should the matching result be communicated to the recruiter?
+
+It converts existing structured evidence into a human-readable explanation.
+
+### Gemini
+
+Gemini is responsible for language generation and explanation.
+
+It is not responsible for:
+
+- Authentication
+- Authorization
+- Database integrity
+- Final numerical scoring
+- Candidate ranking
+- Final hiring decisions
+
+This separation keeps the architecture deterministic where possible and uses GenAI where it provides meaningful value.
+
+---
+
+## One Source of Matching Evidence
+
+The implementation intentionally avoids calculating the same matching evidence multiple times.
+
+The Matching Engine produces:
+
+    CompleteMatchResult
+
+            |
+
+            +-- score
+
+            +-- skills
+
+Both components are then reused by downstream systems.
+
+For example:
+
+    CompleteMatchResult
+
+        |
+
+        +------> Ranking
+
+        |
+
+        +------> Explanation
+
+This provides a single source of matching evidence.
+
+It also prevents inconsistencies where one component could calculate a different skill result from another component.
+
+---
+
+## Explanation and Ranking Relationship
+
+Ranking and explanation have different responsibilities.
+
+The flow is:
+
+    Candidate A
+
+        |
+
+        v
+
+    Matching Engine
+
+        |
+
+        v
+
+    CompleteMatchResult
+
+        |
+
+        +------> Ranking
+
+        |
+
+        +------> Explanation
+
+The ranking system determines candidate ordering.
+
+The explanation system communicates the reasoning behind the matching evidence.
+
+Therefore:
+
+**Matching = Evaluate**
+
+**Scoring = Combine Evidence**
+
+**Ranking = Order**
+
+**Explanation = Communicate Why**
+
+This separation allows the ranking system to remain deterministic while still providing recruiters with understandable results.
+
+---
+
+## Hallucination Control
+
+The explanation architecture uses several mechanisms to reduce hallucination risk.
+
+### Structured Input
+
+The LLM receives structured matching evidence instead of relying on unrestricted interpretation.
+
+### Grounded Prompt
+
+The prompt explicitly restricts the model to the provided evidence.
+
+### Structured Output
+
+The model must return a defined explanation schema.
+
+### Pydantic Validation
+
+The generated output is validated before being accepted.
+
+### Deterministic Evidence
+
+Skills and numerical matching signals are calculated outside the LLM.
+
+### Restricted Scope
+
+The explanation model is asked to explain the match rather than independently evaluate the candidate.
+
+These controls do not guarantee that an LLM will never make an incorrect statement, but they reduce the opportunity for unsupported reasoning.
+
+---
+
+## AI Provider Interaction
+
+The Match Explanation component does not directly implement provider-specific API calls.
+
+Instead, it uses the existing `GeminiService`.
+
+The flow is:
+
+    MatchExplanationService
+
+            |
+
+            v
+
+    ExplanationPromptBuilder
+
+            |
+
+            v
+
+        GeminiService
+
+            |
+
+            v
+
+          Gemini
+
+This keeps provider-specific communication isolated.
+
+If the AI provider changes in the future, the explanation component should require minimal modification.
+
+---
+
+## Match Explanation Service
+
+The `MatchExplanationService` acts as the service-level coordinator for explanation generation.
+
+Its responsibilities are:
+
+- Receive `MatchExplanationInput`
+- Build the explanation prompt
+- Call the Gemini service
+- Request structured output
+- Return a validated `MatchExplanation`
+
+It does not calculate the match score.
+
+It does not perform skill matching.
+
+It does not rank candidates.
+
+This keeps the service focused on explanation generation.
+
+---
+
+## End-to-End Match Explanation Flow
+
+The complete implemented flow is:
+
+    Candidate Data
+          +
+    Job Data
+          |
+          v
+    Candidate / Job Representation
+          |
+          v
+       Embeddings
+          |
+          v
+    Matching Engine
+          |
+          v
+    CompleteMatchResult
+          |
+          +------------------+
+          |                  |
+          v                  v
+       Score              Skills
+          |                  |
+          +--------+---------+
+                   |
+                   v
+       MatchExplanationInput
+                   |
+                   v
+       ExplanationPromptBuilder
+                   |
+                   v
+              GeminiService
+                   |
+                   v
+                 Gemini
+                   |
+                   v
+          Structured Response
+                   |
+                   v
+          MatchExplanation
+                   |
+                   v
+             Recruiter UI
+
+This architecture ensures that the explanation is generated from the same evidence used by the matching system.
+
+---
+
+## Example
+
+Suppose the matching engine produces:
+
+    Required Skills:
+    Python
+    FastAPI
+    SQL
+    Docker
+
+    Candidate Skills:
+    Python
+    FastAPI
+    SQL
+    AWS
+
+The deterministic matching system produces:
+
+    Required Skill Score:
+    0.75
+
+    Required Matched:
+    Python
+    FastAPI
+    SQL
+
+    Required Missing:
+    Docker
+
+Suppose the preferred skills are:
+
+    AWS
+    Kubernetes
+
+The system produces:
+
+    Preferred Skill Score:
+    0.50
+
+    Preferred Matched:
+    AWS
+
+    Preferred Missing:
+    Kubernetes
+
+The explanation model receives this evidence.
+
+It can generate an explanation such as:
+
+    Summary:
+    Strong alignment with the required skills, with Docker
+    remaining as a required gap.
+
+    Strengths:
+    Python, FastAPI, and SQL match the required skills.
+    AWS matches a preferred skill.
+
+    Gaps:
+    Docker is missing from the required skills.
+    Kubernetes is missing from the preferred skills.
+
+The important point is that the LLM did not discover these facts independently.
+
+The deterministic matching system supplied the evidence.
+
+The LLM communicated that evidence in natural language.
+
+---
+
+## Architecture Decision
+
+Hirely will use an **evidence-grounded Match Explanation architecture**.
+
+The architecture will follow:
+
+    Matching Engine
+
+          ↓
+
+    CompleteMatchResult
+
+          ↓
+
+    MatchExplanationInput
+
+          ↓
+
+    ExplanationPromptBuilder
+
+          ↓
+
+    GeminiService
+
+          ↓
+
+    Structured MatchExplanation
+
+The LLM will not be treated as the source of truth for matching evidence.
+
+The Matching Engine remains responsible for calculating structured matching signals.
+
+The Explanation Component remains responsible for communicating those signals.
+
+This provides:
+
+- Better explainability
+- Reduced hallucination risk
+- Clear separation of responsibilities
+- Reusable matching evidence
+- Structured AI output
+- Easier testing
+- Provider flexibility
+- Better control over AI behavior
+
+---
+
+## Advantages
+
+### Evidence Grounding
+
+The explanation is based on structured matching evidence rather than unrestricted LLM evaluation.
+
+### Reduced Duplication
+
+Matching evidence is calculated once and reused by ranking and explanation.
+
+### Better Explainability
+
+Recruiters can understand the strengths and gaps behind a match score.
+
+### Deterministic Matching
+
+The LLM does not control the underlying numerical matching calculation.
+
+### Structured Output
+
+The explanation has a predictable schema.
+
+### Validation
+
+Pydantic validates the generated explanation.
+
+### Provider Flexibility
+
+The explanation service communicates through the existing AI service abstraction.
+
+### Testability
+
+Prompt construction, schema validation, service behavior, and real Gemini integration can be tested independently.
+
+### Clear Responsibility Boundaries
+
+Matching, ranking, and explanation remain separate components.
+
+---
+
+## Limitations
+
+### LLM Output Can Still Be Incorrect
+
+Grounding reduces hallucination risk but does not guarantee perfect language generation.
+
+### Explanation Quality Depends on Matching Evidence
+
+If the underlying matching signals are incomplete or incorrect, the explanation may also be incomplete.
+
+### Semantic Similarity Is Not a Qualification Probability
+
+A high semantic similarity score does not mean that the candidate has a corresponding probability of being qualified or hired.
+
+### Skill Presence Does Not Establish Proficiency
+
+A matched skill should not automatically be interpreted as expertise or years of experience.
+
+### Model Variability
+
+Different models or model versions may produce different wording while using the same evidence.
+
+### External API Dependency
+
+Gemini-based explanations depend on external model availability, latency, and cost.
+
+### Recruitment Bias
+
+AI-generated explanations may still reflect limitations or biases of the underlying model.
+
+### Human Oversight
+
+The explanation should support recruiter decision-making rather than replace human judgment.
+
+---
+
+## Testing Strategy
+
+The Match Explanation implementation is tested at multiple levels.
+
+### Schema Tests
+
+Verify that:
+
+- Valid explanation input is accepted.
+- Invalid scores are rejected.
+- Unavailable preferred scores are supported.
+- Valid explanations are accepted.
+- Empty summaries are rejected.
+
+### Prompt Tests
+
+Verify that:
+
+- Matching evidence is included.
+- Unavailable values are represented correctly.
+- Empty skill lists are handled.
+- Grounding rules are included.
+- Unsupported proficiency claims are prohibited.
+
+### Service Tests
+
+Verify that:
+
+- The service builds the prompt.
+- Gemini is called with the expected structured schema.
+- A valid `MatchExplanation` is returned.
+
+### Integration Test
+
+The real integration test verifies the complete flow:
+
+    MatchingEngine
+
+          ↓
+
+    CompleteMatchResult
+
+          ↓
+
+    MatchExplanationInput
+
+          ↓
+
+    ExplanationPromptBuilder
+
+          ↓
+
+    GeminiService
+
+          ↓
+
+    Real Gemini Model
+
+          ↓
+
+    MatchExplanation
+
+The integration test also verifies that the numerical evidence in the generated explanation corresponds to the deterministic matching result.
+
+---
+
+## Mental Model
+
+The simplest way to understand Match Explanation is:
+
+    Matching Engine
+
+        =
+
+    What the system calculated
+
+        +
+
+    Explanation Layer
+
+        =
+
+    How the system communicates it
+
+The complete Hirely AI matching mental model is:
+
+    Database
+
+        =
+
+    What Hirely knows
+
+    Embeddings
+
+        =
+
+    How Hirely represents meaning
+
+    Matching Engine
+
+        =
+
+    How Hirely combines evidence
+
+    Ranking
+
+        =
+
+    How Hirely orders candidates
+
+    Explanation
+
+        =
+
+    How Hirely communicates why
+
+    Gemini
+
+        =
+
+    Natural-language explanation
+
+The LLM is therefore one component of the system, not the entire recruitment decision engine.
+
+---
+
+## Key Takeaways
+
+- Match Explanation converts structured matching evidence into human-readable language.
+- The Matching Engine remains responsible for calculating matching evidence.
+- `CompleteMatchResult` contains both score information and skill evidence.
+- The explanation layer consumes `CompleteMatchResult` rather than recalculating matching evidence.
+- `MatchExplanationInput` provides a controlled input boundary for the LLM.
+- `ExplanationPromptBuilder` converts structured evidence into a grounded prompt.
+- Gemini is used for language generation and explanation.
+- The LLM must not recalculate or modify the match score.
+- The LLM must not invent skills, experience, qualifications, achievements, or expertise.
+- Matched skill presence does not automatically establish proficiency or years of experience.
+- Missing required skills should be clearly communicated.
+- Unavailable signals must not be treated as zero.
+- The explanation output is structured using `MatchExplanation`.
+- Pydantic validates the generated explanation.
+- Ranking and explanation are separate responsibilities.
+- Matching evidence is calculated once and reused by downstream components.
+- The architecture reduces unnecessary duplicate computation.
+- Evidence-grounded prompting reduces hallucination risk.
+- The explanation supports recruiter understanding but does not make the final hiring decision.
+- The overall architecture follows the principle:
+
+**Deterministic System → Calculates Evidence**
+
+**LLM → Explains Evidence**
