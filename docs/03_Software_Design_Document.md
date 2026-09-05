@@ -2036,3 +2036,252 @@ The goal is to use each technology where it is strongest.
 - Vector storage may be introduced when semantic retrieval requirements justify it.
 - Security, privacy, cost, latency, and bias must be considered throughout the AI architecture.
 - The overall design follows a hybrid approach: structured data + deterministic logic + embeddings + LLM reasoning.
+
+## Candidate Ranking
+
+### Purpose
+
+Candidate matching determines how well an individual candidate matches a specific job.
+
+However, recruiters usually need to evaluate multiple candidates for the same job. Hirely therefore requires a dedicated ranking component that can compare the match results of multiple candidates and arrange them from strongest to weakest match.
+
+The ranking component does not recalculate the candidate-job match. It consumes the overall match scores produced by the Matching Engine.
+
+---
+
+### Ranking Flow
+
+The candidate ranking workflow follows this sequence:
+
+1. Evaluate candidate-job match
+2. Generate MatchScoreResult
+3. Collect multiple candidate match results
+4. Convert results into ranking inputs
+5. Sort candidates by overall match score
+6. Assign rank positions
+7. Return ranked candidate results
+
+The conceptual flow is:
+
+Candidate + Job  
+↓  
+Matching Engine  
+↓  
+MatchScoreResult  
+↓  
+Matching Service  
+↓  
+CandidateMatch  
+↓  
+Candidate Ranker  
+↓  
+RankedCandidate
+
+---
+
+### Ranking Input
+
+The ranking process requires only the information necessary to compare candidates:
+
+- Candidate ID
+- Overall Match Score
+
+The detailed matching evidence remains inside the MatchScoreResult produced by the Matching Engine.
+
+This keeps the ranking component independent from the internal implementation of skill matching, semantic similarity, embeddings, and scoring.
+
+---
+
+### Ranking Output
+
+Each ranked candidate contains:
+
+- Rank
+- Candidate ID
+- Overall Match Score
+
+For example:
+
+| Rank | Candidate | Overall Match Score |
+|------|-----------|--------------------:|
+| 1 | Candidate B | 0.94 |
+| 2 | Candidate D | 0.88 |
+| 3 | Candidate A | 0.82 |
+| 4 | Candidate C | 0.71 |
+
+The ranking system orders candidates by descending overall match score.
+
+---
+
+### Separation of Responsibilities
+
+Hirely separates matching and ranking into independent responsibilities.
+
+**Matching**
+
+Determines:
+
+> How well does this candidate match this job?
+
+The Matching Engine evaluates structured and semantic evidence and produces an overall match score.
+
+**Ranking**
+
+Determines:
+
+> Among all candidates for this job, who matches best?
+
+The Candidate Ranker orders existing match results without recalculating their scores.
+
+**Matching Service**
+
+Acts as the orchestration layer between matching and ranking components.
+
+It converts MatchScoreResult objects into the smaller CandidateMatch representation required by the ranking component and coordinates the ranking workflow.
+
+This separation prevents the Matching Engine and Candidate Ranker from becoming tightly coupled.
+
+---
+
+### Data Validation
+
+Match scores are normalized to the range:
+
+0.0 ≤ overall_score ≤ 1.0
+
+Both MatchScoreResult and CandidateMatch validate this constraint.
+
+Invalid values are rejected instead of silently corrected.
+
+For example:
+
+- 0.0 → valid
+- 0.5 → valid
+- 1.0 → valid
+- -0.1 → invalid
+- 1.1 → invalid
+
+Failing validation early helps identify errors in upstream scoring logic rather than hiding them through automatic correction.
+
+---
+
+### Tie Handling
+
+Multiple candidates may receive the same overall match score.
+
+Hirely's initial ranking implementation preserves the original order of candidates when scores are equal.
+
+For example:
+
+Candidate A → 0.91  
+Candidate B → 0.91  
+Candidate C → 0.85
+
+The result becomes:
+
+| Rank | Candidate | Score |
+|------|-----------|------:|
+| 1 | Candidate A | 0.91 |
+| 2 | Candidate B | 0.91 |
+| 3 | Candidate C | 0.85 |
+
+More advanced tie-breaking strategies may be introduced later using additional matching evidence such as required skill score.
+
+---
+
+### Architecture Decision
+
+Hirely will implement Candidate Ranking as a deterministic component separate from the Matching Engine.
+
+The architecture will follow:
+
+Matching Engine
+→ MatchScoreResult
+→ Matching Service
+→ CandidateMatch
+→ Candidate Ranker
+→ RankedCandidate
+
+The Ranking component will not use an LLM because ranking existing numerical match results is a deterministic business operation.
+
+This provides:
+
+- Predictable behavior
+- Fast execution
+- Low computational cost
+- Easy testing
+- Clear separation of responsibilities
+- Easier future optimization
+
+---
+
+### AI and Ranking Relationship
+
+AI contributes to candidate evaluation through resume understanding, job understanding, semantic representations, embeddings, and other matching signals.
+
+However, the final candidate ordering is performed deterministically using the resulting match scores.
+
+Therefore:
+
+**AI/GenAI → produces semantic evidence**
+
+**Matching Engine → combines evidence**
+
+**Ranking → orders candidates**
+
+This architecture avoids using a single LLM call as the complete hiring decision mechanism.
+
+---
+
+### Limitations
+
+The initial ranking implementation has several limitations:
+
+- Ranking depends on the quality of the underlying match score.
+- Equal scores currently use input order as the tie behavior.
+- Ranking does not independently evaluate candidate qualifications.
+- The current ranking model does not learn optimal ordering from historical hiring outcomes.
+- Match-score weights are configurable but have not yet been scientifically learned or optimized.
+
+These limitations can be addressed in future versions through evaluation datasets, recruiter feedback, additional ranking signals, and machine-learning-based ranking approaches.
+
+---
+
+### Decision for Hirely
+
+Hirely will use a deterministic Candidate Ranker after the Matching Engine.
+
+The system will first evaluate each candidate against the job using structured and semantic evidence. The resulting match scores will then be passed through the Matching Service and ordered by the Candidate Ranker.
+
+The ranking system will remain independent from the underlying AI models so that the AI and ranking components can evolve independently.
+
+---
+
+### Mental Model
+
+The complete candidate evaluation system can be remembered as:
+
+**Matching = Evaluate**
+
+**Scoring = Combine Evidence**
+
+**Ranking = Order**
+
+**Explanation = Communicate Why**
+
+This separation forms the foundation for Hirely's recruiter-facing AI candidate discovery workflow.
+
+---
+
+### Key Takeaways
+
+- Matching evaluates one candidate against one job.
+- Ranking compares multiple candidates for the same job.
+- Ranking uses the existing overall match score.
+- Candidate identity must remain attached to the match result.
+- Matching and ranking are separated into independent components.
+- MatchingService provides orchestration between the components.
+- Match scores are validated between 0.0 and 1.0.
+- Ranking is deterministic and does not require an LLM.
+- Equal scores preserve their original input order in the initial implementation.
+- Future ranking improvements can introduce additional signals or learned ranking models.

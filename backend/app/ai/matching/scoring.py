@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class MatchSignals(BaseModel):
@@ -14,7 +16,8 @@ class MatchingConfig(BaseModel):
 
 
 class MatchScoreResult(BaseModel):
-    overall_score: float
+    candidate_id: UUID
+    overall_score: float = Field(ge=0.0, le=1.0)
     required_skill_score: float
     preferred_skill_score: float | None
     semantic_similarity: float
@@ -24,6 +27,7 @@ def normalize_semantic_similarity(similarity: float) -> float:
     return (similarity + 1.0) / 2.0
 
 def calculate_match_score(
+    candidate_id: UUID,
     signals: MatchSignals,
     config: MatchingConfig,
 ) -> MatchScoreResult:
@@ -55,6 +59,7 @@ def calculate_match_score(
     )
 
     return MatchScoreResult(
+        candidate_id=candidate_id,
         overall_score=overall_score,
         required_skill_score=signals.required_skill_score,
         preferred_skill_score=signals.preferred_skill_score,

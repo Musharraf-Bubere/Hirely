@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.ai.matching.skill_matching import SkillMatcher
 from app.ai.matching.similarity import cosine_similarity
 from app.ai.matching.scoring import (
@@ -20,6 +22,7 @@ class MatchingEngine:
 
     def match(
         self,
+        candidate_id: UUID,
         candidate_skills: list[str],
         required_skills: list[str],
         preferred_skills: list[str] | None,
@@ -57,6 +60,7 @@ class MatchingEngine:
         )
 
         return calculate_match_score(
+            candidate_id=candidate_id,
             signals=signals,
             config=self.scoring_config,
         )
