@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User, UserRole
+from app.models.candidate import Candidate
 
 from collections.abc import Callable
 
@@ -84,3 +85,21 @@ def require_recruiter(
     ),
 ) -> User:
     return current_user
+
+def get_current_candidate(
+    current_user: User = Depends(require_candidate),
+    db: Session = Depends(get_db),
+) -> Candidate:
+    candidate = (
+        db.query(Candidate)
+        .filter(Candidate.user_id == current_user.id)
+        .first()
+    )
+
+    if not candidate:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate profile not found",
+        )
+
+    return candidate

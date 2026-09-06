@@ -133,20 +133,40 @@ def test_recruiter_can_add_skill_to_own_job():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup JobSkill association FIRST
         # ---------------------------------------------------------
-        if job_skill:
-            db.delete(job_skill)
+        if job:
+            db.query(JobSkill).filter(
+                JobSkill.job_id == job.id
+            ).delete(
+                synchronize_session=False,
+            )
 
-        if skill:
-            db.delete(skill)
+            db.flush()
 
+        # ---------------------------------------------------------
+        # IMPORTANT:
+        # Skill is shared master data.
+        # Do NOT delete the Skill here.
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Cleanup job
+        # ---------------------------------------------------------
         if job:
             db.delete(job)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup recruiter
+        # ---------------------------------------------------------
         if recruiter:
             db.delete(recruiter)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -278,20 +298,43 @@ def test_recruiter_can_get_skills_for_own_job():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup JobSkill association FIRST
         # ---------------------------------------------------------
-        if job_skill:
-            db.delete(job_skill)
+        if job:
+            db.query(JobSkill).filter(
+                JobSkill.job_id == job.id
+            ).delete(
+                synchronize_session=False,
+            )
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # This skill is unique to this test.
+        # It is safe to remove after JobSkill is removed.
+        # ---------------------------------------------------------
         if skill:
             db.delete(skill)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup job
+        # ---------------------------------------------------------
         if job:
             db.delete(job)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup recruiter
+        # ---------------------------------------------------------
         if recruiter:
             db.delete(recruiter)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -438,9 +481,9 @@ def test_recruiter_can_delete_skill_from_own_job():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup JobSkill association if API did not delete it
         # ---------------------------------------------------------
-        if job_skill:
+        if job and skill:
             existing_job_skill = (
                 db.query(JobSkill)
                 .filter(
@@ -453,15 +496,34 @@ def test_recruiter_can_delete_skill_from_own_job():
             if existing_job_skill:
                 db.delete(existing_job_skill)
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # Skill is unique to this test.
+        # Safe to delete after JobSkill is removed.
+        # ---------------------------------------------------------
         if skill:
             db.delete(skill)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup job
+        # ---------------------------------------------------------
         if job:
             db.delete(job)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup recruiter
+        # ---------------------------------------------------------
         if recruiter:
             db.delete(recruiter)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -612,28 +674,59 @@ def test_recruiter_cannot_manage_another_recruiters_job_skills():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # No JobSkill should normally exist.
+        # Remove defensively if one somehow exists.
         # ---------------------------------------------------------
-        if job_skill:
-            db.delete(job_skill)
+        if job:
+            db.query(JobSkill).filter(
+                JobSkill.job_id == job.id
+            ).delete(
+                synchronize_session=False,
+            )
 
-        if skill and skill.id:
-            # Only delete the skill if it was created by this test.
-            # Since "Python" may already exist globally, we leave it.
-            pass
+            db.flush()
 
+        # ---------------------------------------------------------
+        # IMPORTANT:
+        # "Python" is shared master data.
+        # Never delete it from this test.
+        # ---------------------------------------------------------
+
+        # ---------------------------------------------------------
+        # Cleanup job
+        # ---------------------------------------------------------
         if job:
             db.delete(job)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup other recruiter
+        # ---------------------------------------------------------
         if other_recruiter:
             db.delete(other_recruiter)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup other user
+        # ---------------------------------------------------------
         if other_user:
             db.delete(other_user)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup owner recruiter
+        # ---------------------------------------------------------
         if owner_recruiter:
             db.delete(owner_recruiter)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup owner user
+        # ---------------------------------------------------------
         if owner_user:
             db.delete(owner_user)
 
@@ -769,6 +862,7 @@ def test_recruiter_cannot_add_duplicate_skill_to_own_job():
             "Duplicate Status:",
             duplicate_response.status_code,
         )
+
         print(
             "Duplicate Response:",
             duplicate_response.json(),
@@ -799,30 +893,40 @@ def test_recruiter_cannot_add_duplicate_skill_to_own_job():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup JobSkill association FIRST
         # ---------------------------------------------------------
-        if job_skill:
-            existing_job_skill = (
-                db.query(JobSkill)
-                .filter(
-                    JobSkill.job_id == job.id,
-                    JobSkill.skill_id == skill.id,
-                )
-                .first()
+        if job:
+            db.query(JobSkill).filter(
+                JobSkill.job_id == job.id
+            ).delete(
+                synchronize_session=False,
             )
 
-            if existing_job_skill:
-                db.delete(existing_job_skill)
+            db.flush()
 
-        if skill:
-            db.delete(skill)
+        # ---------------------------------------------------------
+        # IMPORTANT:
+        # "Python" is shared master data.
+        # Do NOT delete the Skill here.
+        # ---------------------------------------------------------
 
+        # ---------------------------------------------------------
+        # Cleanup job
+        # ---------------------------------------------------------
         if job:
             db.delete(job)
 
+        db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup recruiter
+        # ---------------------------------------------------------
         if recruiter:
             db.delete(recruiter)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 

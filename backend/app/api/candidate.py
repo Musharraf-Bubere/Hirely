@@ -5,7 +5,11 @@ from app.api.dependencies import require_candidate
 from app.db.session import get_db
 from app.models.candidate import Candidate
 from app.models.user import User
-from app.schemas.candidate import CandidateProfileResponse
+from app.schemas.candidate import (
+    CandidateProfileCreate,
+    CandidateProfileResponse,
+)
+from app.services.candidate import create_candidate_profile
 
 
 router = APIRouter(
@@ -13,6 +17,39 @@ router = APIRouter(
     tags=["Candidate"],
 )
 
+@router.post(
+    "/profile",
+    response_model=CandidateProfileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_profile(
+    data: CandidateProfileCreate,
+    current_user: User = Depends(require_candidate),
+    db: Session = Depends(get_db),
+):
+    try:
+        candidate = create_candidate_profile(
+            db=db,
+            user=current_user,
+            data=data,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "role": current_user.role,
+        "is_active": current_user.is_active,
+        "first_name": candidate.first_name,
+        "last_name": candidate.last_name,
+        "headline": candidate.headline,
+        "bio": candidate.bio,
+        "location": candidate.location,
+    }
 
 @router.get(
     "/profile",

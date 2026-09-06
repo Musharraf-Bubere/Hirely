@@ -10,6 +10,7 @@ from app.api.jobs import router as jobs_router
 from app.api.applications import router as applications_router
 from app.api.candidate_skills import router as candidate_skills_router
 from app.api.job_skills import router as job_skills_router
+from app.api.resumes import router as resume_router
 
 
 app = FastAPI(
@@ -28,3 +29,4 @@ app.include_router(candidate_skills_router)
 app.include_router(jobs_router)
 app.include_router(applications_router)
 app.include_router(job_skills_router)
+app.include_router(resume_router)

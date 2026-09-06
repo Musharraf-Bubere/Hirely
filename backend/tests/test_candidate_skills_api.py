@@ -90,29 +90,33 @@ def test_candidate_can_add_skill():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup candidate-skill association FIRST
         # ---------------------------------------------------------
-        if skill_id:
-            from app.models.candidate_skill import CandidateSkill
-            from app.models.skill import Skill
+        if skill_id and candidate:
+            db.query(CandidateSkill).filter(
+                CandidateSkill.candidate_id == candidate.id,
+                CandidateSkill.skill_id == skill_id,
+            ).delete(
+                synchronize_session=False,
+            )
 
-            skill = db.query(Skill).filter(Skill.id == skill_id).first()
+            db.flush()
 
-            if skill:
-                association = (
-                    db.query(CandidateSkill)
-                    .filter(CandidateSkill.skill_id == skill.id)
-                    .first()
-                )
+        # ---------------------------------------------------------
+        # IMPORTANT:
+        # Skill is shared master data.
+        # Do NOT delete it here.
+        # ---------------------------------------------------------
 
-                if association:
-                    db.delete(association)
-
-                db.delete(skill)
-
+        # ---------------------------------------------------------
+        # Cleanup candidate
+        # ---------------------------------------------------------
         if candidate:
             db.delete(candidate)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -224,17 +228,35 @@ def test_candidate_can_get_skills():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup candidate-skill association FIRST
         # ---------------------------------------------------------
         if candidate_skill:
-            db.delete(candidate_skill)
+            db.query(CandidateSkill).filter(
+                CandidateSkill.candidate_id == candidate.id,
+                CandidateSkill.skill_id == skill.id,
+            ).delete(
+                synchronize_session=False,
+            )
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup skill
+        # ---------------------------------------------------------
         if skill:
             db.delete(skill)
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup candidate
+        # ---------------------------------------------------------
         if candidate:
             db.delete(candidate)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -363,27 +385,35 @@ def test_candidate_can_delete_skill():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup any remaining association
         # ---------------------------------------------------------
-        if candidate_skill:
-            existing_association = (
-                db.query(CandidateSkill)
-                .filter(
-                    CandidateSkill.candidate_id == candidate.id,
-                    CandidateSkill.skill_id == skill.id,
-                )
-                .first()
+        if candidate_skill and candidate and skill:
+            db.query(CandidateSkill).filter(
+                CandidateSkill.candidate_id == candidate.id,
+                CandidateSkill.skill_id == skill.id,
+            ).delete(
+                synchronize_session=False,
             )
 
-            if existing_association:
-                db.delete(existing_association)
+            db.flush()
 
+        # ---------------------------------------------------------
+        # Cleanup skill
+        # ---------------------------------------------------------
         if skill:
             db.delete(skill)
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup candidate
+        # ---------------------------------------------------------
         if candidate:
             db.delete(candidate)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -490,27 +520,35 @@ def test_candidate_cannot_add_duplicate_skill():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup association FIRST
         # ---------------------------------------------------------
-        if candidate_skill:
-            existing_association = (
-                db.query(CandidateSkill)
-                .filter(
-                    CandidateSkill.candidate_id == candidate.id,
-                    CandidateSkill.skill_id == skill.id,
-                )
-                .first()
+        if candidate_skill and candidate and skill:
+            db.query(CandidateSkill).filter(
+                CandidateSkill.candidate_id == candidate.id,
+                CandidateSkill.skill_id == skill.id,
+            ).delete(
+                synchronize_session=False,
             )
 
-            if existing_association:
-                db.delete(existing_association)
+            db.flush()
 
+        # ---------------------------------------------------------
+        # Cleanup skill
+        # ---------------------------------------------------------
         if skill:
             db.delete(skill)
 
+            db.flush()
+
+        # ---------------------------------------------------------
+        # Cleanup candidate
+        # ---------------------------------------------------------
         if candidate:
             db.delete(candidate)
 
+        # ---------------------------------------------------------
+        # Cleanup user
+        # ---------------------------------------------------------
         if user:
             db.delete(user)
 
@@ -574,7 +612,7 @@ def test_recruiter_cannot_manage_candidate_skills():
 
     finally:
         # ---------------------------------------------------------
-        # Cleanup
+        # Cleanup recruiter user
         # ---------------------------------------------------------
         if user:
             db.delete(user)

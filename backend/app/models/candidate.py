@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.user import User
     from app.models.application import Application
     from app.models.candidate_skill import CandidateSkill
+    from app.models.resume import Resume
 
 
 class Candidate(Base):
@@ -76,5 +77,9 @@ class Candidate(Base):
     )
 
     candidate_skills: Mapped[list["CandidateSkill"]] = relationship(
+        back_populates="candidate",
+    )
+
+    resumes: Mapped[list["Resume"]] = relationship(
         back_populates="candidate",
     )
