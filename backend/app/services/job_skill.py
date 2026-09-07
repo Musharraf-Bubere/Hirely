@@ -34,3 +34,33 @@ def add_job_skill(
     db.refresh(job_skill)
 
     return job_skill
+
+def get_job_skills(
+    db: Session,
+    job: Job,
+) -> tuple[list[str], list[str]]:
+    rows = (
+        db.query(Skill.name, JobSkill.is_required)
+        .join(
+            JobSkill,
+            JobSkill.skill_id == Skill.id,
+        )
+        .filter(
+            JobSkill.job_id == job.id,
+        )
+        .all()
+    )
+
+    required_skills = [
+        name
+        for name, is_required in rows
+        if is_required
+    ]
+
+    preferred_skills = [
+        name
+        for name, is_required in rows
+        if not is_required
+    ]
+
+    return required_skills, preferred_skills

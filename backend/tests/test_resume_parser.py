@@ -1,7 +1,10 @@
 from app.ai.parsers.schemas import ResumeData
 from app.ai.services.gemini_service import gemini_service
 
+import pytest
 
+
+@pytest.mark.integration
 def test_gemini_can_parse_resume_text():
     resume_text = """
     John Smith

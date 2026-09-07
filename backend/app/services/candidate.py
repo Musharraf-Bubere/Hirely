@@ -33,3 +33,6 @@ def create_candidate_profile(
     db.refresh(candidate)
 
     return candidate
+
+def get_candidates(db: Session) -> list[Candidate]:
+    return db.query(Candidate).all()

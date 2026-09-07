@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.ai.services.matching_orchestrator import MatchingInput
+from app.ai.matching.inputs import MatchingInput
 from app.ai.services.job_preparation_service import JobPreparationResult
 from app.ai.services.candidate_preparation_service import CandidatePreparationResult
 

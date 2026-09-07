@@ -3455,3 +3455,1201 @@ The LLM is therefore one component of the system, not the entire recruitment dec
 **Deterministic System → Calculates Evidence**
 
 **LLM → Explains Evidence**
+
+# Recruiter Candidate Matching API
+
+## Purpose
+
+The Recruiter Candidate Matching API exposes Hirely's candidate-job matching and ranking system to recruiters through a FastAPI endpoint.
+
+The endpoint allows an authenticated recruiter to request a ranked list of eligible candidates for one of their active jobs.
+
+The implemented endpoint is:
+
+    POST /jobs/{job_id}/candidates/match
+
+The API acts as the integration boundary between the traditional recruitment backend and Hirely's AI matching system.
+
+---
+
+## API Responsibilities
+
+The recruiter matching endpoint is responsible for:
+
+- Authenticating the requester
+- Verifying recruiter authorization
+- Retrieving the requested job
+- Verifying that the job is active
+- Verifying recruiter ownership of the job
+- Retrieving candidates
+- Filtering candidates based on resume eligibility
+- Preparing candidate representations
+- Preparing the job representation
+- Generating candidate and job embeddings
+- Assembling matching inputs
+- Executing the Matching Engine
+- Ranking candidates
+- Returning structured ranked results
+
+The API should coordinate these operations rather than implement the underlying AI algorithms itself.
+
+---
+
+## Endpoint Contract
+
+### Endpoint
+
+    POST /jobs/{job_id}/candidates/match
+
+### Path Parameter
+
+    job_id
+
+The `job_id` identifies the job for which candidates should be matched.
+
+### Request Body
+
+No request body is required.
+
+The authenticated recruiter is determined from the JWT token.
+
+The backend retrieves the job and candidate information from trusted application data.
+
+The frontend must not provide:
+
+- Candidate embeddings
+- Job embeddings
+- Match scores
+- Candidate ranking
+- Recruiter ownership information
+
+These values are generated and validated by the backend.
+
+---
+
+## Authentication Flow
+
+The endpoint requires a valid JWT token.
+
+The authentication flow is:
+
+    HTTP Request
+        |
+        v
+    JWT Token
+        |
+        v
+    Authentication
+        |
+        +---- Invalid → 401 Unauthorized
+        |
+        v
+    Current User
+        |
+        v
+    Recruiter Authorization
+        |
+        +---- Not Recruiter → 403 Forbidden
+        |
+        v
+    Recruiter Matching
+
+Authentication and authorization remain deterministic backend responsibilities.
+
+The AI layer is never responsible for deciding whether the requester is allowed to access the endpoint.
+
+---
+
+## Job Validation
+
+After authentication, the API retrieves the requested job.
+
+The job must satisfy two conditions:
+
+    Job exists
+        +
+    Job is active
+
+If the job does not exist or is inactive, the endpoint returns:
+
+    404 Not Found
+
+The API does not expose inactive jobs through the recruiter matching workflow.
+
+---
+
+## Recruiter Ownership Validation
+
+A recruiter must only be able to match candidates for their own jobs.
+
+The ownership rule is:
+
+    job.recruiter_id
+            ==
+    authenticated_recruiter.id
+
+If the job belongs to another recruiter, the endpoint returns:
+
+    403 Forbidden
+
+This creates an explicit authorization boundary around recruiter data.
+
+The flow is:
+
+    Authenticated Recruiter
+            |
+            v
+        Requested Job
+            |
+            v
+      Ownership Check
+            |
+      +-----+-----+
+      |           |
+      v           v
+    Owner      Not Owner
+      |           |
+      v           v
+ Continue       403
+
+---
+
+## Candidate Eligibility
+
+Not every candidate should enter the AI matching pipeline.
+
+Hirely first checks whether the candidate has an eligible resume.
+
+A candidate is eligible when:
+
+- An active resume exists
+- The active resume has completed parsing
+- Parsed resume data is available and valid
+
+Candidates without an eligible resume are skipped.
+
+The flow is:
+
+    Candidate
+        |
+        v
+    Active Resume?
+        |
+        +---- No → Skip
+        |
+        v
+    Parsing Status = COMPLETED?
+        |
+        +---- No → Skip
+        |
+        v
+    Valid Parsed Data?
+        |
+        +---- No → Skip
+        |
+        v
+    Eligible Candidate
+
+Skipping ineligible candidates allows one incomplete candidate record to exist without causing the entire recruiter matching request to fail.
+
+---
+
+## Empty Eligible Candidate Pool
+
+If no candidates satisfy the eligibility requirements, the API returns:
+
+    200 OK
+
+with:
+
+    []
+
+This represents a valid matching request where no candidates are currently eligible.
+
+It is different from an API or authentication failure.
+
+The distinction is:
+
+    Invalid Request / Unauthorized
+            ↓
+          Error
+
+    Valid Job + No Eligible Candidates
+            ↓
+          []
+
+---
+
+## Recruiter Matching Architecture
+
+The implemented recruiter matching flow is:
+
+    POST /jobs/{job_id}/candidates/match
+                |
+                v
+        Authentication
+                |
+                v
+        Recruiter Authorization
+                |
+                v
+          Retrieve Job
+                |
+                v
+          Active Job Check
+                |
+                v
+        Ownership Validation
+                |
+                v
+        Retrieve Job Skills
+                |
+                v
+        Prepare Job Once
+                |
+                v
+        Retrieve Candidates
+                |
+                v
+       Resume Eligibility
+                |
+                v
+    Prepare Eligible Candidates
+                |
+                v
+      MatchingInputAssembler
+                |
+                v
+       Matching Orchestrator
+                |
+                v
+         Matching Engine
+                |
+                v
+          Match Results
+                |
+                v
+             Ranking
+                |
+                v
+       RankedMatchResult[]
+                |
+                v
+           FastAPI Response
+
+---
+
+## Job Preparation
+
+The job is prepared once for the entire recruiter matching request.
+
+This is an important optimization.
+
+If a recruiter has 100 eligible candidates, the system should not generate the same job embedding 100 separate times.
+
+The flow is:
+
+    Job
+      |
+      v
+    Job Skills
+      |
+      v
+    JobPreparationService
+      |
+      +---- Job Representation
+      |
+      +---- Job Embedding
+      |
+      v
+    JobPreparationResult
+
+The resulting job preparation data is reused for candidate matching.
+
+---
+
+## Candidate Preparation
+
+Each eligible candidate is prepared individually.
+
+The candidate preparation process is:
+
+    Candidate
+        |
+        v
+    Active Resume
+        |
+        v
+    Parsed ResumeData
+        |
+        v
+    CandidateRepresentationBuilder
+        |
+        +---- Candidate Representation
+        |
+        v
+    EmbeddingService
+        |
+        v
+    Candidate Embedding
+        |
+        v
+    CandidatePreparationResult
+
+The candidate representation provides the semantic text used to generate the candidate embedding.
+
+---
+
+## Matching Input Assembly
+
+The candidate and job preparation results are converted into a common matching input.
+
+The `MatchingInputAssembler` combines:
+
+- Candidate ID
+- Candidate skills
+- Required job skills
+- Preferred job skills
+- Candidate embedding
+- Job embedding
+
+The flow is:
+
+    CandidatePreparationResult
+                +
+          Candidate Skills
+                +
+      JobPreparationResult
+                +
+        Required Skills
+                +
+        Preferred Skills
+                |
+                v
+      MatchingInputAssembler
+                |
+                v
+          MatchingInput
+
+This creates a clean boundary between preparation and matching.
+
+---
+
+## Matching Orchestrator
+
+The `MatchingOrchestrator` coordinates execution of the matching workflow.
+
+For each candidate:
+
+    MatchingInput
+          |
+          v
+    MatchingOrchestrator
+          |
+          v
+      MatchingEngine
+          |
+          v
+    CompleteMatchResult
+
+The orchestrator does not implement the underlying similarity or scoring mathematics.
+
+Instead, it coordinates the specialized matching components.
+
+---
+
+## Multiple Candidate Matching
+
+For recruiter matching, multiple candidates must be evaluated against the same job.
+
+The conceptual flow is:
+
+    Candidate A + Job
+            |
+            v
+      CompleteMatchResult A
+
+    Candidate B + Job
+            |
+            v
+      CompleteMatchResult B
+
+    Candidate C + Job
+            |
+            v
+      CompleteMatchResult C
+
+            |
+
+            v
+
+    CompleteMatchResult[]
+
+The results can then be passed to the ranking system.
+
+---
+
+## Ranking Integration
+
+Once all eligible candidates have been matched, Hirely ranks the candidates using the existing deterministic ranking system.
+
+The flow is:
+
+    CompleteMatchResult[]
+            |
+            v
+    MatchingService
+            |
+            v
+      Candidate Ranker
+            |
+            v
+    RankedMatchResult[]
+
+The ranking system orders candidates using their calculated overall match scores.
+
+The ranking component does not ask an LLM to decide the ordering.
+
+This follows the established Hirely architecture:
+
+    AI/GenAI
+        ↓
+    Semantic Evidence
+
+    Matching Engine
+        ↓
+    Combined Match Score
+
+    Ranking
+        ↓
+    Candidate Ordering
+
+This preserves deterministic ranking behavior.
+
+---
+
+## Ranked Match Result
+
+The recruiter API returns a structured `RankedMatchResult`.
+
+Each result contains:
+
+- Rank
+- Candidate ID
+- Overall score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+- Required matched skills
+- Required missing skills
+- Preferred matched skills
+- Preferred missing skills
+
+Conceptually:
+
+    RankedMatchResult
+        |
+        +-- Rank
+        +-- Candidate ID
+        +-- Overall Score
+        +-- Required Skill Score
+        +-- Preferred Skill Score
+        +-- Semantic Similarity
+        +-- Required Matched
+        +-- Required Missing
+        +-- Preferred Matched
+        +-- Preferred Missing
+
+This allows the recruiter interface to display both the ranking and the evidence behind the ranking.
+
+---
+
+## Example API Response
+
+A successful response may look conceptually like:
+
+    [
+        {
+            "rank": 1,
+            "candidate_id": "...",
+            "overall_score": 0.975,
+            "required_skill_score": 1.0,
+            "preferred_skill_score": 1.0,
+            "semantic_similarity": 0.918,
+            "required_matched": [],
+            "required_missing": [],
+            "preferred_matched": [],
+            "preferred_missing": []
+        },
+        {
+            "rank": 2,
+            "candidate_id": "...",
+            "overall_score": 0.969,
+            "required_skill_score": 1.0,
+            "preferred_skill_score": 1.0,
+            "semantic_similarity": 0.898,
+            "required_matched": [],
+            "required_missing": [],
+            "preferred_matched": [],
+            "preferred_missing": []
+        }
+    ]
+
+The exact values depend on the candidate data, job requirements, skill information, and embedding model output.
+
+---
+
+## Security Boundaries
+
+The recruiter matching endpoint was designed with explicit security boundaries.
+
+### Unauthenticated User
+
+Request without a valid authentication token:
+
+    401 Unauthorized
+
+### Candidate User
+
+Candidate attempting to access recruiter matching:
+
+    403 Forbidden
+
+### Recruiter Accessing Another Recruiter's Job
+
+Recruiter attempting to match candidates for a job they do not own:
+
+    403 Forbidden
+
+### Inactive Job
+
+Matching request for an inactive job:
+
+    404 Not Found
+
+### Nonexistent Job
+
+Matching request for a nonexistent job:
+
+    404 Not Found
+
+These checks occur before the AI matching workflow.
+
+This prevents unauthorized requests from unnecessarily triggering AI processing.
+
+---
+
+## Why Security Happens Before AI Processing
+
+AI operations can involve external model APIs, latency, and cost.
+
+Therefore the system should validate:
+
+    Authentication
+        ↓
+    Authorization
+        ↓
+    Ownership
+        ↓
+    Job Eligibility
+        ↓
+    Candidate Eligibility
+        ↓
+    AI Processing
+
+rather than:
+
+    AI Processing
+        ↓
+    Security Check
+
+The first design is safer and avoids unnecessary model usage.
+
+---
+
+## AI Provider Boundary
+
+The recruiter API does not directly implement Gemini API calls.
+
+Instead, it uses the existing AI services:
+
+    Recruiter Matching API
+            |
+            v
+    CandidatePreparationService
+            |
+            v
+      EmbeddingService
+            |
+            v
+           Gemini
+
+and:
+
+    Recruiter Matching API
+            |
+            v
+      JobPreparationService
+            |
+            v
+      EmbeddingService
+            |
+            v
+           Gemini
+
+This keeps provider-specific implementation isolated from the API layer.
+
+---
+
+## Client Trust Boundary
+
+The frontend is considered an untrusted client.
+
+The frontend can request:
+
+    Match candidates for job X
+
+but it cannot decide:
+
+    Candidate embedding
+    Job embedding
+    Match score
+    Candidate rank
+    Recruiter ownership
+    Candidate eligibility
+
+The backend generates and validates these values.
+
+This prevents manipulation of the matching system from the client side.
+
+---
+
+## Performance Considerations
+
+The current implementation generates embeddings during the matching request.
+
+For a small candidate pool, this provides a straightforward synchronous architecture.
+
+However, at larger scale, repeatedly generating embeddings can become expensive.
+
+For example:
+
+    1 Job
+      +
+    500 Candidates
+
+could require many embedding operations.
+
+A future production implementation can introduce:
+
+- Cached candidate embeddings
+- Cached job embeddings
+- Embedding persistence
+- Batch embedding generation
+- Background processing
+- Vector retrieval
+- Candidate pre-filtering
+
+The current implementation intentionally keeps the architecture simple until scale requires additional infrastructure.
+
+---
+
+## Current Embedding Strategy
+
+Hirely currently uses Gemini embeddings for semantic representation.
+
+Candidate information is converted into a candidate embedding.
+
+Job information is converted into a job embedding.
+
+The matching engine then calculates semantic similarity between these vectors.
+
+Conceptually:
+
+    Candidate Representation
+            |
+            v
+    Gemini Embedding Model
+            |
+            v
+    Candidate Vector
+
+
+    Job Representation
+            |
+            v
+    Gemini Embedding Model
+            |
+            v
+    Job Vector
+
+
+    Candidate Vector
+            +
+        Job Vector
+            |
+            v
+    Semantic Similarity
+
+Semantic similarity is only one component of the final matching score.
+
+---
+
+## Deterministic and Semantic Signals
+
+The recruiter matching workflow combines two important categories of evidence.
+
+### Deterministic Evidence
+
+Examples include:
+
+- Required skill matches
+- Required skill gaps
+- Preferred skill matches
+- Preferred skill gaps
+
+These signals come from structured application data.
+
+### Semantic Evidence
+
+Semantic similarity is calculated using embeddings.
+
+This allows Hirely to capture relationships that may not be represented by exact keyword overlap.
+
+The final score combines these signals according to the matching configuration.
+
+---
+
+## Why Ranking Is Not Performed by the LLM
+
+An LLM could theoretically be asked:
+
+    "Rank these candidates from best to worst."
+
+However, Hirely does not use this as the primary ranking mechanism.
+
+The ranking system instead uses:
+
+    Candidate Match Scores
+            |
+            v
+    Deterministic Candidate Ranker
+            |
+            v
+    Ranked Candidates
+
+This provides:
+
+- Predictable ordering
+- Reproducibility
+- Lower cost
+- Lower latency
+- Easier testing
+- Easier debugging
+- Clearer explanation of ranking behavior
+
+The LLM can still be used for explanation after ranking.
+
+---
+
+## Match Explanation Integration
+
+The recruiter matching endpoint currently returns deterministic matching and ranking evidence.
+
+The existing Match Explanation component can consume the resulting ranked match data later.
+
+The eventual flow is:
+
+    RankedMatchResult
+            |
+            v
+    MatchExplanationInput
+            |
+            v
+    ExplanationPromptBuilder
+            |
+            v
+       GeminiService
+            |
+            v
+     MatchExplanation
+
+This preserves the established Hirely principle:
+
+    Deterministic System → Calculates Evidence
+
+    LLM → Explains Evidence
+
+The explanation should not override the numerical score or candidate ranking.
+
+---
+
+## Testing Strategy
+
+The recruiter matching API is tested at multiple levels.
+
+### Authentication Test
+
+Verify that unauthenticated requests return:
+
+    401
+
+### Role Authorization Test
+
+Verify that candidates cannot access the recruiter endpoint.
+
+Expected result:
+
+    403
+
+### Job Existence Test
+
+Verify that a nonexistent job returns:
+
+    404
+
+### Active Job Test
+
+Verify that an inactive job cannot be matched.
+
+Expected result:
+
+    404
+
+### Ownership Test
+
+Verify that recruiter A cannot match candidates for recruiter B's job.
+
+Expected result:
+
+    403
+
+### Resume Eligibility Tests
+
+Verify that candidates without an active resume are skipped.
+
+Verify that candidates with pending resumes are skipped.
+
+### Ranking Test
+
+Use deterministic mocked embeddings to verify that:
+
+    Strong Candidate
+          >
+    Weak Candidate
+
+and therefore:
+
+    Strong Candidate → Rank 1
+    Weak Candidate   → Rank 2
+
+This keeps the ranking test deterministic and avoids unnecessary external API calls.
+
+### Real Gemini Integration Test
+
+A separate integration test uses the real Gemini embedding service.
+
+The test verifies:
+
+    Candidate Resume
+          |
+          v
+    Candidate Representation
+          |
+          v
+    Real Gemini Embedding
+
+    Job
+          |
+          v
+    Job Representation
+          |
+          v
+    Real Gemini Embedding
+
+          |
+          v
+    Matching Engine
+          |
+          v
+    Ranking
+          |
+          v
+    API Response
+
+This validates the real AI integration while keeping the deterministic tests independent from external model availability.
+
+---
+
+## Test Results
+
+The recruiter matching API test suite passed:
+
+    8 passed
+
+The deterministic ranking correctness test passed:
+
+    1 passed
+
+The real Gemini recruiter matching integration test passed:
+
+    1 passed
+
+The complete non-integration regression suite passed:
+
+    151 passed
+    8 deselected
+
+The deselected tests are integration tests excluded during the normal regression run.
+
+The normal regression command is:
+
+    pytest tests -m "not integration" -q -v -s
+
+The complete test command remains:
+
+    pytest tests -q -v -s
+
+---
+
+## Regression and Compatibility
+
+During implementation, the existing `MatchingOrchestrator` test suite exposed an interface compatibility issue.
+
+The recruiter workflow needed to rank already-computed `CompleteMatchResult` objects, while the existing orchestrator workflow expected `MultiCandidateMatchingInput`.
+
+The orchestrator was therefore designed to support both workflows.
+
+Conceptually:
+
+    MultiCandidateMatchingInput
+            |
+            v
+      match_candidates()
+            |
+            v
+    CompleteMatchResult[]
+            |
+            v
+          Ranking
+
+
+    CompleteMatchResult[]
+            |
+            v
+          Ranking
+
+This preserves the existing behavior while allowing the recruiter endpoint to avoid unnecessary recomputation.
+
+The full regression suite confirmed that the compatibility change did not introduce additional failures.
+
+---
+
+## Architectural Decision
+
+Hirely will expose recruiter candidate matching through:
+
+    POST /jobs/{job_id}/candidates/match
+
+The endpoint will:
+
+- Require authentication
+- Require recruiter role
+- Require an active job
+- Require recruiter ownership
+- Filter candidates by resume eligibility
+- Generate AI representations server-side
+- Generate embeddings server-side
+- Use the existing Matching Engine
+- Use deterministic candidate ranking
+- Return structured ranked results
+- Keep AI explanation as a separate layer
+
+The API will not accept client-generated embeddings or match scores.
+
+---
+
+## Advantages
+
+### Secure
+
+Authentication, authorization, and ownership are enforced before AI processing.
+
+### Explainable
+
+The API returns structured matching evidence rather than only a ranking number.
+
+### Deterministic Ranking
+
+Candidate ordering is controlled by the deterministic ranking component.
+
+### AI-Powered
+
+Semantic embeddings allow Hirely to identify meaningful relationships between candidate and job information.
+
+### Modular
+
+Candidate preparation, job preparation, matching, ranking, and explanation remain separate components.
+
+### Testable
+
+Security, eligibility, ranking, and AI integration can be tested independently.
+
+### Provider-Aware
+
+The API communicates through AI services rather than embedding Gemini-specific implementation throughout the route.
+
+---
+
+## Limitations
+
+### Synchronous AI Processing
+
+Embedding generation currently occurs during the API request.
+
+### Embedding Cost
+
+A large number of eligible candidates can result in many embedding requests.
+
+### No Persistent Embedding Cache
+
+Candidate and job embeddings are not yet persisted as a dedicated optimization layer.
+
+### Limited Candidate Retrieval
+
+The current workflow does not yet use vector retrieval to reduce the candidate search space.
+
+### Skill Normalization
+
+Deterministic skill matching currently depends on normalized skill names rather than a complete semantic skill ontology.
+
+### Explanation Not Yet Attached
+
+The recruiter ranking endpoint currently returns matching evidence without generating an explanation for every candidate.
+
+This is intentional so that ranking remains independent from LLM generation.
+
+---
+
+## Future Improvements
+
+The recruiter matching system can later evolve toward:
+
+    Recruiter Request
+          |
+          v
+    Authorization
+          |
+          v
+    Candidate Pre-filtering
+          |
+          v
+    Vector Retrieval
+          |
+          v
+    Top Candidate Pool
+          |
+          v
+    Deterministic Matching
+          |
+          v
+    Candidate Ranking
+          |
+          v
+    Top Ranked Candidates
+          |
+          v
+    Evidence-Grounded Explanation
+          |
+          v
+    Recruiter UI
+
+Potential future optimizations include:
+
+- Persistent embeddings
+- Embedding caching
+- Vector search
+- Candidate pre-filtering
+- Batch processing
+- Background workers
+- Ranking evaluation datasets
+- Learned ranking models
+- Recruiter feedback signals
+- Semantic skill normalization
+- Match explanation caching
+
+These improvements should be introduced when actual performance, scale, or product requirements justify them.
+
+---
+
+## Mental Model
+
+The recruiter matching workflow can be remembered as:
+
+    Authenticate
+        ↓
+    Authorize
+        ↓
+    Validate Job
+        ↓
+    Filter Candidates
+        ↓
+    Prepare
+        ↓
+    Embed
+        ↓
+    Match
+        ↓
+    Score
+        ↓
+    Rank
+        ↓
+    Explain
+
+The most important architectural principle remains:
+
+    Backend
+        =
+    Security + Source of Truth
+
+    Embeddings
+        =
+    Semantic Representation
+
+    Matching Engine
+        =
+    Evidence Combination
+
+    Ranking
+        =
+    Candidate Ordering
+
+    LLM
+        =
+    Natural-Language Understanding / Explanation
+
+---
+
+## Key Takeaways
+
+- Hirely now exposes candidate-job matching through a recruiter-facing FastAPI endpoint.
+- The endpoint is protected by authentication and recruiter role authorization.
+- Recruiters can only match candidates for their own jobs.
+- Inactive and nonexistent jobs are rejected.
+- Candidates without eligible resumes are skipped.
+- Candidate and job embeddings are generated server-side.
+- The frontend cannot manipulate embeddings, scores, or rankings.
+- The job embedding is prepared once and reused across candidate matching.
+- Candidate preparation is performed for each eligible candidate.
+- MatchingInputAssembler provides a clean boundary between preparation and matching.
+- MatchingOrchestrator coordinates the matching workflow.
+- MatchingEngine calculates the actual matching evidence.
+- MatchingService and CandidateRanker perform deterministic ranking.
+- The recruiter endpoint returns structured RankedMatchResult objects.
+- Ranking does not depend on an LLM.
+- Match Explanation remains a separate evidence-grounded AI layer.
+- The real Gemini embedding integration has been verified.
+- The ranking correctness test has been verified independently using mocked embeddings.
+- Authentication, authorization, ownership, job status, and resume eligibility have been tested.
+- The full non-integration regression suite remains green.
+- The current implementation is suitable as an MVP foundation and can later evolve toward cached embeddings, vector retrieval, asynchronous processing, and learned ranking.

@@ -1,30 +1,16 @@
-from uuid import UUID
-
 from pydantic import BaseModel, Field
 
 from app.ai.matching.engine import MatchingEngine
-from app.ai.matching.results import (
-    CompleteMatchResult,
-    RankedMatchResult,
-)
-from app.ai.services.matching_service import MatchingService
+from app.ai.matching.inputs import MatchingInput
 from app.ai.matching.ranking import RankedCandidate
-from app.ai.services.match_explanation_service import MatchExplanationService
-from app.ai.matching.explanation import MatchExplanationInput
 from app.ai.matching.results import (
     CompleteMatchResult,
     FinalMatchResult,
     RankedMatchResult,
 )
-
-
-class MatchingInput(BaseModel):
-    candidate_id: UUID
-    candidate_skills: list[str]
-    required_skills: list[str]
-    preferred_skills: list[str] | None = None
-    candidate_embedding: list[float]
-    job_embedding: list[float]
+from app.ai.services.match_explanation_service import MatchExplanationService
+from app.ai.services.matching_service import MatchingService
+from app.ai.matching.explanation import MatchExplanationInput
 
 
 class MatchingOrchestrator:
@@ -38,7 +24,10 @@ class MatchingOrchestrator:
         self.matching_service = matching_service
         self.match_explanation_service = match_explanation_service
 
-    def match(self, data: MatchingInput) -> CompleteMatchResult:
+    def match(
+        self,
+        data: MatchingInput,
+    ) -> CompleteMatchResult:
         return self.matching_engine.match(
             candidate_id=data.candidate_id,
             candidate_skills=data.candidate_skills,
@@ -69,9 +58,14 @@ class MatchingOrchestrator:
 
     def rank_match_results(
         self,
-        data: MultiCandidateMatchingInput,
+        data: MultiCandidateMatchingInput | list[CompleteMatchResult],
     ) -> list[RankedMatchResult]:
-        match_results = self.match_candidates(data)
+
+        if isinstance(data, MultiCandidateMatchingInput):
+            match_results = self.match_candidates(data)
+        else:
+            match_results = data
+
         ranked_candidates = self.matching_service.rank_complete_matches(
             match_results
         )
@@ -140,7 +134,9 @@ class MatchingOrchestrator:
         self,
         data: ExplanationRequest,
     ) -> list[FinalMatchResult]:
-        selected_matches = data.ranked_matches[:data.explanation_limit]
+        selected_matches = data.ranked_matches[
+            :data.explanation_limit
+        ]
 
         selected_candidate_ids = {
             match.candidate_id
@@ -164,8 +160,10 @@ class MatchingOrchestrator:
 
         return results
 
+
 class MultiCandidateMatchingInput(BaseModel):
     candidates: list[MatchingInput]
+
 
 class ExplanationRequest(BaseModel):
     ranked_matches: list[RankedMatchResult]

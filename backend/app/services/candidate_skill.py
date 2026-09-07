@@ -32,3 +32,21 @@ def add_candidate_skill(
     db.refresh(candidate_skill)
 
     return candidate_skill
+
+def get_candidate_skills(
+    db: Session,
+    candidate: Candidate,
+) -> list[str]:
+    rows = (
+        db.query(Skill.name)
+        .join(
+            CandidateSkill,
+            CandidateSkill.skill_id == Skill.id,
+        )
+        .filter(
+            CandidateSkill.candidate_id == candidate.id,
+        )
+        .all()
+    )
+
+    return [row[0] for row in rows]
