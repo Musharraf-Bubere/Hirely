@@ -8,7 +8,8 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 
 class AISettings(BaseSettings):
     gemini_api_key: str
-    gemini_model: str = "gemini-3.6-flash"
+    gemini_model: str = "gemini-3.5-flash-lite"
+    gemini_fallback_model: str = "gemini-3.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
