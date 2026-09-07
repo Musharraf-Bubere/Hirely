@@ -1024,3 +1024,663 @@ def test_recruiter_matching_with_real_gemini():
 
         db.commit()
         db.close()
+
+# ---------------------------------------------------------
+# 11. Recruiter matching explanation endpoint
+# ---------------------------------------------------------
+
+def test_recruiter_matching_explanation_returns_top_n_explanations(
+    monkeypatch,
+):
+    db = SessionLocal()
+
+    recruiter_user = None
+    recruiter = None
+    candidate_user = None
+    candidate = None
+    resume = None
+    job = None
+
+    try:
+        recruiter_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter = create_recruiter(
+            db,
+            recruiter_user,
+        )
+
+        candidate_user = create_user(
+            db,
+            UserRole.CANDIDATE,
+        )
+
+        candidate = create_candidate(
+            db,
+            candidate_user,
+        )
+
+        resume = create_completed_resume(
+            db,
+            candidate,
+        )
+
+        job = create_job(
+            db,
+            recruiter,
+        )
+
+        db.commit()
+
+        # -------------------------------------------------
+        # Mock embeddings
+        # -------------------------------------------------
+
+        def fake_embed_text(self, text):
+            return [1.0, 0.0, 0.0]
+
+        monkeypatch.setattr(
+            "app.ai.embeddings.service.EmbeddingService.embed_text",
+            fake_embed_text,
+        )
+
+        # -------------------------------------------------
+        # Mock Gemini explanation
+        # -------------------------------------------------
+
+        from app.ai.matching.explanation import (
+            MatchExplanation,
+            MatchExplanationEvidence,
+        )
+
+        def fake_explain(data):
+            return MatchExplanation(
+                summary="Candidate matches the job based on the provided evidence.",
+                strengths=["Python", "FastAPI"],
+                gaps=["No preferred skill evidence"],
+                evidence=MatchExplanationEvidence(
+                    required_skill_score=data.required_skill_score,
+                    preferred_skill_score=data.preferred_skill_score,
+                    semantic_similarity=data.semantic_similarity,
+                ),
+                caveats=[
+                    "The explanation is based only on the available matching evidence."
+                ],
+            )
+
+        monkeypatch.setattr(
+            "app.ai.services.match_explanation_service.match_explanation_service.explain",
+            fake_explain,
+        )
+
+        token = token_for(recruiter_user)
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+        )
+
+        print(
+            "Explanation endpoint status:",
+            response.status_code,
+        )
+        print(
+            "Explanation response:",
+            response.json(),
+        )
+
+        assert response.status_code == 200
+
+        results = response.json()
+
+        assert isinstance(results, list)
+        assert results
+
+        result = next(
+            item
+            for item in results
+            if item["match"]["candidate_id"]
+            == str(candidate.id)
+        )
+
+        # -------------------------------------------------
+        # Verify FinalMatchResult structure
+        # -------------------------------------------------
+
+        assert "match" in result
+        assert "explanation" in result
+
+        assert result["match"]["candidate_id"] == str(
+            candidate.id
+        )
+
+        assert result["explanation"] is not None
+
+        # -------------------------------------------------
+        # Verify explanation fields
+        # -------------------------------------------------
+
+        explanation = result["explanation"]
+
+        assert "summary" in explanation
+        assert "strengths" in explanation
+        assert "gaps" in explanation
+        assert "evidence" in explanation
+        assert "caveats" in explanation
+
+        assert explanation["summary"]
+        assert isinstance(explanation["strengths"], list)
+        assert isinstance(explanation["gaps"], list)
+        assert isinstance(explanation["caveats"], list)
+
+        # -------------------------------------------------
+        # Verify evidence comes from matching result
+        # -------------------------------------------------
+
+        assert (
+            explanation["evidence"]["required_skill_score"]
+            == result["match"]["required_skill_score"]
+        )
+
+        assert (
+            explanation["evidence"]["semantic_similarity"]
+            == result["match"]["semantic_similarity"]
+        )
+
+    finally:
+        if resume:
+            db.delete(resume)
+
+        if candidate:
+            db.delete(candidate)
+
+        if job:
+            db.delete(job)
+
+        if recruiter:
+            db.delete(recruiter)
+
+        if candidate_user:
+            db.delete(candidate_user)
+
+        if recruiter_user:
+            db.delete(recruiter_user)
+
+        db.commit()
+        db.close()
+
+
+# ---------------------------------------------------------
+# 12. Explanation limit only explains Top N candidates
+# ---------------------------------------------------------
+
+def test_recruiter_matching_explanation_limit(
+    monkeypatch,
+):
+    db = SessionLocal()
+
+    recruiter_user = None
+    recruiter = None
+
+    candidate_users = []
+    candidates = []
+    resumes = []
+
+    job = None
+
+    try:
+        recruiter_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter = create_recruiter(
+            db,
+            recruiter_user,
+        )
+
+        # -------------------------------------------------
+        # Create multiple eligible candidates
+        # -------------------------------------------------
+
+        for _ in range(3):
+            candidate_user = create_user(
+                db,
+                UserRole.CANDIDATE,
+            )
+
+            candidate = create_candidate(
+                db,
+                candidate_user,
+            )
+
+            resume = create_completed_resume(
+                db,
+                candidate,
+            )
+
+            candidate_users.append(candidate_user)
+            candidates.append(candidate)
+            resumes.append(resume)
+
+        job = create_job(
+            db,
+            recruiter,
+        )
+
+        db.commit()
+
+        # -------------------------------------------------
+        # Mock embeddings
+        # -------------------------------------------------
+
+        def fake_embed_text(self, text):
+            return [1.0, 0.0, 0.0]
+
+        monkeypatch.setattr(
+            "app.ai.embeddings.service.EmbeddingService.embed_text",
+            fake_embed_text,
+        )
+
+        # -------------------------------------------------
+        # Track explanation calls
+        # -------------------------------------------------
+
+        from app.ai.matching.explanation import (
+            MatchExplanation,
+            MatchExplanationEvidence,
+        )
+
+        explained_candidate_ids = []
+
+        def fake_explain(data):
+            explained_candidate_ids.append(
+                str(data.candidate_id)
+            )
+
+            return MatchExplanation(
+                summary="Mock explanation",
+                strengths=[],
+                gaps=[],
+                evidence=MatchExplanationEvidence(
+                    required_skill_score=data.required_skill_score,
+                    preferred_skill_score=data.preferred_skill_score,
+                    semantic_similarity=data.semantic_similarity,
+                ),
+                caveats=[],
+            )
+
+        monkeypatch.setattr(
+            "app.ai.services.match_explanation_service.match_explanation_service.explain",
+            fake_explain,
+        )
+
+        token = token_for(recruiter_user)
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+            params={
+                "explanation_limit": 1,
+            },
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+        )
+
+        print(
+            "Explanation limit status:",
+            response.status_code,
+        )
+        print(
+            "Explanation limit response:",
+            response.json(),
+        )
+
+        assert response.status_code == 200
+
+        results = response.json()
+
+        assert isinstance(results, list)
+
+        # -------------------------------------------------
+        # Exactly one candidate should receive an explanation
+        # -------------------------------------------------
+
+        explained_results = [
+            result
+            for result in results
+            if result["explanation"] is not None
+        ]
+
+        unexplained_results = [
+            result
+            for result in results
+            if result["explanation"] is None
+        ]
+
+        assert len(explained_results) == 1
+
+        assert len(explained_results) + len(
+            unexplained_results
+        ) == len(results)
+
+        # -------------------------------------------------
+        # Only one Gemini explanation call should happen
+        # -------------------------------------------------
+
+        assert len(explained_candidate_ids) == 1
+
+        explained_candidate_id = (
+            explained_results[0]["match"]["candidate_id"]
+        )
+
+        assert (
+            explained_candidate_id
+            == explained_candidate_ids[0]
+        )
+
+        # -------------------------------------------------
+        # The explained candidate must be Rank 1
+        # -------------------------------------------------
+
+        assert (
+            explained_results[0]["match"]["rank"]
+            == 1
+        )
+
+    finally:
+        for resume in resumes:
+            db.delete(resume)
+
+        for candidate in candidates:
+            db.delete(candidate)
+
+        if job:
+            db.delete(job)
+
+        if recruiter:
+            db.delete(recruiter)
+
+        for candidate_user in candidate_users:
+            db.delete(candidate_user)
+
+        if recruiter_user:
+            db.delete(recruiter_user)
+
+        db.commit()
+        db.close()
+
+
+# ---------------------------------------------------------
+# 13. Candidate cannot access explanation endpoint
+# ---------------------------------------------------------
+
+def test_candidate_cannot_access_matching_explanation_endpoint():
+    db = SessionLocal()
+
+    recruiter_user = None
+    recruiter = None
+    candidate_user = None
+    job = None
+
+    try:
+        recruiter_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter = create_recruiter(
+            db,
+            recruiter_user,
+        )
+
+        candidate_user = create_user(
+            db,
+            UserRole.CANDIDATE,
+        )
+
+        job = create_job(
+            db,
+            recruiter,
+        )
+
+        token = token_for(candidate_user)
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+        )
+
+        print(
+            "Candidate explanation access:",
+            response.status_code,
+        )
+        print(
+            "Response:",
+            response.json(),
+        )
+
+        assert response.status_code == 403
+
+    finally:
+        if job:
+            db.delete(job)
+
+        if recruiter:
+            db.delete(recruiter)
+
+        if candidate_user:
+            db.delete(candidate_user)
+
+        if recruiter_user:
+            db.delete(recruiter_user)
+
+        db.commit()
+        db.close()
+
+
+# ---------------------------------------------------------
+# 14. Unauthenticated explanation request
+# ---------------------------------------------------------
+
+def test_matching_explanation_requires_authentication():
+    db = SessionLocal()
+
+    recruiter_user = None
+    recruiter = None
+    job = None
+
+    try:
+        recruiter_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter = create_recruiter(
+            db,
+            recruiter_user,
+        )
+
+        job = create_job(
+            db,
+            recruiter,
+        )
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+        )
+
+        print(
+            "Unauthenticated explanation:",
+            response.status_code,
+        )
+        print(
+            "Response:",
+            response.json(),
+        )
+
+        assert response.status_code == 401
+
+    finally:
+        if job:
+            db.delete(job)
+
+        if recruiter:
+            db.delete(recruiter)
+
+        if recruiter_user:
+            db.delete(recruiter_user)
+
+        db.commit()
+        db.close()
+
+
+# ---------------------------------------------------------
+# 15. Cross-recruiter explanation access is forbidden
+# ---------------------------------------------------------
+
+def test_recruiter_cannot_explain_candidates_for_another_recruiters_job():
+    db = SessionLocal()
+
+    recruiter_a_user = None
+    recruiter_a = None
+
+    recruiter_b_user = None
+    recruiter_b = None
+
+    job = None
+
+    try:
+        recruiter_a_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter_a = create_recruiter(
+            db,
+            recruiter_a_user,
+        )
+
+        recruiter_b_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter_b = create_recruiter(
+            db,
+            recruiter_b_user,
+        )
+
+        job = create_job(
+            db,
+            recruiter_a,
+        )
+
+        token = token_for(recruiter_b_user)
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+        )
+
+        print(
+            "Cross-recruiter explanation:",
+            response.status_code,
+        )
+        print(
+            "Response:",
+            response.json(),
+        )
+
+        assert response.status_code == 403
+
+    finally:
+        if job:
+            db.delete(job)
+
+        if recruiter_a:
+            db.delete(recruiter_a)
+
+        if recruiter_b:
+            db.delete(recruiter_b)
+
+        if recruiter_a_user:
+            db.delete(recruiter_a_user)
+
+        if recruiter_b_user:
+            db.delete(recruiter_b_user)
+
+        db.commit()
+        db.close()
+
+
+# ---------------------------------------------------------
+# 16. Invalid explanation limit
+# ---------------------------------------------------------
+
+def test_matching_explanation_rejects_invalid_explanation_limit():
+    db = SessionLocal()
+
+    recruiter_user = None
+    recruiter = None
+    job = None
+
+    try:
+        recruiter_user = create_user(
+            db,
+            UserRole.RECRUITER,
+        )
+
+        recruiter = create_recruiter(
+            db,
+            recruiter_user,
+        )
+
+        job = create_job(
+            db,
+            recruiter,
+        )
+
+        token = token_for(recruiter_user)
+
+        response = client.post(
+            f"/jobs/{job.id}/candidates/match/explain",
+            params={
+                "explanation_limit": 0,
+            },
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+        )
+
+        print(
+            "Invalid explanation limit:",
+            response.status_code,
+        )
+        print(
+            "Response:",
+            response.json(),
+        )
+
+        assert response.status_code == 422
+
+    finally:
+        if job:
+            db.delete(job)
+
+        if recruiter:
+            db.delete(recruiter)
+
+        if recruiter_user:
+            db.delete(recruiter_user)
+
+        db.commit()
+        db.close()

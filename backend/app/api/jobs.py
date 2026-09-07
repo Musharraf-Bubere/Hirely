@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import (
@@ -8,41 +8,9 @@ from app.api.dependencies import (
     require_recruiter,
 )
 
-from app.ai.services.matching_orchestrator import MatchingOrchestrator
-from app.ai.matching.inputs import MatchingInput
-from app.ai.parsers.schemas import ResumeData
-
-from app.ai.services.candidate_preparation_service import (
-    CandidatePreparationInput,
-    CandidatePreparationService,
+from app.ai.services.recruiter_matching_service import (
+    recruiter_matching_service,
 )
-
-from app.ai.services.job_preparation_service import (
-    JobPreparationInput,
-    JobPreparationService,
-)
-
-from app.ai.services.matching_input_assembler import (
-    MatchingInputAssembler,
-    MatchingInputAssembly,
-)
-
-from app.ai.embeddings.service import embedding_service
-from app.ai.matching.engine import matching_engine
-
-from app.ai.services.match_explanation_service import (
-    match_explanation_service,
-)
-
-from app.ai.representations.candidate import (
-    candidate_representation_builder,
-)
-
-from app.ai.representations.job import (
-    job_representation_builder,
-)
-
-from app.ai.services.matching_service import matching_service
 
 from app.db.session import get_db
 
@@ -55,8 +23,6 @@ from app.schemas.application import ApplicationResponse
 from app.schemas.job import JobCreateRequest, JobResponse
 
 from app.services.application import create_application
-from app.services.candidate import get_candidates
-from app.services.candidate_skill import get_candidate_skills
 
 from app.services.job import (
     create_job,
@@ -64,39 +30,10 @@ from app.services.job import (
     get_active_jobs,
 )
 
-from app.services.job_skill import get_job_skills
-from app.services.resume import get_active_resume
-
 
 router = APIRouter(
     prefix="/jobs",
     tags=["Jobs"],
-)
-
-
-# ---------------------------------------------------------
-# AI Services
-# ---------------------------------------------------------
-
-candidate_preparation_service = CandidatePreparationService(
-    representation_builder=candidate_representation_builder,
-    embedding_service=embedding_service,
-)
-
-
-job_preparation_service = JobPreparationService(
-    representation_builder=job_representation_builder,
-    embedding_service=embedding_service,
-)
-
-
-matching_input_assembler = MatchingInputAssembler()
-
-
-matching_orchestrator = MatchingOrchestrator(
-    matching_engine=matching_engine,
-    matching_service=matching_service,
-    match_explanation_service=match_explanation_service,
 )
 
 
@@ -261,6 +198,8 @@ def match_candidate_to_job(
     # 2. Get active resume
     # -----------------------------------------------------
 
+    from app.services.resume import get_active_resume
+
     resume = get_active_resume(
         db=db,
         candidate=candidate,
@@ -292,6 +231,8 @@ def match_candidate_to_job(
     # 4. Validate resume data
     # -----------------------------------------------------
 
+    from app.ai.parsers.schemas import ResumeData
+
     try:
         resume_data = ResumeData.model_validate(
             resume.parsed_data
@@ -322,17 +263,16 @@ def match_candidate_to_job(
         )
 
     # -----------------------------------------------------
-    # 6. Get candidate skills
+    # 6. Candidate and job skills
     # -----------------------------------------------------
+
+    from app.services.candidate_skill import get_candidate_skills
+    from app.services.job_skill import get_job_skills
 
     candidate_skills = get_candidate_skills(
         db=db,
         candidate=candidate,
     )
-
-    # -----------------------------------------------------
-    # 7. Get job skills
-    # -----------------------------------------------------
 
     required_skills, preferred_skills = get_job_skills(
         db=db,
@@ -340,8 +280,48 @@ def match_candidate_to_job(
     )
 
     # -----------------------------------------------------
-    # 8. Prepare candidate
+    # 7. Prepare candidate and job
     # -----------------------------------------------------
+
+    from app.ai.embeddings.service import embedding_service
+    from app.ai.matching.engine import matching_engine
+    from app.ai.representations.candidate import (
+        candidate_representation_builder,
+    )
+    from app.ai.representations.job import (
+        job_representation_builder,
+    )
+    from app.ai.services.candidate_preparation_service import (
+        CandidatePreparationInput,
+        CandidatePreparationService,
+    )
+    from app.ai.services.job_preparation_service import (
+        JobPreparationInput,
+        JobPreparationService,
+    )
+    from app.ai.services.matching_input_assembler import (
+        MatchingInputAssembly,
+        MatchingInputAssembler,
+    )
+    from app.ai.services.match_explanation_service import (
+        match_explanation_service,
+    )
+    from app.ai.services.matching_orchestrator import (
+        MatchingOrchestrator,
+    )
+    from app.ai.services.matching_service import (
+        matching_service,
+    )
+
+    candidate_preparation_service = CandidatePreparationService(
+        representation_builder=candidate_representation_builder,
+        embedding_service=embedding_service,
+    )
+
+    job_preparation_service = JobPreparationService(
+        representation_builder=job_representation_builder,
+        embedding_service=embedding_service,
+    )
 
     candidate_preparation = candidate_preparation_service.prepare(
         CandidatePreparationInput(
@@ -349,10 +329,6 @@ def match_candidate_to_job(
             resume_data=resume_data,
         )
     )
-
-    # -----------------------------------------------------
-    # 9. Prepare job
-    # -----------------------------------------------------
 
     job_preparation = job_preparation_service.prepare(
         JobPreparationInput(
@@ -368,8 +344,10 @@ def match_candidate_to_job(
     )
 
     # -----------------------------------------------------
-    # 10. Assemble matching input
+    # 8. Assemble matching input
     # -----------------------------------------------------
+
+    matching_input_assembler = MatchingInputAssembler()
 
     matching_input = matching_input_assembler.assemble(
         MatchingInputAssembly(
@@ -382,8 +360,14 @@ def match_candidate_to_job(
     )
 
     # -----------------------------------------------------
-    # 11. Run matching engine
+    # 9. Run matching engine
     # -----------------------------------------------------
+
+    matching_orchestrator = MatchingOrchestrator(
+        matching_engine=matching_engine,
+        matching_service=matching_service,
+        match_explanation_service=match_explanation_service,
+    )
 
     result = matching_orchestrator.match(
         matching_input
@@ -453,142 +437,89 @@ def match_candidates_to_job(
         )
 
     # -----------------------------------------------------
-    # 4. Get job skills
+    # 4. Run recruiter matching workflow
     # -----------------------------------------------------
 
-    required_skills, preferred_skills = get_job_skills(
+    return recruiter_matching_service.rank_candidates(
         db=db,
         job=job,
     )
 
+
+# ---------------------------------------------------------
+# Recruiter → Candidate Matching + AI Explanation
+# ---------------------------------------------------------
+
+@router.post(
+    "/{job_id}/candidates/match/explain",
+)
+def explain_candidates_for_job(
+    job_id: UUID,
+    explanation_limit: int = Query(
+        default=5,
+        ge=1,
+        description=(
+            "Number of top-ranked candidates that should "
+            "receive an AI-generated match explanation."
+        ),
+    ),
+    current_user: User = Depends(require_recruiter),
+    db: Session = Depends(get_db),
+):
     # -----------------------------------------------------
-    # 5. Prepare job ONCE
+    # 1. Get recruiter profile
     # -----------------------------------------------------
 
-    job_preparation = job_preparation_service.prepare(
-        JobPreparationInput(
-            job_id=job.id,
-            title=job.title,
-            description=job.description,
-            location=job.location,
-            employment_type=job.employment_type,
-            experience_level=job.experience_level,
-            required_skills=required_skills,
-            preferred_skills=preferred_skills,
-        )
+    recruiter = (
+        db.query(Recruiter)
+        .filter(Recruiter.user_id == current_user.id)
+        .first()
     )
 
+    if not recruiter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recruiter profile not found",
+        )
+
     # -----------------------------------------------------
-    # 6. Get all candidates
+    # 2. Get active job
     # -----------------------------------------------------
 
-    candidates = get_candidates(
+    job = (
+        db.query(Job)
+        .filter(
+            Job.id == job_id,
+            Job.is_active.is_(True),
+        )
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    # -----------------------------------------------------
+    # 3. Verify job ownership
+    # -----------------------------------------------------
+
+    if job.recruiter_id != recruiter.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "You do not have permission to explain "
+                "candidates for this job"
+            ),
+        )
+
+    # -----------------------------------------------------
+    # 4. Run matching + explanation workflow
+    # -----------------------------------------------------
+
+    return recruiter_matching_service.rank_and_explain_candidates(
         db=db,
+        job=job,
+        explanation_limit=explanation_limit,
     )
-
-    matching_inputs: list[MatchingInput] = []
-
-    # -----------------------------------------------------
-    # 7. Prepare eligible candidates
-    # -----------------------------------------------------
-
-    for candidate in candidates:
-
-        # ---------------------------------------------
-        # Candidate must have an active resume
-        # ---------------------------------------------
-
-        resume = get_active_resume(
-            db=db,
-            candidate=candidate,
-        )
-
-        if not resume:
-            continue
-
-        # ---------------------------------------------
-        # Resume must be successfully parsed
-        # ---------------------------------------------
-
-        if resume.parsing_status != "COMPLETED":
-            continue
-
-        if not resume.parsed_data:
-            continue
-
-        # ---------------------------------------------
-        # Validate parsed resume
-        # ---------------------------------------------
-
-        try:
-            resume_data = ResumeData.model_validate(
-                resume.parsed_data
-            )
-        except Exception:
-            continue
-
-        # ---------------------------------------------
-        # Get candidate skills
-        # ---------------------------------------------
-
-        candidate_skills = get_candidate_skills(
-            db=db,
-            candidate=candidate,
-        )
-
-        # ---------------------------------------------
-        # Prepare candidate
-        # ---------------------------------------------
-
-        candidate_preparation = (
-            candidate_preparation_service.prepare(
-                CandidatePreparationInput(
-                    candidate_id=candidate.id,
-                    resume_data=resume_data,
-                )
-            )
-        )
-
-        # ---------------------------------------------
-        # Assemble matching input
-        # ---------------------------------------------
-
-        matching_inputs.append(
-            MatchingInputAssembly(
-                candidate_preparation=candidate_preparation,
-                candidate_skills=candidate_skills,
-                job_preparation=job_preparation,
-                required_skills=required_skills,
-                preferred_skills=preferred_skills,
-            )
-        )
-
-    # -----------------------------------------------------
-    # 8. No eligible candidates
-    # -----------------------------------------------------
-
-    if not matching_inputs:
-        return []
-
-    # -----------------------------------------------------
-    # 9. Calculate match results
-    # -----------------------------------------------------
-
-    matching_results = [
-        matching_orchestrator.match(
-            matching_input_assembler.assemble(data)
-        )
-        for data in matching_inputs
-    ]
-
-    # -----------------------------------------------------
-    # 10. Rank candidates
-    # -----------------------------------------------------
-
-    ranked_results = (
-        matching_orchestrator.rank_match_results(
-            matching_results
-        )
-    )
-
-    return ranked_results

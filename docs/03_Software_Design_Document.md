@@ -4653,3 +4653,633 @@ The most important architectural principle remains:
 - Authentication, authorization, ownership, job status, and resume eligibility have been tested.
 - The full non-integration regression suite remains green.
 - The current implementation is suitable as an MVP foundation and can later evolve toward cached embeddings, vector retrieval, asynchronous processing, and learned ranking.
+
+---
+
+## Recruiter Matching Service
+
+### Purpose
+
+Hirely's recruiter-facing candidate matching workflow requires evaluating multiple candidates against the same job.
+
+Initially, this workflow was implemented directly inside the FastAPI job routes. This resulted in duplicated workflow logic between:
+
+- Recruiter candidate ranking
+- Recruiter candidate ranking with AI explanations
+
+To improve separation of concerns and maintainability, the recruiter matching workflow was moved into a dedicated service:
+
+`RecruiterMatchingService`
+
+The API layer is now responsible for:
+
+- Authentication
+- Recruiter authorization
+- Job lookup
+- Job ownership verification
+- Calling the appropriate service method
+- Returning the result
+
+The matching workflow itself is handled by the service layer.
+
+---
+
+### Architecture
+
+The recruiter matching architecture follows:
+
+    React
+       |
+       | HTTP/JSON
+       v
+    FastAPI
+       |
+       v
+    Jobs API
+       |
+       | authorization + job ownership
+       v
+    RecruiterMatchingService
+       |
+       +-----------------------------+
+       |                             |
+       v                             v
+    Job Preparation          Candidate Preparation
+       |                             |
+       |                             |
+       +-------------+---------------+
+                     |
+                     v
+              Matching Input
+                     |
+                     v
+              Matching Engine
+                     |
+                     v
+             MatchScoreResult
+                     |
+                     v
+              Matching Service
+                     |
+                     v
+              Candidate Ranker
+                     |
+                     v
+             RankedMatchResult
+                     |
+                     v
+              Top-N Selection
+                     |
+                     v
+             Match Explanation
+                     |
+                     v
+                  Gemini
+                     |
+                     v
+             FinalMatchResult
+
+This architecture keeps HTTP-specific concerns separate from the candidate matching workflow.
+
+---
+
+### Recruiter Matching Workflow
+
+The recruiter matching workflow is implemented as a multi-stage process.
+
+#### Job Preparation
+
+The job is prepared only once for a recruiter matching request.
+
+The service retrieves:
+
+- Job title
+- Job description
+- Location
+- Employment type
+- Experience level
+- Required skills
+- Preferred skills
+
+The information is converted into a `JobRepresentation` and an embedding is generated.
+
+The prepared job is then reused for every eligible candidate.
+
+This avoids unnecessarily generating the same job embedding repeatedly.
+
+---
+
+### Candidate Eligibility
+
+The service retrieves candidates and evaluates whether each candidate can participate in matching.
+
+A candidate is currently considered eligible when:
+
+- An active resume exists.
+- The resume has completed parsing.
+- Parsed resume data exists.
+- Parsed resume data passes `ResumeData` validation.
+
+Candidates that do not satisfy these conditions are skipped.
+
+This allows the matching system to continue processing valid candidates without failing the entire ranking operation because of one incomplete candidate record.
+
+---
+
+### Candidate Preparation
+
+For each eligible candidate, Hirely retrieves:
+
+- Candidate skills
+- Active parsed resume data
+
+The resume data is converted into a `CandidateRepresentation`.
+
+The candidate representation contains relevant information such as:
+
+- Profile information
+- Location
+- Headline
+- Summary
+- Skills
+- Professional experience
+- Projects
+- Education
+- Certifications
+
+The candidate representation is then converted into an embedding.
+
+The candidate embedding is used together with the prepared job embedding for semantic similarity.
+
+---
+
+### Matching Input Assembly
+
+The prepared candidate and prepared job are combined with structured skill information.
+
+The resulting `MatchingInput` contains:
+
+- Candidate ID
+- Candidate skills
+- Required job skills
+- Preferred job skills
+- Candidate embedding
+- Job embedding
+
+`MatchingInputAssembler` is responsible for constructing this input.
+
+This keeps the recruiter workflow independent from the internal structure of the preparation services.
+
+---
+
+### Candidate Matching
+
+Each eligible candidate is evaluated by the existing `MatchingEngine`.
+
+The Matching Engine combines:
+
+- Required skill matching
+- Preferred skill matching
+- Semantic similarity
+
+The result is represented as a `CompleteMatchResult`.
+
+The underlying scoring system remains deterministic.
+
+The LLM is not responsible for calculating the final match score.
+
+---
+
+### Candidate Ranking
+
+After all eligible candidates have been matched, their results are passed to the existing ranking workflow.
+
+The process is:
+
+    CompleteMatchResult
+            |
+            v
+    MatchScoreResult
+            |
+            v
+    MatchingService
+            |
+            v
+    CandidateMatch
+            |
+            v
+    CandidateRanker
+            |
+            v
+    RankedCandidate
+            |
+            v
+    RankedMatchResult
+
+The ranking component orders candidates by their overall match score.
+
+Ranking remains deterministic and does not require an LLM.
+
+This preserves the separation already established between:
+
+**Matching = Evaluate**
+
+**Scoring = Combine Evidence**
+
+**Ranking = Order**
+
+---
+
+### Recruiter Matching API
+
+Hirely exposes a recruiter-facing endpoint for candidate ranking:
+
+    POST /jobs/{job_id}/candidates/match
+
+The endpoint requires recruiter authentication.
+
+The recruiter must also own the requested job.
+
+The API route performs:
+
+1. Authentication
+2. Recruiter profile lookup
+3. Active job lookup
+4. Job ownership verification
+5. Delegation to `RecruiterMatchingService`
+6. Returning ranked results
+
+The route does not perform candidate preparation, embedding generation, matching, or ranking itself.
+
+This keeps the API layer thin.
+
+---
+
+### AI Match Explanation
+
+Recruiters may also request explanations for ranked candidates.
+
+The explanation endpoint is:
+
+    POST /jobs/{job_id}/candidates/match/explain
+
+The endpoint accepts:
+
+    explanation_limit
+
+The default explanation limit is:
+
+    5
+
+The explanation workflow first performs candidate matching and ranking.
+
+Only the top N ranked candidates are then sent to the explanation workflow.
+
+For example:
+
+    100 candidates
+          |
+          v
+    Match 100 candidates
+          |
+          v
+    Rank 100 candidates
+          |
+          v
+    Select top 5
+          |
+          v
+    Generate 5 explanations
+
+This avoids generating an expensive LLM explanation for every candidate.
+
+---
+
+### Evidence-Grounded Explanation
+
+The explanation system does not send the complete resume and job description to the LLM for every explanation.
+
+Instead, the explanation workflow uses structured matching evidence such as:
+
+- Overall match score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+- Required matched skills
+- Required missing skills
+- Preferred matched skills
+- Preferred missing skills
+
+The LLM receives this structured evidence and generates a human-readable explanation.
+
+The resulting output is validated using the defined Pydantic explanation schema.
+
+This reduces the risk of unsupported claims and keeps the explanation grounded in the actual matching result.
+
+---
+
+### Explanation Output
+
+The explanation endpoint returns `FinalMatchResult` objects.
+
+Each result contains:
+
+- Ranked match information
+- Optional AI explanation
+
+For candidates outside the explanation limit:
+
+    explanation = None
+
+For candidates within the explanation limit:
+
+    explanation = MatchExplanation
+
+Therefore, the API can return the complete ranked candidate list while limiting expensive AI explanation generation to the most relevant candidates.
+
+---
+
+### Separation of Responsibilities
+
+The final recruiter matching architecture separates responsibilities across several components.
+
+**Jobs API**
+
+Responsible for:
+
+- HTTP requests
+- Authentication
+- Authorization
+- Job ownership
+- HTTP responses
+
+**RecruiterMatchingService**
+
+Responsible for:
+
+- Coordinating recruiter candidate matching
+- Preparing the job
+- Preparing eligible candidates
+- Assembling matching inputs
+- Executing candidate matching
+- Ranking candidates
+- Coordinating optional explanations
+
+**CandidatePreparationService**
+
+Responsible for:
+
+- Building candidate representations
+- Generating candidate embeddings
+
+**JobPreparationService**
+
+Responsible for:
+
+- Building job representations
+- Generating job embeddings
+
+**MatchingInputAssembler**
+
+Responsible for:
+
+- Combining prepared candidate and job information into `MatchingInput`
+
+**MatchingEngine**
+
+Responsible for:
+
+- Structured skill matching
+- Semantic similarity
+- Match score calculation
+
+**MatchingService**
+
+Responsible for:
+
+- Converting match results into ranking inputs
+- Coordinating ranking
+
+**CandidateRanker**
+
+Responsible for:
+
+- Deterministically ordering candidates
+
+**MatchExplanationService**
+
+Responsible for:
+
+- Building explanation prompts
+- Calling Gemini
+- Validating structured explanation output
+
+This separation allows each component to be tested and changed independently.
+
+---
+
+### Why a Dedicated Recruiter Matching Service?
+
+The dedicated service provides several engineering benefits.
+
+#### Reduced Duplication
+
+The recruiter ranking endpoint and recruiter explanation endpoint previously contained the same candidate preparation and ranking workflow.
+
+The shared workflow now exists in one service.
+
+#### Thin API Layer
+
+The API route focuses on HTTP and authorization concerns rather than implementing the entire matching pipeline.
+
+#### Reusability
+
+The same recruiter matching workflow can later be used by:
+
+- Recruiter dashboards
+- Background jobs
+- Batch matching
+- Scheduled candidate recommendations
+- Administrative tools
+
+without duplicating the workflow.
+
+#### Testability
+
+The workflow can be tested independently from FastAPI routes.
+
+Individual AI and matching components can also continue to be tested separately.
+
+#### Maintainability
+
+Changes to candidate eligibility, preparation, matching, or ranking can be implemented in the service without modifying multiple API endpoints.
+
+---
+
+### Performance Considerations
+
+The service currently performs synchronous candidate preparation and embedding generation.
+
+For a small candidate pool, this is acceptable for the initial implementation.
+
+However, as the number of candidates grows, the workflow may become expensive because candidate embeddings are generated during the request.
+
+Potential future improvements include:
+
+- Persisting candidate embeddings
+- Persisting job embeddings
+- Caching embeddings
+- Batch embedding generation
+- Vector database search
+- Background processing
+- Asynchronous candidate matching
+- Precomputed candidate representations
+
+These optimizations should be introduced when actual performance requirements justify them.
+
+---
+
+### Security Boundary
+
+The AI matching workflow does not bypass Hirely's authentication and authorization system.
+
+The request flow is:
+
+    Recruiter
+        |
+        v
+    Authentication
+        |
+        v
+    Recruiter Authorization
+        |
+        v
+    Job Ownership Verification
+        |
+        v
+    RecruiterMatchingService
+        |
+        v
+    AI Matching Components
+
+A recruiter cannot use the matching endpoint for another recruiter's job.
+
+The AI service therefore operates behind the existing application security boundary.
+
+---
+
+### Architecture Decision
+
+Hirely will use `RecruiterMatchingService` as the orchestration layer for recruiter-facing multi-candidate matching.
+
+The architecture follows:
+
+    FastAPI
+       |
+       v
+    Authorization
+       |
+       v
+    RecruiterMatchingService
+       |
+       +---- Job Preparation
+       |
+       +---- Candidate Preparation
+       |
+       +---- Matching Input Assembly
+       |
+       +---- Matching Engine
+       |
+       +---- Ranking
+       |
+       +---- Optional Top-N Explanation
+
+This design maintains the project's core architectural principle:
+
+**Use deterministic application logic where deterministic logic is sufficient, and use AI where semantic understanding or natural-language reasoning provides meaningful value.**
+
+---
+
+### Testing
+
+The recruiter matching workflow is covered by automated API tests.
+
+The implemented test coverage includes:
+
+- Recruiter can match candidates for an owned job
+- Candidate cannot access recruiter matching
+- Unauthenticated requests are rejected
+- Nonexistent jobs are rejected
+- Inactive jobs are rejected
+- Cross-recruiter access is rejected
+- Candidates without eligible resumes are skipped
+- Pending resumes are skipped
+- Candidate ranking is returned correctly
+- Recruiter explanation endpoint works
+- Top-N explanation behavior works
+- Candidate access to explanation endpoint is rejected
+- Unauthenticated explanation requests are rejected
+- Cross-recruiter explanation requests are rejected
+- Invalid explanation limits are rejected
+
+The full normal test suite currently passes:
+
+    157 passed
+    8 deselected
+
+Integration tests involving external AI services remain separately marked so that normal regression testing does not depend on external model availability or quota.
+
+---
+
+### Mental Model
+
+The recruiter-facing Hirely workflow can be remembered as:
+
+    Prepare
+       ↓
+    Match
+       ↓
+    Score
+       ↓
+    Rank
+       ↓
+    Explain Top N
+
+Or more simply:
+
+**Recruiter Matching = Prepare + Evaluate + Rank + Explain**
+
+The LLM is not the complete recruitment decision maker.
+
+Instead:
+
+**Structured Data → reliable facts**
+
+**Embeddings → semantic meaning**
+
+**Matching Engine → evidence combination**
+
+**Ranking → deterministic ordering**
+
+**LLM Explanation → human-readable reasoning**
+
+This keeps Hirely's recruitment intelligence explainable, testable, and modular.
+
+---
+
+### Key Takeaways
+
+- Recruiter matching is implemented as a dedicated service workflow.
+- `RecruiterMatchingService` removes duplicated matching logic from API routes.
+- The FastAPI layer remains thin.
+- The job is prepared once and reused across candidates.
+- Only eligible candidates participate in matching.
+- Candidate preparation and job preparation remain separate services.
+- `MatchingInputAssembler` provides a clean boundary between preparation and matching.
+- The Matching Engine combines structured and semantic evidence.
+- Candidate ranking remains deterministic.
+- LLM explanations are generated only for the top N candidates.
+- Explanation output is structured and validated.
+- Authentication and authorization remain outside the AI workflow.
+- The architecture can later support caching, vector search, batch processing, and background AI processing.
+- The final design follows Hirely's hybrid approach: structured data + deterministic logic + embeddings + LLM reasoning.
