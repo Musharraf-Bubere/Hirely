@@ -1,10 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
-
 import { useAuth } from '../context/AuthContext'
 
 function Navbar() {
   const navigate = useNavigate()
-
   const { user, isAuthenticated, logout } = useAuth()
 
   function handleLogout() {
@@ -12,60 +10,69 @@ function Navbar() {
     navigate('/', { replace: true })
   }
 
+  function getDashboardPath() {
+    if (user?.role === 'recruiter') {
+      return '/recruiter/dashboard'
+    }
+
+    return '/candidate/dashboard'
+  }
+
   return (
-    <nav className="navbar">
-      <div className="container navbar-content">
+    <header className="public-navbar">
+      <div className="public-navbar-inner">
         <Link to="/" className="brand">
-          Hirely
+          <span className="brand-mark">✦</span>
+          <span>Hirely</span>
         </Link>
 
-        <div className="nav-links">
-          <Link to="/" className="nav-link">
-            Home
+        <nav className="public-nav-links">
+          <Link to="/jobs" className="public-nav-link">
+            Find Jobs
           </Link>
 
-          {!isAuthenticated && (
+          <a href="#how-it-works" className="public-nav-link">
+            How It Works
+          </a>
+
+          <a href="#for-recruiters" className="public-nav-link">
+            For Recruiters
+          </a>
+        </nav>
+
+        <div className="public-nav-actions">
+          {!isAuthenticated ? (
             <>
-              <Link to="/login" className="nav-link">
-                Login
+              <Link to="/login" className="public-sign-in">
+                Sign In
               </Link>
 
-              <Link to="/register" className="nav-button">
+              <Link to="/register" className="public-nav-cta">
                 Get Started
+                <span>→</span>
               </Link>
             </>
-          )}
+          ) : (
+            <>
+              <Link
+                to={getDashboardPath()}
+                className="public-sign-in"
+              >
+                Dashboard
+              </Link>
 
-          {isAuthenticated && user?.role === 'candidate' && (
-            <Link
-              to="/candidate/dashboard"
-              className="nav-button"
-            >
-              Dashboard
-            </Link>
-          )}
-
-          {isAuthenticated && user?.role === 'recruiter' && (
-            <Link
-              to="/recruiter/dashboard"
-              className="nav-button"
-            >
-              Dashboard
-            </Link>
-          )}
-
-          {isAuthenticated && (
-            <button
-              type="button"
-              className="nav-link nav-logout"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+              <button
+                type="button"
+                className="public-nav-cta"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
           )}
         </div>
       </div>
-    </nav>
+    </header>
   )
 }
 

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   createCandidateProfile,
   getCandidateProfile,
+  updateCandidateProfile,
 } from '../services/candidate'
 
 function CandidateProfile() {
@@ -66,7 +67,9 @@ function CandidateProfile() {
     setSaving(true)
 
     try {
-      const profile = await createCandidateProfile(formData)
+      const profile = profileExists
+        ? await updateCandidateProfile(formData)
+        : await createCandidateProfile(formData)
 
       setFormData({
         first_name: profile.first_name || '',
@@ -77,7 +80,12 @@ function CandidateProfile() {
       })
 
       setProfileExists(true)
-      setSuccess('Profile created successfully.')
+
+      setSuccess(
+        profileExists
+          ? 'Profile updated successfully.'
+          : 'Profile created successfully.'
+      )
 
       setTimeout(() => {
         navigate('/candidate/dashboard')

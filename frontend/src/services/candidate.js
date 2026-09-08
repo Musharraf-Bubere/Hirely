@@ -11,3 +11,9 @@ export async function createCandidateProfile(profileData) {
     auth: true,
   })
 }
+
+export async function updateCandidateProfile(profileData) {
+  return api.patch('/candidate/profile', profileData, {
+    auth: true,
+  })
+}

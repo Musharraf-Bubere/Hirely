@@ -1,14 +1,23 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import MainLayout from './layouts/MainLayout'
+import AppShell from './components/layout/AppShell'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Jobs from './pages/Jobs'
+import JobDetail from './pages/JobDetail'
+import Applications from './pages/Applications'
 import CandidateDashboard from './pages/CandidateDashboard'
 import CandidateProfile from './pages/CandidateProfile'
 import CandidateResume from './pages/CandidateResume'
+
+import RecruiterDashboard from './pages/RecruiterDashboard'
+import RecruiterJobs from './pages/RecruiterJobs'
+import CreateJob from './pages/CreateJob'
+import RecruiterJobDetail from './pages/RecruiterJobDetail'
 
 import { AuthProvider } from './context/AuthContext'
 
@@ -20,31 +29,37 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<MainLayout />}>
-            <Route
-              path="/"
-              element={<Home />}
-            />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:jobId" element={<JobDetail />} />
+          </Route>
 
-            <Route
-              path="/login"
-              element={<Login />}
-            />
-
-            <Route
-              path="/register"
-              element={<Register />}
-            />
-
-            <Route
-              element={
-                <ProtectedRoute
-                  allowedRoles={['candidate']}
-                />
-              }
-            >
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={['candidate']} />
+            }
+          >
+            <Route element={<AppShell />}>
               <Route
                 path="/candidate/dashboard"
                 element={<CandidateDashboard />}
+              />
+
+              <Route
+                path="/candidate/jobs"
+                element={<Jobs />}
+              />
+
+              <Route
+                path="/candidate/jobs/:jobId"
+                element={<JobDetail />}
+              />
+
+              <Route
+                path="/candidate/applications"
+                element={<Applications />}
               />
 
               <Route
@@ -57,27 +72,32 @@ function App() {
                 element={<CandidateResume />}
               />
             </Route>
+          </Route>
 
-            <Route
-              element={
-                <ProtectedRoute
-                  allowedRoles={['recruiter']}
-                />
-              }
-            >
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={['recruiter']} />
+            }
+          >
+            <Route element={<AppShell />}>
               <Route
                 path="/recruiter/dashboard"
-                element={
-                  <main className="placeholder-page">
-                    <h1>
-                      Recruiter Dashboard
-                    </h1>
+                element={<RecruiterDashboard />}
+              />
 
-                    <p>
-                      Recruiter dashboard coming next.
-                    </p>
-                  </main>
-                }
+              <Route
+                path="/recruiter/jobs"
+                element={<RecruiterJobs />}
+              />
+
+              <Route
+                path="/recruiter/jobs/create"
+                element={<CreateJob />}
+              />
+
+              <Route
+                path="/recruiter/jobs/:jobId"
+                element={<RecruiterJobDetail />}
               />
             </Route>
           </Route>

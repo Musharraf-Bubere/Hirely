@@ -8,6 +8,8 @@ function Register() {
   const { register } = useAuth()
 
   const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     role: 'candidate',
@@ -76,6 +78,42 @@ function Register() {
         )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="register-first-name">
+                First Name
+              </label>
+
+              <input
+                id="register-first-name"
+                name="first_name"
+                type="text"
+                value={formData.first_name}
+                onChange={handleChange}
+                placeholder="First name"
+                required
+                autoComplete="given-name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-last-name">
+                Last Name
+              </label>
+
+              <input
+                id="register-last-name"
+                name="last_name"
+                type="text"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="Last name"
+                required
+                autoComplete="family-name"
+              />
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="register-email">Email</label>
 

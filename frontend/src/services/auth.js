@@ -2,8 +2,16 @@ import api from './api'
 
 const ACCESS_TOKEN_KEY = 'hirely_access_token'
 
-export async function registerUser({ email, password, role }) {
+export async function registerUser({
+  first_name,
+  last_name,
+  email,
+  password,
+  role,
+}) {
   return api.post('/auth/register', {
+    first_name,
+    last_name,
     email,
     password,
     role,
