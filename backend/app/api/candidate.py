@@ -8,14 +8,19 @@ from app.models.user import User
 from app.schemas.candidate import (
     CandidateProfileCreate,
     CandidateProfileResponse,
+    CandidateProfileUpdate,
 )
-from app.services.candidate import create_candidate_profile
+from app.services.candidate import (
+    create_candidate_profile,
+    update_candidate_profile,
+)
 
 
 router = APIRouter(
     prefix="/candidate",
     tags=["Candidate"],
 )
+
 
 @router.post(
     "/profile",
@@ -37,19 +42,18 @@ def create_profile(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
-        ) from exc
+        )
 
     return {
-        "id": current_user.id,
+        "id": candidate.id,
         "email": current_user.email,
-        "role": current_user.role,
-        "is_active": current_user.is_active,
         "first_name": candidate.first_name,
         "last_name": candidate.last_name,
         "headline": candidate.headline,
         "bio": candidate.bio,
         "location": candidate.location,
     }
+
 
 @router.get(
     "/profile",
@@ -72,10 +76,40 @@ def get_candidate_profile(
         )
 
     return {
-        "id": current_user.id,
+        "id": candidate.id,
         "email": current_user.email,
-        "role": current_user.role,
-        "is_active": current_user.is_active,
+        "first_name": candidate.first_name,
+        "last_name": candidate.last_name,
+        "headline": candidate.headline,
+        "bio": candidate.bio,
+        "location": candidate.location,
+    }
+
+
+@router.patch(
+    "/profile",
+    response_model=CandidateProfileResponse,
+)
+def update_profile(
+    data: CandidateProfileUpdate,
+    current_user: User = Depends(require_candidate),
+    db: Session = Depends(get_db),
+):
+    try:
+        candidate = update_candidate_profile(
+            db=db,
+            user=current_user,
+            data=data,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+    return {
+        "id": candidate.id,
+        "email": current_user.email,
         "first_name": candidate.first_name,
         "last_name": candidate.last_name,
         "headline": candidate.headline,

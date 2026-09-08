@@ -31,7 +31,7 @@ def create_job(
 
 
 def get_active_jobs(
-        db: Session,
+    db: Session,
 ) -> list[Job]:
     return (
         db.query(Job)
@@ -52,4 +52,18 @@ def get_active_job(
             Job.is_active.is_(True),
         )
         .first()
+    )
+
+
+def get_recruiter_jobs(
+    db: Session,
+    recruiter: Recruiter,
+) -> list[Job]:
+    return (
+        db.query(Job)
+        .filter(
+            Job.recruiter_id == recruiter.id,
+        )
+        .order_by(Job.created_at.desc())
+        .all()
     )

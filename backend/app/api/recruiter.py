@@ -5,7 +5,9 @@ from app.api.dependencies import require_recruiter
 from app.db.session import get_db
 from app.models.recruiter import Recruiter
 from app.models.user import User
+from app.schemas.job import JobResponse
 from app.schemas.recruiter import RecruiterProfileResponse
+from app.services.job import get_recruiter_jobs
 
 
 router = APIRouter(
@@ -47,3 +49,29 @@ def get_recruiter_profile(
         "location": recruiter.location,
         "company": company,
     }
+
+
+@router.get(
+    "/jobs",
+    response_model=list[JobResponse],
+)
+def get_my_jobs(
+    current_user: User = Depends(require_recruiter),
+    db: Session = Depends(get_db),
+):
+    recruiter = (
+        db.query(Recruiter)
+        .filter(Recruiter.user_id == current_user.id)
+        .first()
+    )
+
+    if not recruiter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recruiter profile not found",
+        )
+
+    return get_recruiter_jobs(
+        db=db,
+        recruiter=recruiter,
+    )
