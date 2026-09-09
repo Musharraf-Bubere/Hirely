@@ -1052,3 +1052,207 @@
     gap: 6px 10px;
   }
 }
+
+/* =========================================================
+   Create Job — Skill Matching
+========================================================= */
+
+.recruiter-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.recruiter-skill-editor {
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.recruiter-skill-editor.required {
+  border-color: #bfdbfe;
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #eff6ff 100%
+  );
+}
+
+.recruiter-skill-editor.preferred {
+  border-color: #ddd6fe;
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #f5f3ff 100%
+  );
+}
+
+.recruiter-skill-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.recruiter-skill-editor-header h3 {
+  margin: 7px 0 0;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.recruiter-skill-label {
+  display: inline-flex;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recruiter-skill-label.required {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.recruiter-skill-label.preferred {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.recruiter-skill-count {
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.recruiter-skill-help {
+  margin: 10px 0 16px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.recruiter-skill-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.recruiter-skill-input-row input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  color: #0f172a;
+  background: #fff;
+  font-size: 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.recruiter-skill-input-row input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.recruiter-skill-input-row button {
+  padding: 0 15px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  background: #334155;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.recruiter-skill-input-row button:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.recruiter-skill-chips {
+  min-height: 44px;
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 7px;
+}
+
+.recruiter-skill-empty {
+  color: #94a3b8;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.recruiter-skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.recruiter-skill-chip.required {
+  color: #1e40af;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+
+.recruiter-skill-chip.preferred {
+  color: #6d28d9;
+  background: #ede9fe;
+  border: 1px solid #ddd6fe;
+}
+
+.recruiter-skill-chip button {
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  color: currentColor;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.recruiter-skill-chip button:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 800px) {
+  .recruiter-skills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .recruiter-skill-input-row {
+    flex-direction: column;
+  }
+
+  .recruiter-skill-input-row button {
+    min-height: 38px;
+  }
+}

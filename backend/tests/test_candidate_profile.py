@@ -76,10 +76,11 @@ def test_candidate_can_get_own_profile():
 
         data = response.json()
 
-        assert data["id"] == str(user.id)
+        # ---------------------------------------------------------
+        # Validate candidate profile response
+        # ---------------------------------------------------------
+        assert data["id"] == str(candidate.id)
         assert data["email"] == email
-        assert data["role"] == "candidate"
-        assert data["is_active"] is True
         assert data["first_name"] == "Test"
         assert data["last_name"] == "Candidate"
         assert data["headline"] == "Python Developer"

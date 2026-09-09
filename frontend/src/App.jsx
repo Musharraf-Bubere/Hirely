@@ -18,6 +18,7 @@ import RecruiterDashboard from './pages/RecruiterDashboard'
 import RecruiterJobs from './pages/RecruiterJobs'
 import CreateJob from './pages/CreateJob'
 import RecruiterJobDetail from './pages/RecruiterJobDetail'
+import RecruiterCandidates from './pages/RecruiterCandidates'
 
 import { AuthProvider } from './context/AuthContext'
 
@@ -28,13 +29,28 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* =====================================================
+              Public Routes
+          ===================================================== */}
+
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+
             <Route path="/login" element={<Login />} />
+
             <Route path="/register" element={<Register />} />
+
             <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:jobId" element={<JobDetail />} />
+
+            <Route
+              path="/jobs/:jobId"
+              element={<JobDetail />}
+            />
           </Route>
+
+          {/* =====================================================
+              Candidate Routes
+          ===================================================== */}
 
           <Route
             element={
@@ -74,31 +90,47 @@ function App() {
             </Route>
           </Route>
 
+          {/* =====================================================
+              Recruiter Routes
+          ===================================================== */}
+
           <Route
             element={
               <ProtectedRoute allowedRoles={['recruiter']} />
             }
           >
             <Route element={<AppShell />}>
+
+              {/* Recruiter Dashboard */}
               <Route
                 path="/recruiter/dashboard"
                 element={<RecruiterDashboard />}
               />
 
+              {/* Recruiter Jobs */}
               <Route
                 path="/recruiter/jobs"
                 element={<RecruiterJobs />}
               />
 
+              {/* Create Job */}
               <Route
                 path="/recruiter/jobs/create"
                 element={<CreateJob />}
               />
 
+              {/* Recruiter Job Detail */}
               <Route
                 path="/recruiter/jobs/:jobId"
                 element={<RecruiterJobDetail />}
               />
+
+              {/* AI Candidate Matching */}
+              <Route
+                path="/recruiter/jobs/:jobId/candidates"
+                element={<RecruiterCandidates />}
+              />
+
             </Route>
           </Route>
         </Routes>

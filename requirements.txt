@@ -11,3 +11,6 @@ argon2-cffi==25.1.0
 PyJWT==2.13.0
 httpx==0.28.1
 google-genai==2.21.0
+python-multipart==0.0.32
+langchain-core==1.6.1
+langchain-docling==3.0.0
