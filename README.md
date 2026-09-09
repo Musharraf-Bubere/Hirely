@@ -1,120 +1,55 @@
-# 🚀 Hirely
+# Hirely — AI-Powered Recruitment Platform
 
-### AI-Powered Recruitment & Candidate Matching Platform
+Hirely is an AI-powered recruitment platform designed to simplify and improve the hiring process for both candidates and recruiters.
 
-Hirely is an AI-powered recruitment platform designed to improve how candidates discover opportunities and recruiters discover qualified talent.
+The platform combines modern web technologies, Machine Learning, Generative AI, semantic matching, and automated candidate analysis to create an intelligent recruitment workflow.
 
-The platform combines traditional recruitment workflows with:
+Hirely enables candidates to manage their profiles and resumes, discover relevant jobs, evaluate their compatibility with job opportunities, and use AI-powered career tools.
 
-- Generative AI
-- Semantic embeddings
-- Deterministic skill matching
-- Hybrid scoring
+Recruiters can create and manage job openings, discover suitable candidates, evaluate candidate-job compatibility, rank candidates, and understand AI-generated matching explanations.
+
+---
+
+## 🚀 Project Overview
+
+Traditional recruitment often involves:
+
+- Manually reviewing large numbers of resumes
+- Searching for candidates based on exact keywords
+- Comparing candidates against job descriptions manually
+- Spending significant time understanding candidate suitability
+- Difficulty identifying semantically relevant skills and experience
+
+Hirely addresses these challenges by combining:
+
+- Resume parsing
+- Structured candidate profiles
+- Job description analysis
+- Skill-based matching
+- Semantic similarity
+- Embeddings
 - Candidate ranking
-- Evidence-grounded AI explanations
-- Structured data validation
+- Explainable AI
+- Generative AI
+- AI-powered career assistance
 
-> **Project Status:** 🚧 Active Development  
-> **Current Focus:** AI Matching API & Product Integration
-
----
-
-## 📌 Overview
-
-Traditional recruitment systems often rely heavily on keyword matching and manual candidate screening. This can make it difficult to identify candidates whose experience is relevant to a job but described using different terminology.
-
-Hirely addresses this problem using a **hybrid AI architecture**.
-
-Instead of relying entirely on an LLM, Hirely combines deterministic software logic with AI capabilities.
-
-### Core Approach
-
-- **Database** → Source of truth
-- **Deterministic matching** → Structured skill comparison
-- **Embeddings** → Semantic understanding
-- **Hybrid scoring** → Combines measurable signals
-- **Ranking engine** → Orders candidates by match quality
-- **Generative AI** → Explains matching evidence
-- **Pydantic schemas** → Validates structured AI output
-
-The goal is to build a recruitment system that is not only AI-powered, but also:
-
-- Explainable
-- Testable
-- Maintainable
-- Modular
-- Production-oriented
+The goal is to create a recruitment platform where AI assists users throughout the hiring lifecycle while keeping the system understandable, modular, and scalable.
 
 ---
 
-# 🎯 Problem Statement
+## 🎯 Key Objectives
 
-Recruiters often need to evaluate a large number of candidates against job requirements.
-
-Traditional keyword-based approaches can struggle with:
-
-- Different terminology for similar skills
-- Large numbers of applicants
-- Manual candidate screening
-- Difficulty comparing candidates consistently
-- Lack of meaningful explanations for matching decisions
-
-Candidates also face challenges such as:
-
-- Understanding how well their resume matches a job
-- Identifying missing skills
-- Improving their resume
-- Generating job-specific application materials
-- Understanding potential career improvements
-
-Hirely aims to address these problems through a combination of **conventional software engineering and AI**.
-
----
-
-# 💡 Core Idea
-
-Hirely uses a hybrid candidate-matching architecture.
-
-    Candidate Resume
-           │
-           ▼
-    Resume Parsing
-           │
-           ▼
-    Candidate Representation
-           │
-           ▼
-    Candidate Embedding
-           │
-           ├────────────────────────┐
-           ▼                        ▼
-    Deterministic Skill       Semantic Similarity
-        Matching
-           │                        │
-           └───────────┬────────────┘
-                       ▼
-                Hybrid Scoring
-                       │
-                       ▼
-                Candidate Ranking
-                       │
-                       ▼
-                AI Match Explanation
-                       │
-                       ▼
-                  Final Result
-
-The system does **not** ask an LLM to make the entire hiring decision.
-
-Instead:
-
-1. The database remains the source of truth.
-2. Deterministic logic handles structured matching.
-3. Embeddings capture semantic similarity.
-4. The matching engine combines measurable signals.
-5. Candidate ranking is based on the calculated score.
-6. Generative AI explains the evidence.
-7. Human judgment remains important in recruitment decisions.
+- Build an intelligent recruitment platform
+- Simplify candidate job discovery
+- Help recruiters identify suitable candidates
+- Automate resume and job analysis
+- Combine structured skill matching with semantic similarity
+- Rank candidates according to job requirements
+- Provide understandable AI match explanations
+- Provide AI-powered candidate career assistance
+- Build a scalable backend architecture
+- Provide a modern and responsive frontend
+- Follow production-oriented engineering practices
 
 ---
 
@@ -122,420 +57,419 @@ Instead:
 
 ## 👤 Candidate Features
 
+### Candidate Authentication
+
+Candidates can:
+
+- Register an account
+- Login securely
+- Authenticate using JWT
+- Access protected candidate functionality
+- Manage their account
+
 ### Candidate Profile
 
-Candidates can maintain structured profile information including:
+Candidates can maintain:
 
-- Name
-- Headline
-- Bio
+- First name
+- Last name
+- Professional headline
+- Biography
 - Location
 - Skills
+- Profile information
 
 ### Resume Management
 
-Hirely supports:
+Candidates can:
 
-- Resume upload
-- PDF validation
-- DOCX validation
-- Multiple resume versions
-- Active resume selection
-- Resume persistence
-- Resume retrieval
+- Upload resumes
+- Process resume documents
+- Extract resume text
+- Parse resume information
+- Extract skills
+- Store structured resume information
 
-### Resume Parsing
+### Resume Intelligence
 
-Uploaded resumes can be processed into structured information.
+Hirely processes resumes using an AI-powered workflow to extract useful candidate information such as:
 
-The parsing pipeline extracts information such as:
-
-- Skills
-- Experience
-- Projects
+- Personal information
+- Professional summary
 - Education
+- Experience
+- Skills
+- Projects
 - Certifications
-- Resume summary
+- Other relevant resume information
 
-### Resume → Candidate Skills
+### Job Discovery
 
-Extracted skills can be synchronized with the normalized skill system.
+Candidates can:
 
-This allows structured candidate skill matching while keeping the original parsed resume data.
+- Browse available jobs
+- View job details
+- Review job requirements
+- Review experience requirements
+- Review salary information
+- Review employment type
+- Review location
+
+### Job Applications
+
+Candidates can:
+
+- Apply to jobs
+- Track submitted applications
+- View application status
+- Prevent duplicate applications
+
+### AI Job Matching
+
+Hirely evaluates candidate-job compatibility using:
+
+- Required skill matching
+- Preferred skill matching
+- Semantic similarity
+- Candidate representation
+- Job representation
+- Combined matching scores
+
+### AI Career Tools
+
+The platform provides AI-powered assistance for:
+
+- Resume ATS analysis
+- Resume improvement
+- Career guidance
+- Cover letter generation
 
 ---
 
-# 🏢 Recruiter Features
+# 💼 Recruiter Features
+
+## Recruiter Authentication
+
+Recruiters can:
+
+- Register an account
+- Login securely
+- Authenticate using JWT
+- Access recruiter-only functionality
+- Manage recruiter information
 
 ## Recruiter Profile
 
-Recruiters have dedicated recruiter profiles and role-based access.
+Recruiters can maintain:
+
+- First name
+- Last name
+- Job title
+- Location
+- Company information
 
 ## Job Management
 
 Recruiters can:
 
 - Create jobs
-- View jobs
-- Manage active jobs
-- Define required skills
-- Define preferred skills
+- Define job descriptions
+- Specify location
+- Specify employment type
+- Define experience level
+- Define salary ranges
+- Specify required skills
+- Specify preferred skills
+- View their own jobs
+- View individual job details
 
-## Candidate Matching
+## Candidate Discovery
 
-Recruiters will be able to evaluate candidates using:
+Recruiters can discover candidates suitable for a specific job using Hirely's AI-powered candidate matching engine.
+
+The matching workflow combines:
 
 - Required skill matching
 - Preferred skill matching
 - Semantic similarity
-- Hybrid match scores
-- Candidate ranking
-- AI-generated match explanations
+- Candidate representations
+- Job representations
+- Ranking algorithms
+
+## Candidate Ranking
+
+Candidates are ranked according to their compatibility with a job.
+
+The system considers multiple signals rather than relying only on exact keyword matching.
+
+## AI Match Explanation
+
+Hirely provides explainable matching information including:
+
+- Overall match score
+- Required skill score
+- Preferred skill score
+- Semantic similarity
+- Matched skills
+- Missing skills
+- AI-generated reasoning
+
+This helps recruiters understand not only which candidate matches, but also why the candidate matches.
+
+## Application Management
+
+Recruiters can:
+
+- View candidate applications
+- Review applications
+- Track application status
+- Manage candidates through the recruitment process
 
 ---
 
-# 🤖 AI Features
+# 🤖 AI & Machine Learning Architecture
 
-## Resume Intelligence
+Hirely combines traditional software engineering with AI and Machine Learning techniques.
 
-Resume processing follows this pipeline:
+The core AI recruitment pipeline follows this architecture:
+
+    Candidate Resume
+           │
+           ▼
+    Document Processing
+           │
+           ▼
+    Resume Text Extraction
+           │
+           ▼
+    Generative AI Parsing
+           │
+           ▼
+    Structured Candidate Data
+           │
+           ▼
+    Candidate Skills
+           │
+           ▼
+    Candidate Representation
+           │
+           ├──────────────────────┐
+           │                      │
+           ▼                      ▼
+    Skill Matching          Semantic Embedding
+           │                      │
+           └──────────┬───────────┘
+                      ▼
+              Matching Engine
+                      │
+                      ▼
+              Candidate Ranking
+                      │
+                      ▼
+            Match Explanation
+
+---
+
+# 🧠 Resume Processing
+
+Hirely uses document processing and Generative AI to transform unstructured resumes into structured candidate information.
 
     Resume File
-         │
-         ▼
-    Document Loader
-         │
-         ▼
+        ↓
     Document Processing
-         │
-         ▼
-       Gemini
-         │
-         ▼
+        ↓
+    Text Extraction
+        ↓
+    Gemini
+        ↓
     Structured Resume Data
-         │
-         ▼
-    Pydantic Validation
+        ↓
+    Database
+        ↓
+    Candidate Profile + Skills
 
-The parsed output is represented using validated structured schemas.
-
----
-
-# 🧠 Candidate Representation
-
-Hirely creates a deterministic textual representation of a candidate using relevant information such as:
-
-- Profile information
-- Skills
-- Experience
-- Projects
-- Education
-- Certifications
-
-Sensitive contact information such as:
-
-- Email
-- Phone number
-
-is excluded from the representation used for semantic matching.
-
-This helps ensure that semantic similarity focuses on **professional relevance rather than personal contact information**.
+This allows the recruitment engine to work with structured candidate information instead of depending only on raw resume text.
 
 ---
 
-# 💼 Job Representation
+# 🔍 Candidate-Job Matching
 
-Jobs are represented using relevant information such as:
+The matching engine evaluates candidates using multiple signals.
 
-- Job title
-- Job description
-- Location
-- Employment type
-- Experience level
-- Required skills
-- Preferred skills
+## Required Skill Matching
 
-Recruiter-specific and system metadata are excluded from the semantic representation.
+Required skills are compared against the candidate's skills.
 
----
+    Job Required Skills
+            │
+            ▼
+    Candidate Skills
+            │
+            ▼
+    Matched / Missing Skills
+            │
+            ▼
+    Required Skill Score
 
-# 🔢 Embeddings
+## Preferred Skill Matching
 
-Hirely uses **Gemini Embeddings** to convert candidate and job representations into numerical vectors.
+Preferred skills provide additional information about candidate suitability.
 
-## Candidate Embedding
+    Job Preferred Skills
+            │
+            ▼
+    Candidate Skills
+            │
+            ▼
+    Matched / Missing Skills
+            │
+            ▼
+    Preferred Skill Score
+
+## Semantic Similarity
+
+Semantic embeddings are used to evaluate conceptual similarity between candidate information and job requirements.
+
+This helps Hirely identify relevant relationships even when exact keywords do not match.
 
     Candidate Representation
-             │
-             ▼
-          Embedding
-             │
-             ▼
-       Candidate Vector
+            │
+            ▼
+        Embedding
+            │
+            │ Semantic Similarity
+            │
+            ▼
+        Job Representation
+            │
+            ▼
+        Embedding
 
-## Job Embedding
+## Overall Matching
 
-    Job Representation
-             │
-             ▼
-          Embedding
-             │
-             ▼
-          Job Vector
+The matching engine combines different signals to produce an overall compatibility score.
 
-Semantic similarity is then calculated between the candidate and job vectors.
-
-### Current Configuration
-
-- Embedding provider: Google Gemini
-- Vector dimensionality: 768
-
----
-
-# 🧩 Hybrid Matching Engine
-
-Hirely does not depend on semantic similarity alone.
-
-The matching engine combines deterministic skill matching with semantic similarity.
-
-## Current Scoring Configuration
-
-| Signal | Weight |
-|---|---:|
-| Required Skills | 50% |
-| Preferred Skills | 20% |
-| Semantic Similarity | 30% |
-| **Total** | **100%** |
-
-### Scoring Principle
-
-When all signals are available:
-
-    Final Score =
-        (Required Skill Score × 0.50)
-      + (Preferred Skill Score × 0.20)
-      + (Semantic Similarity Score × 0.30)
-
-When a signal is unavailable, the available signals can be **renormalized** instead of inventing a score.
-
-This ensures that missing information does not automatically become an artificial zero or fabricated value.
-
----
-
-# 🎯 Skill Matching
-
-The skill matching system distinguishes between two categories.
-
-## Required Skills
-
-Skills that are explicitly required by a job.
-
-## Preferred Skills
-
-Skills that are useful but not mandatory.
-
-The matching engine identifies:
-
-- Matched required skills
-- Missing required skills
-- Matched preferred skills
-- Missing preferred skills
-
----
-
-## Normalized Skill System
-
-Skills are maintained as normalized shared entities.
-
-    Skill
-    ├── CandidateSkill
-    │      └── Candidate
-    │
-    └── JobSkill
-           └── Job
-
-This allows the same skill to be reused across candidates and jobs.
-
-It also reduces inconsistencies caused by storing skills as independent text values.
+    Required Skills
+          +
+    Preferred Skills
+          +
+    Semantic Similarity
+          ↓
+    Overall Match Score
 
 ---
 
 # 🏆 Candidate Ranking
 
-Multiple candidates can be evaluated against a job.
+For a recruiter job, Hirely can evaluate multiple candidates and rank them according to their compatibility.
 
-The ranking pipeline is:
+    Job
+     │
+     ├── Candidate A → Match Score
+     │
+     ├── Candidate B → Match Score
+     │
+     ├── Candidate C → Match Score
+     │
+     └── Candidate D → Match Score
+                 │
+                 ▼
+           Ranking Engine
+                 │
+                 ▼
+          Ranked Candidates
 
-    Candidates
-         │
-         ▼
-    Candidate Preparation
-         │
-         ▼
-    Skill Matching
-         │
-         ▼
-    Semantic Similarity
-         │
-         ▼
-    Hybrid Scoring
-         │
-         ▼
-    Sorting
-         │
-         ▼
-    Ranked Candidates
-
-Candidates are ranked according to their final hybrid match score.
+This allows recruiters to focus their attention on the most relevant candidates first.
 
 ---
 
-# 💬 AI Match Explanation
+# 💡 Explainable AI
 
-Hirely uses Generative AI to explain matching results.
+AI systems used in recruitment should not behave like a black box.
 
-The explanation system is **evidence-grounded**.
+Hirely therefore exposes meaningful matching signals such as:
 
-The LLM receives structured matching evidence instead of being asked to independently inspect the entire candidate and job.
-
-## Explanation Inputs
-
-The AI can receive information such as:
-
-- Final match score
-- Required skill matches
-- Missing required skills
-- Preferred skill matches
-- Missing preferred skills
+- Overall score
+- Required skill score
+- Preferred skill score
 - Semantic similarity
-- Relevant candidate evidence
-- Relevant job requirements
-
-## Explanation Output
-
-The explanation can communicate:
-
-- Matching strengths
-- Relevant skills
+- Matched skills
 - Missing skills
-- Semantic relevance
-- Important matching evidence
+- AI-generated explanation
 
-The system is designed to prevent the model from inventing:
+Example:
 
-- Skills
-- Experience
-- Qualifications
-- Certifications
-- Hiring decisions
+    Overall Match       95%
+    Required Skills     100%
+    Preferred Skills    100%
+    Semantic Similarity 84%
 
-Structured AI output is validated using **Pydantic schemas**.
+    Matched Skills:
+    ✓ Python
+    ✓ FastAPI
+    ✓ PostgreSQL
+    ✓ REST APIs
 
----
+    Missing Skills:
+    - Redis
 
-# 🧠 AI Architecture
-
-Hirely follows a layered AI architecture.
-
-    ┌───────────────────────────────────┐
-    │             AI ENGINE             │
-    └─────────────────┬─────────────────┘
-                      │
-          ┌───────────┼───────────┐
-          │           │           │
-          ▼           ▼           ▼
-     Document     Candidate/Job  Embeddings
-     Processing   Representation
-          │           │           │
-          └───────────┼───────────┘
-                      │
-                      ▼
-               Matching Engine
-                      │
-                      ▼
-                   Ranking
-                      │
-                      ▼
-               AI Explanation
-                      │
-                      ▼
-                 Final Result
-
-This architecture intentionally avoids building one large LLM call responsible for the entire recruitment decision.
-
-Each component has a clearly defined responsibility.
-
----
-
-# 🔐 Authentication & Authorization
-
-Hirely uses **JWT-based authentication** with **Role-Based Access Control (RBAC)**.
-
-## Supported Roles
-
-- Candidate
-- Recruiter
-
-Protected resources verify:
-
-1. Authentication
-2. User identity
-3. User role
-4. Resource ownership where required
-
-### Authorization Examples
-
-    Candidate
-        │
-        └── Candidate Resources
-
-    Recruiter
-        │
-        ├── Recruiter Resources
-        └── Own Jobs
-
-Unauthorized operations are rejected by the API.
+The goal is to help recruiters understand the reasoning behind candidate recommendations.
 
 ---
 
 # 🏗️ System Architecture
 
-The planned production architecture separates the frontend from the backend API.
+Hirely follows a modular architecture separating the frontend, backend, database, and AI processing components.
 
-    ┌──────────────────────────┐
-    │      React Frontend      │
-    └────────────┬─────────────┘
-                 │
-                 ▼
-    ┌──────────────────────────┐
-    │     FastAPI REST API      │
-    └────────────┬─────────────┘
-                 │
-                 ▼
-    ┌──────────────────────────┐
-    │ Authentication / RBAC     │
-    └────────────┬─────────────┘
-                 │
-                 ▼
-    ┌──────────────────────────┐
-    │    Business Services      │
-    └────────────┬─────────────┘
-                 │
-          ┌──────┴──────┐
-          │             │
-          ▼             ▼
-    ┌───────────┐   ┌───────────────┐
-    │ PostgreSQL│   │    AI Layer   │
-    └───────────┘   └───────┬───────┘
-                            │
-                   ┌────────┼────────┐
-                   │        │        │
-                   ▼        ▼        ▼
-                Gemini  Embeddings Matching
+    ┌──────────────────────┐
+    │      React UI        │
+    │      Frontend        │
+    └──────────┬───────────┘
+               │
+               │ REST API
+               ▼
+    ┌──────────────────────┐
+    │       FastAPI        │
+    │      Backend API     │
+    └──────────┬───────────┘
+               │
+       ┌───────┼───────────────┐
+       │       │               │
+       ▼       ▼               ▼
+    Authentication   Business Logic   AI Services
+       │       │               │
+       │       │               ├── Resume Parser
+       │       │               ├── Gemini
+       │       │               ├── Embeddings
+       │       │               └── Matching
+       │       │
+       └───────┼───────────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │     SQLAlchemy       │
+    │         ORM          │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │      PostgreSQL      │
+    │       Database       │
+    └──────────────────────┘
 
 ---
 
-# 🛠️ Technology Stack
+# 🧩 Technology Stack
+
+## Frontend
+
+- React
+- JavaScript
+- Vite
+- HTML5
+- CSS3
+- REST API integration
+- Responsive UI
 
 ## Backend
 
@@ -543,669 +477,638 @@ The planned production architecture separates the frontend from the backend API.
 - FastAPI
 - Pydantic
 - SQLAlchemy
-- Alembic
+- REST APIs
+- JWT Authentication
 - PostgreSQL
 
-## AI / Generative AI
+## AI & Machine Learning
 
+- Generative AI
 - Google Gemini
-- Gemini Embeddings
-- Structured AI outputs
-- Semantic similarity
-- Hybrid matching
-- AI orchestration
+- Machine Learning
+- Semantic Similarity
+- Embeddings
+- Explainable AI
+- Resume Parsing
+- Candidate Matching
+- Candidate Ranking
 
 ## Document Processing
 
 - Docling
-- PDF processing
-- DOCX processing
 
-## Authentication & Security
+## Data & Analytics
 
-- JWT
-- Password hashing
-- Role-Based Access Control
+- Pandas
+- NumPy
+- Scikit-learn
 
-## Frontend
+## Development & Engineering
 
-- React
-
-## Testing
-
+- Git
+- GitHub
 - Pytest
-- FastAPI TestClient
-- Unit tests
-- API tests
-- Integration tests
-- AI pipeline tests
+- Alembic
+- Jupyter
+- VS Code
 
-## DevOps & Deployment
-
-### Planned
+## Production & MLOps
 
 - Docker
 - Docker Compose
-- AWS EC2
-- Object storage
-- Production environment configuration
-- Monitoring and observability
+- AWS
+- MLflow
+- DVC
+- GitHub Actions
 
 ---
 
-# 📂 Project Structure
-
-The project is organized around clear separation of concerns between the backend API, AI components, database layer, business services, tests, documentation, and frontend.
+# 📁 Project Structure
 
     Hirely/
     │
     ├── backend/
     │   │
     │   ├── app/
-    │   │   │
-    │   │   ├── ai/
-    │   │   │   ├── embeddings/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── gemini.py
-    │   │   │   │
-    │   │   │   ├── loaders/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── document_loader.py
-    │   │   │   │
-    │   │   │   ├── matching/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── skill_matcher.py
-    │   │   │   │   ├── semantic_matcher.py
-    │   │   │   │   ├── hybrid_scorer.py
-    │   │   │   │   └── ranker.py
-    │   │   │   │
-    │   │   │   ├── parsers/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── resume_parser.py
-    │   │   │   │
-    │   │   │   ├── representations/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── candidate_representation.py
-    │   │   │   │   └── job_representation.py
-    │   │   │   │
-    │   │   │   └── services/
-    │   │   │       ├── __init__.py
-    │   │   │       ├── resume_service.py
-    │   │   │       ├── embedding_service.py
-    │   │   │       ├── matching_service.py
-    │   │   │       └── explanation_service.py
-    │   │   │
     │   │   ├── api/
-    │   │   │   ├── __init__.py
-    │   │   │   ├── dependencies.py
-    │   │   │   │
-    │   │   │   └── routes/
-    │   │   │       ├── __init__.py
-    │   │   │       ├── auth.py
-    │   │   │       ├── candidates.py
-    │   │   │       ├── recruiters.py
-    │   │   │       ├── jobs.py
-    │   │   │       ├── applications.py
-    │   │   │       ├── skills.py
-    │   │   │       ├── resumes.py
-    │   │   │       └── matching.py
+    │   │   │   ├── auth.py
+    │   │   │   ├── candidate.py
+    │   │   │   ├── recruiter.py
+    │   │   │   ├── jobs.py
+    │   │   │   └── ...
     │   │   │
     │   │   ├── core/
-    │   │   │   ├── __init__.py
     │   │   │   ├── config.py
-    │   │   │   ├── security.py
-    │   │   │   └── exceptions.py
+    │   │   │   └── security.py
     │   │   │
     │   │   ├── db/
-    │   │   │   ├── __init__.py
     │   │   │   ├── base.py
     │   │   │   └── session.py
     │   │   │
     │   │   ├── models/
-    │   │   │   ├── __init__.py
     │   │   │   ├── user.py
     │   │   │   ├── candidate.py
     │   │   │   ├── recruiter.py
+    │   │   │   ├── company.py
     │   │   │   ├── job.py
     │   │   │   ├── application.py
     │   │   │   ├── skill.py
-    │   │   │   ├── candidate_skill.py
-    │   │   │   ├── job_skill.py
     │   │   │   └── resume.py
     │   │   │
     │   │   ├── schemas/
-    │   │   │   ├── __init__.py
-    │   │   │   ├── auth.py
-    │   │   │   ├── candidate.py
-    │   │   │   ├── recruiter.py
-    │   │   │   ├── job.py
-    │   │   │   ├── application.py
-    │   │   │   ├── skill.py
-    │   │   │   ├── resume.py
-    │   │   │   └── matching.py
-    │   │   │
     │   │   ├── services/
-    │   │   │   ├── __init__.py
-    │   │   │   ├── auth_service.py
-    │   │   │   ├── candidate_service.py
-    │   │   │   ├── recruiter_service.py
-    │   │   │   ├── job_service.py
-    │   │   │   ├── application_service.py
-    │   │   │   ├── skill_service.py
-    │   │   │   └── resume_service.py
-    │   │   │
-    │   │   ├── storage/
-    │   │   │   ├── __init__.py
-    │   │   │   ├── base.py
-    │   │   │   └── local_storage.py
-    │   │   │
     │   │   └── main.py
     │   │
-    │   ├── tests/
-    │   │   ├── unit/
-    │   │   │   ├── ai/
-    │   │   │   ├── services/
-    │   │   │   └── matching/
-    │   │   │
-    │   │   ├── api/
-    │   │   │   ├── test_auth.py
-    │   │   │   ├── test_candidates.py
-    │   │   │   ├── test_recruiters.py
-    │   │   │   ├── test_jobs.py
-    │   │   │   ├── test_applications.py
-    │   │   │   ├── test_skills.py
-    │   │   │   ├── test_resumes.py
-    │   │   │   └── test_matching.py
-    │   │   │
-    │   │   └── integration/
-    │   │       ├── test_resume_pipeline.py
-    │   │       ├── test_matching_pipeline.py
-    │   │       └── test_ai_pipeline.py
-    │   │
     │   ├── alembic/
-    │   │   ├── versions/
-    │   │   └── env.py
-    │   │
+    │   ├── tests/
     │   ├── requirements.txt
-    │   ├── .env.example
-    │   └── Dockerfile
+    │   └── alembic.ini
     │
     ├── frontend/
+    │   │
     │   ├── src/
     │   │   ├── components/
+    │   │   ├── layouts/
     │   │   ├── pages/
     │   │   ├── services/
-    │   │   ├── hooks/
-    │   │   ├── context/
-    │   │   └── utils/
+    │   │   ├── App.jsx
+    │   │   └── main.jsx
     │   │
-    │   ├── public/
     │   ├── package.json
-    │   └── Dockerfile
+    │   └── vite.config.js
     │
     ├── docs/
-    │   ├── 01_Project_Overview.md
-    │   ├── 02_Research_and_Analysis.md
-    │   └── 03_Software_Design_Document.md
+    │   ├── research/
+    │   ├── architecture/
+    │   └── software-design/
     │
-    ├── .github/
-    │   └── workflows/
-    │       └── tests.yml
-    │
-    ├── docker-compose.yml
     ├── .gitignore
     ├── README.md
-    └── LICENSE
+    └── ...
 
 ---
 
-# 🗄️ Database Design
+# 🗃️ Database Design
 
-The backend currently contains core entities such as:
+Hirely uses PostgreSQL with SQLAlchemy ORM.
+
+Core entities include:
 
     User
-    ├── Candidate
-    │     ├── Resume
-    │     ├── CandidateSkill
-    │     └── Application
-    │
-    └── Recruiter
-          └── Job
-                ├── JobSkill
-                └── Application
+     │
+     ├──────── Candidate
+     │
+     └──────── Recruiter
+                  │
+                  └──────── Job
 
-    Skill
-    ├── CandidateSkill
-    └── JobSkill
+    Candidate
+     │
+     ├──────── Resume
+     │
+     ├──────── Application
+     │
+     └──────── CandidateSkill ───── Skill
 
-Applications connect candidates with jobs.
+    Job
+     │
+     ├──────── Application
+     │
+     └──────── JobSkill ─────────── Skill
 
-    Candidate ───── Application ───── Job
-
-This supports the recruitment workflow while keeping skills normalized and reusable.
+    Company
+     │
+     └──────── Recruiter
 
 ---
 
-# 📄 Resume Storage Architecture
+# 🔐 Authentication & Authorization
 
-During development, resumes are stored using **local filesystem storage**.
+Hirely uses JWT-based authentication.
 
-The database stores a reference to the stored file rather than storing the physical file itself.
+Authentication flow:
 
-    Upload
-       │
-       ▼
-    Validation
-       │
-       ▼
-    Storage Service
-       │
-       ▼
-    Local Filesystem
-       │
-       └── UUID-based physical filename
+    User
+     │
+     ▼
+    Login
+     │
+     ▼
+    FastAPI
+     │
+     ▼
+    Credential Validation
+     │
+     ▼
+    JWT Access Token
+     │
+     ▼
+    Protected API Requests
+     │
+     ▼
+    Role-Based Authorization
 
-    Database
-       │
-       └── Storage reference
+Supported roles:
 
-The production architecture is planned to use object storage such as **Amazon S3**.
+- Candidate
+- Recruiter
+
+Protected resources are controlled through backend authorization.
+
+---
+
+# 🛡️ Security Principles
+
+Hirely follows security-focused engineering practices including:
+
+- Password hashing
+- JWT authentication
+- Role-based authorization
+- Protected API endpoints
+- Input validation
+- Pydantic schemas
+- Environment-based secret configuration
+- Database constraints
+- File upload validation
+- Separation of frontend and backend responsibilities
+- Secure handling of API credentials
+
+API keys and secrets should never be committed to GitHub.
 
 ---
 
 # 🧪 Testing
 
-Hirely follows a **test-driven verification approach** across the backend.
+Hirely uses automated backend testing with Pytest.
 
-The test suite covers:
-
-### Authentication & Security
+Testing covers areas such as:
 
 - Authentication
-- JWT
-- RBAC
+- Password hashing
+- JWT validation
 - Authorization
-- Resource ownership
-
-### Core APIs
-
-- Candidate APIs
-- Recruiter APIs
-- Job APIs
-- Application APIs
-- Candidate skills
-- Job skills
-
-### Resume System
-
-- Resume upload
-- Resume APIs
-- Resume activation
-- Resume parsing
-- Resume skill synchronization
-
-### AI System
-
-- AI pipelines
-- Candidate representation
-- Job representation
-- Embeddings
-- Matching components
-- Matching orchestration
-- Match explanation
-
----
-
-## 📊 Current Regression Result
-
-    142 passed
-    0 failed
-
-The complete backend regression suite currently passes successfully.
-
----
-
-# 🚧 Project Status
-
-Hirely is currently under active development.
-
-## ✅ Completed
-
-- [x] Project architecture
-- [x] Database foundation
-- [x] Authentication
-- [x] JWT
-- [x] Role-Based Access Control
-- [x] Candidate profile
-- [x] Recruiter profile
-- [x] Job management
-- [x] Applications
-- [x] Skill management
-- [x] Resume upload
-- [x] Resume storage
-- [x] Multiple resume versions
-- [x] Active resume
-- [x] Resume parsing
-- [x] Resume → candidate skills
-- [x] Candidate representation
-- [x] Job representation
-- [x] Gemini embeddings
-- [x] Semantic similarity
-- [x] Deterministic skill matching
-- [x] Hybrid scoring
-- [x] Candidate ranking
-- [x] AI match explanation
-- [x] AI orchestration
-- [x] Backend regression testing
-
-## 🚧 In Progress
-
-- [ ] Matching FastAPI API
-- [ ] Matching API integration tests
-- [ ] Candidate-facing AI features
-- [ ] Recruiter-facing AI features
-- [ ] React frontend
-- [ ] Frontend/backend integration
-
-## 🔮 Planned
-
-- [ ] Resume ATS checker
-- [ ] Resume improvement
-- [ ] AI career coach
-- [ ] Cover letter generator
-- [ ] Job description analyzer
-- [ ] Advanced candidate search
-- [ ] Docker deployment
-- [ ] AWS deployment
-- [ ] Security hardening
-- [ ] Production optimization
-- [ ] Monitoring and observability
-
----
-
-# 🗺️ Development Roadmap
-
-    Foundation
-        ↓
-    Research & Analysis
-        ↓
-    Software Design
-        ↓
-    Backend Architecture
-        ↓
-    Authentication & RBAC
-        ↓
-    Candidate / Recruiter / Jobs
-        ↓
-    Applications
-        ↓
-    Skills
-        ↓
-    Resume Management
-        ↓
-    Resume Parsing
-        ↓
-    Candidate & Job Representation
-        ↓
-    Embeddings
-        ↓
-    Semantic Matching
-        ↓
-    Skill Matching
-        ↓
-    Hybrid Scoring
-        ↓
-    Candidate Ranking
-        ↓
-    AI Match Explanation
-        ↓
-    Matching API                  ← CURRENT
-        ↓
-    AI Candidate Features
-        ↓
-    AI Recruiter Features
-        ↓
-    React Frontend
-        ↓
-    Frontend / Backend Integration
-        ↓
-    Testing & Optimization
-        ↓
-    Docker
-        ↓
-    AWS Deployment
-        ↓
-    Security Hardening
-        ↓
-    Production Release
-
----
-
-# 🔬 Engineering Principles
-
-Hirely is being developed around several core engineering principles.
-
-## 1. Database as Source of Truth
-
-Structured recruitment data remains in the database.
-
-The AI layer should not become the authoritative source for structured candidate or job information.
-
----
-
-## 2. Deterministic Logic Where Possible
-
-Skills, relationships, permissions, and scoring rules should be:
-
-- Predictable
-- Testable
-- Reproducible
-- Easy to debug
-
----
-
-## 3. LLM for Language Understanding
-
-Generative AI is used where natural-language understanding and generation provide value.
-
-Examples include:
-
-- Resume understanding
-- Structured extraction
-- Match explanations
-- Future candidate assistance
-- Future recruiter assistance
-
----
-
-## 4. Embeddings for Semantic Meaning
-
-Embeddings are used to capture semantic relationships between candidate and job representations.
-
-This helps identify relevant matches even when terminology differs.
-
----
-
-## 5. Evidence-Grounded AI
-
-AI-generated explanations should be based on actual matching evidence.
-
-The LLM should explain the system's evidence rather than independently deciding whether a candidate should be hired.
-
----
-
-## 6. Separation of Responsibilities
-
-Different components handle different responsibilities:
-
-- Authentication
-- Authorization
-- Data persistence
-- Document processing
-- Resume parsing
-- Representation
-- Embeddings
-- Skill matching
-- Semantic matching
-- Scoring
+- Candidate profiles
+- Recruiter profiles
+- Job management
+- Recruiter job ownership
+- Applications
+- Resume processing
+- Candidate matching
 - Ranking
-- Explanation
-- API orchestration
+- AI matching APIs
+- Service-level logic
+
+Example test command:
+
+    pytest tests -m "not integration" -q -v -s
+
+Integration tests can be executed separately when required.
 
 ---
 
-## 7. Test Before Moving Forward
+# 🔄 Development Workflow
 
-Each major backend capability is tested before becoming a dependency for the next layer.
+Hirely follows a structured engineering workflow:
 
-This reduces regressions and makes the system easier to evolve.
-
----
-
-# 🔮 Future Vision
-
-The long-term goal is for Hirely to become an intelligent recruitment platform where candidates, recruiters, and AI-assisted workflows work together.
-
-## 👤 Candidates Can
-
-- Build professional profiles
-- Upload resumes
-- Manage multiple resume versions
-- Improve resumes
-- Discover relevant jobs
-- Understand their job match
-- Identify skill gaps
-- Generate cover letters
-- Receive AI career guidance
-
----
-
-## 🏢 Recruiters Can
-
-- Create job descriptions
-- Analyze job descriptions
-- Define required skills
-- Define preferred skills
-- Discover relevant candidates
-- Rank candidates automatically
-- Understand why candidates match
-- Manage applications efficiently
-
----
-
-## 🤖 The AI System Can
-
-- Understand resumes
-- Understand job descriptions
-- Extract structured information
-- Represent candidates semantically
-- Represent jobs semantically
-- Generate embeddings
-- Match candidates to opportunities
-- Rank candidates
-- Explain matching evidence
-- Identify skill gaps
-- Assist candidates with career development
-- Assist recruiters with candidate discovery
-
----
-
-# ⚠️ Responsible AI
-
-Hirely is designed as a **recruitment assistance system** rather than an autonomous hiring decision-maker.
-
-AI-generated results should be treated as **decision-support information**.
-
-The system is designed to:
-
-- Ground explanations in available evidence
-- Avoid inventing candidate qualifications
-- Separate deterministic signals from generated explanations
-- Keep structured recruitment data as the source of truth
-- Make matching logic measurable and testable
-
-### Human-in-the-Loop
-
-Human judgment remains important in recruitment decisions.
-
-Hirely should assist recruiters and candidates rather than making irreversible hiring decisions autonomously.
-
----
-
-# 👨‍💻 Development Journey
-
-Hirely is being built as a **learning-in-public project** with a focus on understanding production-oriented AI engineering rather than simply connecting an LLM to an application.
-
-The development process follows:
-
-    Learn
-      ↓
+    Research
+       ↓
     Understand
-      ↓
+       ↓
     Design
-      ↓
+       ↓
     Implement
-      ↓
+       ↓
     Test
-      ↓
+       ↓
     Debug
-      ↓
+       ↓
+    Refactor
+       ↓
     Document
-      ↓
+       ↓
     Git
-      ↓
+       ↓
     GitHub
-      ↓
-    Build in Public
 
-The goal is to understand not only **what** is being built, but also **why** each architectural and engineering decision is made.
+The goal is not only to build features, but also to understand the engineering decisions behind them.
+
+---
+
+# 📊 Recruitment Workflow
+
+The complete recruitment workflow can be represented as:
+
+                         HIRELY
+                            │
+             ┌──────────────┴──────────────┐
+             │                             │
+         Candidate                     Recruiter
+             │                             │
+             ▼                             ▼
+       Create Profile                 Create Job
+             │                             │
+             ▼                             ▼
+        Upload Resume              Job Requirements
+             │                             │
+             ▼                             │
+      AI Resume Parsing                    │
+             │                             │
+             ▼                             │
+       Candidate Skills                    │
+             │                             │
+             └──────────────┬──────────────┘
+                            │
+                            ▼
+                     Matching Engine
+                            │
+               ┌────────────┼────────────┐
+               │            │            │
+               ▼            ▼            ▼
+           Required     Preferred    Semantic
+            Skills        Skills     Similarity
+               │            │            │
+               └────────────┼────────────┘
+                            ▼
+                     Overall Score
+                            │
+                            ▼
+                    Candidate Ranking
+                            │
+                            ▼
+                  AI Match Explanation
+                            │
+                            ▼
+                     Recruiter Decision
+                            │
+                            ▼
+                    Application Pipeline
+
+---
+
+# 🎨 Frontend Experience
+
+Hirely provides dedicated workspaces for candidates and recruiters.
+
+## Candidate Workspace
+
+    Dashboard
+       │
+       ├── Profile
+       ├── Resume
+       ├── Jobs
+       ├── Job Details
+       ├── Applications
+       └── AI Career Tools
+
+## Recruiter Workspace
+
+    Dashboard
+       │
+       ├── Profile
+       ├── Jobs
+       ├── Create Job
+       ├── Job Details
+       ├── Candidates
+       ├── Candidate Matching
+       ├── Candidate Ranking
+       └── Applications
+
+---
+
+# 🌐 API Architecture
+
+The backend follows RESTful API principles.
+
+Representative API groups include:
+
+    /auth
+    /candidate
+    /recruiter
+    /jobs
+    /applications
+
+Authentication-protected endpoints use JWT bearer authentication.
+
+The frontend communicates with the backend through REST APIs rather than directly accessing the database.
+
+---
+
+# 🧠 AI Technologies
+
+## Generative AI
+
+Google Gemini is used for AI-powered workflows such as:
+
+- Resume parsing
+- AI-generated explanations
+- Career assistance
+- Resume improvement
+- Cover letter generation
+- Recruitment intelligence
+
+## Embeddings
+
+Gemini embedding models are used to generate vector representations for semantic comparison.
+
+    Text
+     ↓
+    Embedding Model
+     ↓
+    Vector Representation
+     ↓
+    Similarity Calculation
+
+This enables semantic matching beyond exact keyword comparison.
+
+---
+
+# 📈 Scalability Considerations
+
+Hirely is designed with modularity and future scalability in mind.
+
+The architecture separates:
+
+- Frontend
+- API layer
+- Business logic
+- AI services
+- Database access
+- Authentication
+- Document processing
+
+This allows individual components to evolve without tightly coupling the entire application.
+
+The architecture supports:
+
+- Containerized services
+- Cloud deployment
+- Background processing
+- AI service scaling
+- Database optimization
+- Caching
+- Monitoring
+- CI/CD
+
+---
+
+# 🐳 Deployment Architecture
+
+A production deployment can use Docker and AWS.
+
+    Internet
+        │
+        ▼
+    ┌─────────────┐
+    │   Frontend  │
+    │    React    │
+    └──────┬──────┘
+           │
+           ▼
+    ┌─────────────┐
+    │   FastAPI   │
+    │   Backend   │
+    └──────┬──────┘
+           │
+      ┌────┼────┬─────────┐
+      │    │    │         │
+      ▼    ▼    ▼         ▼
+    PostgreSQL  AI      Storage
+                 │
+                 ▼
+               Gemini
+
+Docker provides reproducible environments, while AWS provides infrastructure for production deployment.
+
+---
+
+# 🔮 Future Expansion
+
+Hirely's architecture can support additional intelligent recruitment capabilities such as:
+
+- Advanced candidate recommendations
+- Personalized job recommendations
+- Interview preparation
+- Interview question generation
+- Interview evaluation assistance
+- Automated recruiter workflows
+- Advanced analytics
+- Recruitment forecasting
+- Candidate talent pools
+- AI recruitment agents
+- Multi-agent recruitment workflows
+- Advanced semantic search
+- Personalized career roadmaps
+
+---
+
+# 💡 Why Hirely?
+
+Hirely demonstrates the integration of multiple modern engineering disciplines within a single production-oriented project:
+
+- Full-stack development
+- Backend API engineering
+- Database design
+- Authentication
+- Machine Learning
+- Generative AI
+- Embeddings
+- Semantic Search
+- Explainable AI
+- Document Intelligence
+- Recommendation Systems
+- React development
+- Automated testing
+- MLOps
+- Docker
+- Cloud deployment
+- Security engineering
+
+Rather than building a simple CRUD application, Hirely combines these technologies into an end-to-end intelligent recruitment system.
+
+---
+
+# 🛠️ Local Development
+
+## Clone the Repository
+
+    git clone https://github.com/Musharraf-Bubere/Hirely.git
+    cd Hirely
+
+## Backend
+
+Create and activate a virtual environment:
+
+    python -m venv venv
+
+Windows:
+
+    venv\Scripts\activate
+
+Install dependencies:
+
+    cd backend
+    pip install -r requirements.txt
+
+Configure the required environment variables in the backend environment configuration.
+
+Run the FastAPI server:
+
+    uvicorn app.main:app --reload
+
+Backend API:
+
+    http://localhost:8000
+
+API documentation:
+
+    http://localhost:8000/docs
+
+## Frontend
+
+Open another terminal:
+
+    cd frontend
+    npm install
+    npm run dev
+
+The React development server will provide the frontend application.
+
+---
+
+# 🔑 Environment Variables
+
+Sensitive configuration should be stored in environment variables rather than source code.
+
+Typical configuration includes:
+
+    DATABASE_URL
+    JWT_SECRET_KEY
+    GEMINI_API_KEY
+
+Never commit real secrets or API keys to GitHub.
 
 ---
 
 # 📚 Documentation
 
-Project documentation is maintained in the `docs/` directory.
+Project documentation includes:
 
-## Current Documentation
-
-- `01_Project_Overview.md`
-- `02_Research_and_Analysis.md`
-- `03_Software_Design_Document.md`
-
-These documents cover:
-
-- Project vision
-- Research
-- Requirements
-- Architecture
-- System design
-- AI architecture
+- Research and analysis
+- System architecture
+- Component design
 - Database design
-- Matching engine
-- Candidate ranking
-- AI explanation system
+- AI architecture
+- Matching engine design
+- API design
+- Security considerations
+- Development decisions
+
+The documentation is maintained alongside the implementation to make the system easier to understand and maintain.
 
 ---
 
-# 🔗 Repository
+# 📌 Project Highlights
 
-**GitHub:**  
+### Full-Stack AI Application
+
+React frontend + FastAPI backend + PostgreSQL database + AI services.
+
+### Intelligent Resume Processing
+
+Unstructured resumes are transformed into structured candidate information.
+
+### Hybrid Candidate Matching
+
+Combines:
+
+- Structured skill matching
+- Required skills
+- Preferred skills
+- Semantic similarity
+- Embeddings
+
+### Explainable Recruitment AI
+
+Provides meaningful signals explaining candidate-job compatibility.
+
+### Role-Based Platform
+
+Separate candidate and recruiter workflows with protected APIs.
+
+### Production-Oriented Architecture
+
+Designed around modular services, testing, security, containerization, and cloud deployment.
+
+---
+
+# 👨‍💻 Author
+
+**Musharraf Bubere**
+
+Master's in Data Science, Analytics & AI
+
+Interested in:
+
+- Data Science
+- Machine Learning
+- Generative AI
+- Agentic AI
+- AI Engineering
+- Backend Engineering
+- MLOps
+
+---
+
+# ⭐ Project
+
+If you find Hirely interesting, consider giving the repository a star.
+
+**GitHub Repository:**
+
 https://github.com/Musharraf-Bubere/Hirely
 
 ---
 
-# 📌 Disclaimer
+# 📄 License
 
-Hirely is an actively developed **portfolio and learning project**.
-
-Features, architecture, AI models, infrastructure, and production capabilities may continue to evolve as development progresses.
-
-The current implementation and roadmap represent the project's development state and may change as new engineering requirements are identified.
-
----
-
-# ⭐ Hirely
-
-**Building an AI-powered recruitment platform with GenAI, semantic matching, and production-oriented software engineering.**
-
-> 🚀 **Build. Learn. Test. Improve.**
+This project is developed for educational, portfolio, research, and demonstration purposes.
