@@ -7,6 +7,8 @@ import {
   matchCandidateToJob,
 } from '../services/jobs'
 
+import { getMyApplications } from '../services/applications'
+
 import './Jobs.css'
 
 function formatPercentage(value) {
@@ -31,6 +33,16 @@ function formatSkillList(skills) {
   )
 }
 
+function formatApplicationStatus(status) {
+  if (!status) {
+    return 'Applied'
+  }
+
+  return status
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
 function JobDetail() {
   const { jobId } = useParams()
   const navigate = useNavigate()
@@ -44,6 +56,9 @@ function JobDetail() {
   const [actionError, setActionError] = useState('')
 
   const [matchResult, setMatchResult] = useState(null)
+
+  const [application, setApplication] = useState(null)
+  const [applicationLoading, setApplicationLoading] = useState(false)
 
   useEffect(() => {
     let ignore = false
@@ -79,6 +94,56 @@ function JobDetail() {
     }
   }, [jobId])
 
+  useEffect(() => {
+    let ignore = false
+
+    async function loadApplication() {
+      const token = localStorage.getItem(
+        'hirely_access_token',
+      )
+
+      if (!token) {
+        return
+      }
+
+      try {
+        setApplicationLoading(true)
+
+        const applications = await getMyApplications()
+
+        if (ignore || !Array.isArray(applications)) {
+          return
+        }
+
+        const existingApplication = applications.find(
+          (item) => item.job_id === jobId,
+        )
+
+        if (!ignore) {
+          setApplication(existingApplication || null)
+        }
+      } catch {
+        /*
+         * Application lookup should never prevent the job
+         * detail page from loading.
+         *
+         * This also keeps public job pages usable when the
+         * current token belongs to a non-candidate user.
+         */
+      } finally {
+        if (!ignore) {
+          setApplicationLoading(false)
+        }
+      }
+    }
+
+    loadApplication()
+
+    return () => {
+      ignore = true
+    }
+  }, [jobId])
+
   async function handleApply() {
     const token = localStorage.getItem(
       'hirely_access_token',
@@ -94,12 +159,24 @@ function JobDetail() {
       return
     }
 
+    if (application) {
+      navigate('/candidate/applications')
+      return
+    }
+
     try {
       setActionLoading('apply')
       setActionMessage('')
       setActionError('')
 
-      await applyToJob(jobId)
+      const createdApplication = await applyToJob(jobId)
+
+      setApplication(
+        createdApplication || {
+          job_id: jobId,
+          status: 'applied',
+        },
+      )
 
       setActionMessage(
         'Application submitted successfully.',
@@ -267,6 +344,12 @@ function JobDetail() {
     matchResult?.skills?.preferred_missing,
   )
 
+  const hasApplication = Boolean(application)
+
+  const applicationStatus = application
+    ? formatApplicationStatus(application.status)
+    : ''
+
   return (
     <section className="job-detail-page">
       <div className="jobs-container">
@@ -381,22 +464,57 @@ function JobDetail() {
                 profile aligns with this opportunity.
               </p>
 
-              <button
-                type="button"
-                className="primary-button job-apply-button"
-                onClick={handleApply}
-                disabled={actionLoading !== ''}
-              >
-                {actionLoading === 'apply'
-                  ? 'Submitting...'
-                  : 'Apply for this role'}
+              {applicationLoading ? (
+                <button
+                  type="button"
+                  className="primary-button job-apply-button"
+                  disabled
+                >
+                  Checking application...
+                </button>
+              ) : hasApplication ? (
+                <>
+                  <button
+                    type="button"
+                    className="primary-button job-apply-button"
+                    disabled
+                  >
+                    <span aria-hidden="true">
+                      ✓
+                    </span>
 
-                {actionLoading !== 'apply' && (
-                  <span aria-hidden="true">
-                    →
-                  </span>
-                )}
-              </button>
+                    {applicationStatus}
+                  </button>
+
+                  <Link
+                    to="/candidate/applications"
+                    className="job-match-button"
+                  >
+                    <span aria-hidden="true">
+                      →
+                    </span>
+
+                    View my application
+                  </Link>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="primary-button job-apply-button"
+                  onClick={handleApply}
+                  disabled={actionLoading !== ''}
+                >
+                  {actionLoading === 'apply'
+                    ? 'Submitting...'
+                    : 'Apply for this role'}
+
+                  {actionLoading !== 'apply' && (
+                    <span aria-hidden="true">
+                      →
+                    </span>
+                  )}
+                </button>
+              )}
 
               <button
                 type="button"
