@@ -1,0 +1,716 @@
+.career-coach-page {
+  min-height: calc(100vh - var(--topbar-height));
+  padding: 36px 0 64px;
+  background:
+    radial-gradient(
+      circle at 88% 4%,
+      rgba(99, 91, 255, 0.08),
+      transparent 28%
+    ),
+    var(--color-bg);
+}
+
+.career-coach-container {
+  width: min(1440px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+
+.career-coach-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.career-coach-overline,
+.career-coach-section-label {
+  display: inline-block;
+  color: var(--color-accent);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1.3;
+}
+
+.career-coach-hero h1 {
+  max-width: 760px;
+  margin: 8px 0 10px;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.career-coach-accent {
+  color: var(--color-accent);
+}
+
+.career-coach-hero p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.career-coach-hero-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  border: 1px solid rgba(99, 91, 255, 0.14);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-xs);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.career-coach-badge-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.8rem;
+}
+
+/* ============================================================
+   Main layout
+   ============================================================ */
+
+.career-coach-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.75fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   Ask card
+   ============================================================ */
+
+.career-coach-ask-card {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-sm);
+}
+
+.career-coach-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.career-coach-card-heading h2 {
+  margin: 7px 0 0;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.career-coach-card-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(99, 91, 255, 0.15);
+  border-radius: 13px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 1.15rem;
+}
+
+/* ============================================================
+   Form
+   ============================================================ */
+
+.career-coach-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.career-coach-label {
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.career-coach-textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  padding: 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.career-coach-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.career-coach-textarea:hover {
+  border-color: #c8cbd5;
+}
+
+.career-coach-textarea:focus {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px rgba(99, 91, 255, 0.1);
+}
+
+.career-coach-textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.career-coach-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.career-coach-character-count {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.career-coach-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.career-coach-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.career-coach-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.career-coach-submit span {
+  font-size: 1rem;
+}
+
+/* ============================================================
+   Loading
+   ============================================================ */
+
+.career-coach-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: career-coach-spin 0.75s linear infinite;
+}
+
+@keyframes career-coach-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   Examples
+   ============================================================ */
+
+.career-coach-examples {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.career-coach-examples > span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.career-coach-example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.career-coach-example {
+  padding: 8px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.career-coach-example:hover:not(:disabled) {
+  border-color: rgba(99, 91, 255, 0.25);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-dark);
+}
+
+.career-coach-example:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Error
+   ============================================================ */
+
+.career-coach-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 18px;
+  padding: 13px 15px;
+  border: 1px solid rgba(240, 68, 56, 0.16);
+  border-radius: var(--radius-md);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+
+.career-coach-error-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(240, 68, 56, 0.1);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.career-coach-error strong {
+  display: block;
+  font-size: 0.76rem;
+}
+
+.career-coach-error p {
+  margin: 3px 0 0;
+  color: #b42318;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Capabilities card
+   ============================================================ */
+
+.career-coach-capabilities {
+  position: relative;
+  min-width: 0;
+  min-height: 100%;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 91, 255, 0.22);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(
+      145deg,
+      #111827 0%,
+      #171a3c 52%,
+      #29225f 100%
+    );
+  box-shadow: 0 18px 45px rgba(35, 28, 99, 0.16);
+}
+
+.career-coach-capabilities-glow {
+  position: absolute;
+  top: -105px;
+  right: -90px;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: rgba(120, 105, 255, 0.24);
+  filter: blur(8px);
+}
+
+.career-coach-capabilities .career-coach-section-label {
+  position: relative;
+  color: #aaa3ff;
+}
+
+.career-coach-capabilities h2 {
+  position: relative;
+  max-width: 360px;
+  margin: 9px 0 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
+}
+
+.career-coach-capabilities h2 span {
+  color: #bdb7ff;
+}
+
+.career-coach-capabilities > p {
+  position: relative;
+  max-width: 390px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.career-coach-capability-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.career-coach-capability {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.career-coach-capability-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #bdb7ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.career-coach-capability strong {
+  display: block;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.career-coach-capability p {
+  margin: 3px 0 0;
+  color: rgba(255, 255, 255, 0.57);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   AI response
+   ============================================================ */
+
+.career-coach-response {
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-sm);
+}
+
+.career-coach-response-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.career-coach-response-header h2 {
+  margin: 6px 0 0;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.career-coach-response-status {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: #087443;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.career-coach-response-status span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+}
+
+/* ============================================================
+   Answer
+   ============================================================ */
+
+.career-coach-answer {
+  margin-top: 23px;
+  padding: 20px;
+  border: 1px solid rgba(99, 91, 255, 0.12);
+  border-radius: var(--radius-md);
+  background: rgba(99, 91, 255, 0.035);
+}
+
+.career-coach-answer h3 {
+  margin: 0 0 8px;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.career-coach-answer p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.83rem;
+  line-height: 1.75;
+}
+
+/* ============================================================
+   Insights
+   ============================================================ */
+
+.career-coach-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.career-coach-insight {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.career-coach-insight-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.career-coach-insight-heading > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.career-coach-insight h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.career-coach-insight ul {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.career-coach-insight li {
+  position: relative;
+  padding-left: 15px;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.career-coach-insight li::before {
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  content: '';
+}
+
+.career-coach-no-insights {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 1050px) {
+  .career-coach-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .career-coach-capabilities {
+    min-height: auto;
+  }
+
+  .career-coach-capability-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .career-coach-page {
+    padding: 25px 0 45px;
+  }
+
+  .career-coach-container {
+    width: min(100% - 32px, 700px);
+  }
+
+  .career-coach-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .career-coach-hero h1 {
+    font-size: 2rem;
+  }
+
+  .career-coach-hero p {
+    font-size: 0.88rem;
+  }
+
+  .career-coach-hero-badge {
+    align-self: flex-start;
+  }
+
+  .career-coach-insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .career-coach-container {
+    width: min(100% - 24px, 560px);
+  }
+
+  .career-coach-ask-card,
+  .career-coach-capabilities,
+  .career-coach-response {
+    padding: 20px;
+  }
+
+  .career-coach-card-heading {
+    gap: 12px;
+  }
+
+  .career-coach-card-heading h2 {
+    font-size: 1.1rem;
+  }
+
+  .career-coach-form-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .career-coach-submit {
+    width: 100%;
+  }
+
+  .career-coach-example-list {
+    flex-direction: column;
+  }
+
+  .career-coach-example {
+    width: 100%;
+  }
+
+  .career-coach-capability-list {
+    grid-template-columns: 1fr;
+  }
+
+  .career-coach-response-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .career-coach-answer {
+    padding: 17px;
+  }
+}

@@ -13,6 +13,7 @@ import Applications from './pages/Applications'
 import CandidateDashboard from './pages/CandidateDashboard'
 import CandidateProfile from './pages/CandidateProfile'
 import CandidateResume from './pages/CandidateResume'
+import CareerCoach from './pages/CareerCoach'
 
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import RecruiterJobs from './pages/RecruiterJobs'
@@ -87,6 +88,11 @@ function App() {
                 path="/candidate/resumes"
                 element={<CandidateResume />}
               />
+
+              <Route
+                path="/candidate/career-coach"
+                element={<CareerCoach />}
+              />
             </Route>
           </Route>
 
@@ -96,7 +102,8 @@ function App() {
 
           <Route
             element={
-              <ProtectedRoute allowedRoles={['recruiter']} />
+              <ProtectedRoute allowedRoles={['recruiter']}
+              />
             }
           >
             <Route element={<AppShell />}>

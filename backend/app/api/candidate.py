@@ -1,7 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import require_candidate
+from app.ai.career_coach.schemas import (
+    CareerCoachRequest,
+    CareerCoachResponse,
+)
+from app.ai.career_coach.service import career_coach_service
+from app.api.dependencies import (
+    get_current_candidate,
+    require_candidate,
+)
 from app.db.session import get_db
 from app.models.candidate import Candidate
 from app.models.user import User
@@ -116,3 +124,25 @@ def update_profile(
         "bio": candidate.bio,
         "location": candidate.location,
     }
+
+
+@router.post(
+    "/career-coach",
+    response_model=CareerCoachResponse,
+)
+def career_coach(
+    data: CareerCoachRequest,
+    candidate: Candidate = Depends(get_current_candidate),
+    db: Session = Depends(get_db),
+):
+    try:
+        return career_coach_service.generate_response(
+            db=db,
+            candidate=candidate,
+            request=data,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Career Coach service is temporarily unavailable.",
+        ) from exc
