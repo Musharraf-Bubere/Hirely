@@ -5283,3 +5283,867 @@ This keeps Hirely's recruitment intelligence explainable, testable, and modular.
 - Authentication and authorization remain outside the AI workflow.
 - The architecture can later support caching, vector search, batch processing, and background AI processing.
 - The final design follows Hirely's hybrid approach: structured data + deterministic logic + embeddings + LLM reasoning.
+
+---
+
+# Implemented AI Features
+
+The initial AI capabilities of Hirely have been implemented as focused, domain-specific AI services rather than as a single monolithic AI component.
+
+The currently implemented candidate-facing AI features are:
+
+- AI Career Coach
+- AI Cover Letter Generator
+
+Each feature follows the same architectural principles established for the Hirely AI layer:
+
+- Dedicated AI module
+- Structured context
+- Controlled prompt construction
+- Backend-only LLM interaction
+- Structured AI output
+- Pydantic validation
+- Evidence-grounded generation
+- Separation between application logic and AI provider logic
+
+The purpose of this design is to make each AI capability independently testable, maintainable, and replaceable.
+
+---
+
+# AI Career Coach
+
+## Purpose
+
+The AI Career Coach provides candidates with contextual career guidance based on information already available within Hirely.
+
+The feature is designed to provide useful career-oriented responses while grounding the AI in the candidate's actual profile, skills, resume information, job context, and application information where applicable.
+
+The Career Coach is implemented as a dedicated AI module rather than placing prompt construction and Gemini interaction directly inside the API route.
+
+The architecture follows:
+
+    Candidate
+        |
+        v
+    Candidate Context
+        |
+        +---- Profile
+        +---- Skills
+        +---- Resume
+        +---- Job / Application Context
+        |
+        v
+    Career Coach Context
+        |
+        v
+    Prompt Builder
+        |
+        v
+    Gemini Service
+        |
+        v
+    Structured Response
+        |
+        v
+    Pydantic Validation
+        |
+        v
+    Candidate UI
+
+---
+
+## Career Coach Component Structure
+
+The Career Coach is organized into dedicated components:
+
+    career_coach/
+        |
+        +-- schemas.py
+        |
+        +-- context.py
+        |
+        +-- prompts.py
+        |
+        +-- service.py
+
+Each component has a focused responsibility.
+
+### Schemas
+
+Defines the request and response contracts used by the Career Coach API.
+
+Structured schemas ensure that the AI response follows a predictable application-level contract.
+
+### Context Builder
+
+The context builder prepares the information required by the Career Coach.
+
+This keeps context preparation separate from prompt construction and model communication.
+
+### Prompt Builder
+
+The prompt builder converts the structured context into a controlled prompt.
+
+Prompt construction is isolated from the Gemini provider implementation.
+
+### Career Coach Service
+
+The service coordinates:
+
+1. Context preparation
+2. Prompt construction
+3. Gemini invocation
+4. Structured response validation
+
+The API route therefore remains thin and delegates the AI workflow to the service layer.
+
+---
+
+## Career Coach API
+
+The candidate-facing Career Coach is exposed through a protected API endpoint.
+
+The request must pass through Hirely's authentication and candidate authorization boundary before the AI service is invoked.
+
+The request flow is:
+
+    Candidate
+        |
+        v
+    Authentication
+        |
+        v
+    Candidate Authorization
+        |
+        v
+    Career Coach API
+        |
+        v
+    Career Coach Service
+        |
+        v
+    Gemini Service
+        |
+        v
+    Structured Response
+
+The AI service does not bypass the existing authentication or authorization system.
+
+---
+
+## Career Coach Grounding
+
+The Career Coach should use the information supplied by Hirely rather than inventing candidate-specific facts.
+
+The model should not create unsupported:
+
+- Skills
+- Work experience
+- Qualifications
+- Projects
+- Achievements
+- Employment history
+- Candidate accomplishments
+
+The application's structured information remains the source of truth for known candidate facts.
+
+This follows the broader Hirely architecture principle:
+
+**Database and validated application data → reliable facts**
+
+**LLM → interpretation and natural-language guidance**
+
+The Career Coach therefore acts as an AI assistant rather than an authoritative source of candidate information.
+
+---
+
+## Career Coach Output Validation
+
+The Career Coach uses structured AI output rather than relying on uncontrolled free-form model responses.
+
+The flow is:
+
+    Gemini
+       |
+       v
+    AI Output
+       |
+       v
+    Pydantic Schema
+       |
+       v
+    Validation
+       |
+       +---- Invalid → Reject / Error
+       |
+       v
+    Valid Career Coach Response
+       |
+       v
+    Candidate UI
+
+This keeps the AI provider response behind a predictable application boundary.
+
+---
+
+## Career Coach Provider Abstraction
+
+The Career Coach does not communicate directly with Gemini-specific implementation details throughout the application.
+
+Instead, it uses the shared Hirely Gemini service.
+
+The architecture follows:
+
+    Career Coach Service
+            |
+            v
+       Gemini Service
+            |
+            v
+          Gemini
+
+This keeps provider-specific communication isolated and allows the underlying AI provider or model to evolve without requiring changes throughout the Career Coach feature.
+
+---
+
+# AI Cover Letter Generator
+
+## Purpose
+
+The AI Cover Letter Generator creates a job-specific cover letter for a candidate using the candidate's available Hirely information and the selected job's requirements.
+
+The feature is intentionally designed as a focused generation workflow.
+
+It does not attempt to become a complete application-management system.
+
+The initial implementation supports:
+
+- Job-specific cover letter generation
+- Candidate profile context
+- Candidate skills context
+- Active resume context
+- Job description context
+- Required job skills
+- Preferred job skills
+- Structured AI response
+- Copy functionality
+- Regeneration
+
+The generated document is presented as an editable draft that the candidate can review and personalize before using it.
+
+---
+
+## Cover Letter Architecture
+
+The implemented cover letter workflow follows:
+
+    Candidate
+        |
+        +-- Profile
+        |
+        +-- Skills
+        |
+        +-- Active Resume
+        |
+        v
+    Candidate Context
+        |
+        +----------------------+
+                               |
+    Selected Job              |
+        |                      |
+        +-- Title              |
+        +-- Description        |
+        +-- Location           |
+        +-- Employment Type    |
+        +-- Experience Level   |
+        +-- Required Skills    |
+        +-- Preferred Skills   |
+                               |
+        +----------+-----------+
+                   |
+                   v
+        Cover Letter Context
+                   |
+                   v
+          Prompt Builder
+                   |
+                   v
+             Gemini LLM
+                   |
+                   v
+        Structured Response
+                   |
+                   v
+        Pydantic Validation
+                   |
+                   v
+        Cover Letter Response
+                   |
+                   v
+            Candidate UI
+
+---
+
+## Cover Letter Component Structure
+
+The Cover Letter Generator is implemented as a dedicated AI module:
+
+    cover_letter/
+        |
+        +-- schemas.py
+        |
+        +-- context.py
+        |
+        +-- prompts.py
+        |
+        +-- service.py
+
+The components have separate responsibilities.
+
+### Request and Response Schemas
+
+`CoverLetterRequest` accepts the selected job identifier.
+
+The generated result is returned through `CoverLetterResponse`.
+
+The API contract is therefore intentionally small:
+
+    Request
+        |
+        +-- job_id
+
+    Response
+        |
+        +-- cover_letter
+
+This keeps the feature simple while allowing the backend to derive the candidate from the authenticated user.
+
+---
+
+## Candidate Context
+
+The Cover Letter Generator builds a candidate context from information already stored in Hirely.
+
+The candidate context may contain:
+
+- Candidate name
+- Headline
+- Bio
+- Location
+- Candidate skills
+- Active parsed resume
+
+The active resume is treated as supporting candidate context.
+
+Resume information is converted into the existing structured `ResumeData` representation before being passed to the cover letter context.
+
+The context therefore combines structured profile information with validated resume information.
+
+---
+
+## Job Context
+
+The selected job provides the source of truth for the target opportunity.
+
+The job context contains:
+
+- Job title
+- Job description
+- Location
+- Employment type
+- Experience level
+- Required skills
+- Preferred skills
+
+Required and preferred skills are kept separate.
+
+This distinction allows the prompt to prioritize genuine alignment with required requirements without treating optional requirements as mandatory.
+
+---
+
+## Context Construction
+
+Candidate and job information are assembled into a dedicated `CoverLetterContext`.
+
+The architecture is:
+
+    Candidate Data
+          |
+          v
+    Candidate Context
+          |
+          |
+    Job Data
+          |
+          v
+      Job Context
+          |
+          +--------+
+                   |
+                   v
+        CoverLetterContext
+
+The context builder also normalizes skill collections by removing empty values and duplicate skill names.
+
+This keeps prompt input predictable and reduces unnecessary duplication.
+
+---
+
+## Prompt Builder
+
+The `CoverLetterPromptBuilder` converts the structured `CoverLetterContext` into a controlled generation prompt.
+
+Candidate and job information are serialized separately.
+
+The prompt explicitly establishes grounding rules for the generated cover letter.
+
+The model is instructed to:
+
+- Use only supplied candidate information
+- Use the selected job as the target opportunity
+- Prioritize genuine candidate-job overlap
+- Avoid unsupported claims
+- Avoid inventing skills
+- Avoid inventing experience
+- Avoid inventing companies
+- Avoid inventing projects
+- Avoid inventing achievements
+- Avoid inventing qualifications
+- Avoid claiming a missing required skill
+- Avoid inventing company culture or products
+- Avoid including internal identifiers
+- Avoid including authentication information
+- Avoid mentioning the AI generation process
+
+The model should produce only the final professional cover letter.
+
+---
+
+## Hallucination Control
+
+Cover letter generation presents a particular hallucination risk because a language model may attempt to make a candidate sound stronger by adding unsupported qualifications.
+
+Hirely therefore applies explicit grounding rules.
+
+For example:
+
+    Candidate Skills:
+    Python
+    FastAPI
+    PostgreSQL
+
+    Job Required Skills:
+    Python
+    FastAPI
+    Docker
+
+The generated letter may highlight Python and FastAPI.
+
+It must not claim that the candidate has Docker experience unless supporting candidate information exists.
+
+Similarly, the model must not invent:
+
+- Years of experience
+- Previous employers
+- Job titles
+- Projects
+- Responsibilities
+- Achievements
+- Certifications
+- Education
+- Technical expertise
+
+This follows Hirely's broader principle:
+
+**AI should interpret available evidence, not manufacture candidate qualifications.**
+
+---
+
+## Cover Letter API
+
+The feature is exposed through:
+
+    POST /candidate/cover-letter
+
+The request contains the selected job identifier.
+
+The candidate is derived from the authenticated request rather than being supplied by the frontend.
+
+The request flow is:
+
+    Candidate
+        |
+        v
+    Authentication
+        |
+        v
+    Candidate Authorization
+        |
+        v
+    Cover Letter API
+        |
+        v
+    Active Job Validation
+        |
+        v
+    Cover Letter Service
+        |
+        v
+    Context Construction
+        |
+        v
+    Prompt Construction
+        |
+        v
+    Gemini Service
+        |
+        v
+    Structured Response
+        |
+        v
+    Candidate UI
+
+Only an active job can be used by the current implementation.
+
+If the selected job cannot be found or is inactive, the API returns an appropriate HTTP error instead of invoking the AI service.
+
+---
+
+## Cover Letter AI Provider Flow
+
+The Cover Letter Service communicates with the shared Gemini service.
+
+The architecture is:
+
+    CoverLetterService
+           |
+           v
+    GeminiService
+           |
+           v
+        Gemini
+           |
+           v
+    CoverLetterResponse
+
+The Cover Letter Service is therefore independent from the low-level Gemini communication implementation.
+
+This preserves the project's AI provider abstraction principle.
+
+---
+
+## Structured AI Response
+
+The Cover Letter Generator requests a structured response matching `CoverLetterResponse`.
+
+The expected structure is:
+
+    CoverLetterResponse
+        |
+        +-- cover_letter: string
+
+The generated result is validated before being returned by the API.
+
+The application also verifies that the generated cover letter is not empty before presenting it to the candidate.
+
+---
+
+## Candidate User Experience
+
+The candidate can access the Cover Letter Generator from the Job Detail page.
+
+The frontend workflow is:
+
+    Job Detail
+        |
+        v
+    Generate Cover Letter
+        |
+        v
+    Cover Letter Page
+        |
+        v
+    Generate
+        |
+        v
+    AI-generated Draft
+        |
+        +---- Copy
+        |
+        +---- Regenerate
+
+The generated cover letter is displayed in a document-style interface.
+
+The candidate can copy the generated text and review or personalize it before sending it to an employer.
+
+The current implementation intentionally does not automatically send the cover letter to recruiters.
+
+---
+
+## Frontend Architecture
+
+The frontend uses a dedicated service module for communication with the backend:
+
+    frontend
+        |
+        +-- services/
+        |      |
+        |      +-- coverLetter.js
+        |
+        +-- pages/
+               |
+               +-- CoverLetter.jsx
+               +-- CoverLetter.css
+
+`coverLetter.js` is responsible for the API request.
+
+`CoverLetter.jsx` manages:
+
+- Job loading
+- Generation state
+- Generated content
+- Error state
+- Copy state
+- Regeneration
+
+`CoverLetter.css` contains the presentation layer for the cover letter workspace.
+
+The AI provider is never called directly from the frontend.
+
+---
+
+## Security Boundary
+
+The Cover Letter Generator follows the existing Hirely security model.
+
+The request must pass through:
+
+    Candidate
+        |
+        v
+    Authentication
+        |
+        v
+    Candidate Authorization
+        |
+        v
+    Cover Letter Endpoint
+        |
+        v
+    Cover Letter Service
+        |
+        v
+    Gemini Service
+
+The Gemini API credentials remain on the backend.
+
+The frontend does not receive or store the Gemini API key.
+
+Only the information required for cover letter generation is assembled into the AI context.
+
+---
+
+## Privacy Considerations
+
+Candidate resumes and profiles may contain personal information.
+
+The Cover Letter Generator therefore follows a minimum-context approach.
+
+The AI context is constructed specifically for cover letter generation rather than sending unrelated application information.
+
+Sensitive contact information such as internal authentication data is not included in the cover letter generation prompt.
+
+The generated cover letter is intended for the candidate's review and should not be treated as an independently verified representation of the candidate.
+
+---
+
+## Why RAG Is Not Used
+
+The initial Cover Letter Generator does not use Retrieval-Augmented Generation.
+
+The feature currently operates on a small, well-defined context:
+
+    Candidate Profile
+        +
+    Candidate Skills
+        +
+    Active Resume
+        +
+    Selected Job
+
+This information can be assembled directly without requiring semantic retrieval from a large external knowledge base.
+
+Therefore, introducing a vector database or retrieval pipeline at this stage would add architectural complexity without providing a necessary benefit.
+
+RAG may become valuable later for capabilities involving larger knowledge collections, such as:
+
+- Recruitment knowledge bases
+- Company-specific hiring policies
+- Large collections of job descriptions
+- Historical candidate information
+- Internal recruitment documentation
+
+Such technologies should be introduced when actual retrieval requirements justify them.
+
+---
+
+## Testing
+
+The implemented Cover Letter Generator has been validated through the Hirely application workflow.
+
+The feature was tested with:
+
+- Candidate authentication
+- Job selection
+- Job detail navigation
+- Cover letter generation
+- Real Gemini generation
+- Generated cover letter rendering
+- Copy functionality
+- Regeneration functionality
+- Protected candidate route
+- Invalid generation states
+- Backend regression testing
+- Frontend production build
+
+The normal backend regression suite passed:
+
+    182 passed
+    8 deselected
+
+The frontend production build completed successfully.
+
+The generated cover letter was also verified through browser-based testing using the actual Hirely application and Gemini service.
+
+---
+
+## Architecture Decision
+
+Hirely will implement AI-assisted candidate features as independent domain-specific AI services.
+
+The Cover Letter Generator follows:
+
+    Candidate Data
+          +
+    Job Data
+          |
+          v
+    Structured Context
+          |
+          v
+    Controlled Prompt
+          |
+          v
+        Gemini
+          |
+          v
+    Pydantic Validation
+          |
+          v
+    Structured Application Result
+          |
+          v
+    Candidate UI
+
+This design provides:
+
+- Clear separation of concerns
+- Controlled AI context
+- Reduced hallucination risk
+- Structured output validation
+- Backend-only provider access
+- Provider abstraction
+- Independent testing
+- Simple frontend integration
+- Low architectural complexity
+- Future extensibility
+
+---
+
+## Current AI Capability Model
+
+The implemented AI capabilities can be understood as:
+
+    Candidate
+        |
+        +---- Career Coach
+        |        |
+        |        +---- Contextual Guidance
+        |
+        +---- Cover Letter Generator
+                 |
+                 +---- Job-specific Application Draft
+
+These capabilities operate alongside the larger recruitment intelligence architecture.
+
+The future matching system remains responsible for:
+
+- Candidate representation
+- Job representation
+- Semantic matching
+- Candidate ranking
+- Match explanations
+- AI-powered recommendations
+
+The candidate assistance features complement this system rather than replacing it.
+
+---
+
+## AI Feature Design Principles
+
+The implemented candidate AI features follow the same core Hirely principles:
+
+### Structured First
+
+Application data is collected and organized before being sent to the AI model.
+
+### Grounded Generation
+
+The model is instructed to use only the information supplied in its context.
+
+### Deterministic Security
+
+Authentication and authorization remain traditional backend responsibilities.
+
+### Provider Abstraction
+
+AI provider communication is isolated inside shared AI services.
+
+### Structured Output
+
+AI responses are validated using Pydantic schemas.
+
+### Minimum Necessary Context
+
+Only information required for the specific AI task should be supplied.
+
+### No Premature Complexity
+
+RAG, vector databases, agents, and other advanced infrastructure are introduced only when the application's requirements justify them.
+
+### Human Review
+
+AI-generated candidate-facing content is treated as an assistive draft rather than an unquestionable source of truth.
+
+---
+
+## Key Takeaways
+
+- Hirely now contains dedicated candidate-facing AI services.
+- The AI Career Coach provides contextual career guidance.
+- The AI Cover Letter Generator creates job-specific application drafts.
+- AI features are implemented as independent domain modules.
+- Context construction is separated from prompt construction.
+- Prompt construction is separated from the Gemini provider implementation.
+- Candidate and job information are assembled into structured context.
+- Required and preferred job skills are represented separately.
+- Cover letter generation is grounded in available candidate and job evidence.
+- The system explicitly prevents unsupported candidate claims.
+- AI output is returned through structured Pydantic schemas.
+- Gemini credentials remain on the backend.
+- Candidate authorization remains outside the AI logic.
+- The frontend communicates with AI capabilities through FastAPI APIs.
+- The Cover Letter Generator currently does not require RAG or vector storage.
+- AI-generated cover letters are presented as drafts that candidates should review and personalize.
+- The architecture remains modular and ready for future AI capabilities.
