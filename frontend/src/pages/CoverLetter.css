@@ -1,0 +1,565 @@
+.cover-letter-page {
+  min-height: 100%;
+  padding: 48px 0 80px;
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(99, 102, 241, 0.08),
+      transparent 28%
+    ),
+    #f7f8fc;
+}
+
+.cover-letter-container {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.cover-letter-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cover-letter-back:hover {
+  color: #111827;
+  transform: translateX(-2px);
+}
+
+.cover-letter-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.cover-letter-hero-mark {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      #111827,
+      #374151
+    );
+  color: #ffffff;
+  font-size: 24px;
+  box-shadow:
+    0 14px 30px rgba(17, 24, 39, 0.16);
+}
+
+.cover-letter-overline {
+  display: block;
+  margin-bottom: 10px;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+}
+
+.cover-letter-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  color: #111827;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.cover-letter-hero p {
+  max-width: 700px;
+  margin: 16px 0 0;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.cover-letter-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.cover-letter-job-card,
+.cover-letter-workspace {
+  border: 1px solid #e7e9f0;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 50px rgba(15, 23, 42, 0.06);
+}
+
+.cover-letter-job-card {
+  padding: 28px;
+  position: sticky;
+  top: 24px;
+}
+
+.cover-letter-card-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #98a2b3;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+}
+
+.cover-letter-job-card h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.cover-letter-job-details {
+  display: grid;
+  gap: 0;
+  margin-top: 24px;
+  border-top: 1px solid #eef0f4;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.cover-letter-job-details > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.cover-letter-job-details > div:last-child {
+  border-bottom: 0;
+}
+
+.cover-letter-job-details span {
+  color: #98a2b3;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.cover-letter-job-details strong {
+  color: #344054;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.cover-letter-job-description {
+  margin-top: 24px;
+}
+
+.cover-letter-job-description p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+}
+
+.cover-letter-ai-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 24px;
+  padding: 14px;
+  border: 1px solid #e9d5ff;
+  border-radius: 14px;
+  background: #faf5ff;
+}
+
+.cover-letter-ai-note > span {
+  flex: 0 0 auto;
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.cover-letter-ai-note p {
+  margin: 0;
+  color: #6b21a8;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.cover-letter-workspace {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cover-letter-empty {
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 48px;
+  text-align: center;
+}
+
+.cover-letter-empty-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  border: 1px solid #e9d5ff;
+  border-radius: 22px;
+  background: #faf5ff;
+  color: #7c3aed;
+  font-size: 28px;
+}
+
+.cover-letter-empty .cover-letter-overline {
+  margin-bottom: 8px;
+}
+
+.cover-letter-empty h2 {
+  max-width: 520px;
+  margin: 0;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.cover-letter-empty > p {
+  max-width: 570px;
+  margin: 14px auto 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.cover-letter-generate-button {
+  margin-top: 30px;
+  min-width: 220px;
+}
+
+.cover-letter-action-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.cover-letter-action-error span {
+  flex: 0 0 auto;
+  font-weight: 800;
+}
+
+.cover-letter-result {
+  padding: 32px;
+}
+
+.cover-letter-result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.cover-letter-result-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.cover-letter-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cover-letter-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid #dfe3eb;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #344054;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cover-letter-secondary-button:hover:not(:disabled) {
+  border-color: #c4c9d4;
+  background: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.cover-letter-secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cover-letter-document {
+  margin-top: 28px;
+  padding: 42px 48px;
+  border: 1px solid #e7e9f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+.cover-letter-document p {
+  margin: 0;
+  color: #344054;
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.cover-letter-document-space {
+  height: 18px;
+}
+
+.cover-letter-result-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  color: #98a2b3;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cover-letter-loading,
+.cover-letter-error-state {
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  border: 1px solid #e7e9f0;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 50px rgba(15, 23, 42, 0.06);
+  text-align: center;
+}
+
+.cover-letter-loading-mark {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border-radius: 20px;
+  background: #f3f0ff;
+  color: #7c3aed;
+  font-size: 25px;
+  animation: cover-letter-pulse 1.6s ease-in-out infinite;
+}
+
+.cover-letter-loading h1,
+.cover-letter-error-state h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.cover-letter-loading p,
+.cover-letter-error-state p {
+  max-width: 520px;
+  margin: 12px 0 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.cover-letter-error-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border-radius: 20px;
+  background: #fef2f2;
+  color: #b42318;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.cover-letter-error-state .primary-button {
+  margin-top: 26px;
+  text-decoration: none;
+}
+
+@keyframes cover-letter-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .cover-letter-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cover-letter-job-card {
+    position: static;
+  }
+
+  .cover-letter-job-description p {
+    display: block;
+    -webkit-line-clamp: unset;
+  }
+}
+
+@media (max-width: 640px) {
+  .cover-letter-page {
+    padding: 28px 0 56px;
+  }
+
+  .cover-letter-container {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .cover-letter-back {
+    margin-bottom: 24px;
+  }
+
+  .cover-letter-hero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .cover-letter-hero-mark {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    font-size: 21px;
+  }
+
+  .cover-letter-hero h1 {
+    font-size: 32px;
+  }
+
+  .cover-letter-hero p {
+    font-size: 14px;
+  }
+
+  .cover-letter-job-card,
+  .cover-letter-result {
+    padding: 22px;
+  }
+
+  .cover-letter-empty {
+    min-height: 460px;
+    padding: 44px 24px;
+  }
+
+  .cover-letter-empty h2 {
+    font-size: 24px;
+  }
+
+  .cover-letter-generate-button {
+    width: 100%;
+  }
+
+  .cover-letter-result-header {
+    flex-direction: column;
+  }
+
+  .cover-letter-result-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cover-letter-secondary-button {
+    flex: 1;
+  }
+
+  .cover-letter-document {
+    margin-top: 22px;
+    padding: 28px 22px;
+  }
+
+  .cover-letter-document p {
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  .cover-letter-result-footer {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .cover-letter-loading,
+  .cover-letter-error-state {
+    min-height: 460px;
+    padding: 36px 24px;
+  }
+
+  .cover-letter-loading h1,
+  .cover-letter-error-state h1 {
+    font-size: 25px;
+  }
+}

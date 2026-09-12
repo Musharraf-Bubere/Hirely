@@ -236,6 +236,26 @@ function JobDetail() {
     }
   }
 
+  function handleCoverLetter() {
+    const token = localStorage.getItem(
+      'hirely_access_token',
+    )
+
+    if (!token) {
+      navigate('/login', {
+        state: {
+          from: `/jobs/${jobId}`,
+        },
+      })
+
+      return
+    }
+
+    navigate(
+      `/candidate/cover-letter?job_id=${jobId}`,
+    )
+  }
+
   const matchSummary = useMemo(() => {
     if (!matchResult?.score) {
       return null
@@ -529,6 +549,19 @@ function JobDetail() {
                 {actionLoading === 'match'
                   ? 'Analyzing your profile...'
                   : 'Check my AI match'}
+              </button>
+
+              <button
+                type="button"
+                className="job-match-button"
+                onClick={handleCoverLetter}
+                disabled={actionLoading !== ''}
+              >
+                <span aria-hidden="true">
+                  ✎
+                </span>
+
+                Generate Cover Letter
               </button>
 
               {actionMessage && (
