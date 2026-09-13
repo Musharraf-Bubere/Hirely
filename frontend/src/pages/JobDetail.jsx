@@ -256,6 +256,26 @@ function JobDetail() {
     )
   }
 
+  function handleATSAnalysis() {
+    const token = localStorage.getItem(
+      'hirely_access_token',
+    )
+
+    if (!token) {
+      navigate('/login', {
+        state: {
+          from: `/jobs/${jobId}`,
+        },
+      })
+
+      return
+    }
+
+    navigate(
+      `/candidate/ats-analysis?job_id=${jobId}`,
+    )
+  }
+
   const matchSummary = useMemo(() => {
     if (!matchResult?.score) {
       return null
@@ -562,6 +582,19 @@ function JobDetail() {
                 </span>
 
                 Generate Cover Letter
+              </button>
+
+              <button
+                type="button"
+                className="job-match-button"
+                onClick={handleATSAnalysis}
+                disabled={actionLoading !== ''}
+              >
+                <span aria-hidden="true">
+                  ◎
+                </span>
+
+                Analyze My Resume
               </button>
 
               {actionMessage && (

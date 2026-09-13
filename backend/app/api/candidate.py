@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.ai.ats_analyzer.schemas import (
+    ATSAnalysisRequest,
+    ATSAnalysisResponse,
+)
+from app.ai.ats_analyzer.service import ats_analyzer_service
 from app.ai.career_coach.schemas import (
     CareerCoachRequest,
     CareerCoachResponse,
@@ -184,4 +189,42 @@ def generate_cover_letter(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Cover Letter service is temporarily unavailable.",
+        ) from exc
+
+
+@router.post(
+    "/ats-analysis",
+    response_model=ATSAnalysisResponse,
+)
+def analyze_resume_ats(
+    data: ATSAnalysisRequest,
+    candidate: Candidate = Depends(get_current_candidate),
+    db: Session = Depends(get_db),
+):
+    job = get_active_job(
+        db=db,
+        job_id=data.job_id,
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    try:
+        return ats_analyzer_service.generate_analysis(
+            db=db,
+            candidate=candidate,
+            job=job,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="ATS Analysis service is temporarily unavailable.",
         ) from exc

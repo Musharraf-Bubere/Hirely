@@ -15,6 +15,7 @@ import CandidateProfile from './pages/CandidateProfile'
 import CandidateResume from './pages/CandidateResume'
 import CareerCoach from './pages/CareerCoach'
 import CoverLetter from './pages/CoverLetter'
+import ATSAnalyzer from './pages/ATSAnalyzer'
 
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import RecruiterJobs from './pages/RecruiterJobs'
@@ -99,6 +100,11 @@ function App() {
                 path="/candidate/cover-letter"
                 element={<CoverLetter />}
               />
+
+              <Route
+                path="/candidate/ats-analysis"
+                element={<ATSAnalyzer />}
+              />
             </Route>
           </Route>
 
@@ -108,7 +114,8 @@ function App() {
 
           <Route
             element={
-              <ProtectedRoute allowedRoles={['recruiter']} />
+              <ProtectedRoute allowedRoles={['recruiter']}
+              />
             }
           >
             <Route element={<AppShell />}>
