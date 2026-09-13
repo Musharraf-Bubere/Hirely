@@ -6300,3 +6300,42 @@ The future matching system remains responsible for:
 - AI-powered recommendations
 
 The candidate assistance features complement this system rather than replacing it.
+
+### Deterministic Evaluation
+
+Numerical ATS scoring is calculated by backend logic rather than delegated to the language model.
+
+This provides predictable scoring and makes the major scoring components independently inspectable.
+
+### Hybrid AI Architecture
+
+The ATS Analyzer combines deterministic business logic, semantic embeddings, and generative AI.
+
+Deterministic logic handles measurable signals, embeddings provide semantic relevance, and Gemini provides qualitative interpretation.
+
+### Grounded Analysis
+
+ATS insights must be based only on the supplied resume and job information.
+
+The model is explicitly instructed not to invent skills, experience, qualifications, or achievements.
+
+### No Premature Complexity
+
+The ATS Analyzer V1 does not require RAG, vector databases, agents, or other advanced infrastructure because the current use case can be effectively handled using structured context and embeddings.
+
+## Key Takeaways
+
+- Hirely now contains dedicated candidate-facing AI services.
+- The AI Career Coach provides contextual career guidance.
+- The AI Cover Letter Generator creates job-specific application drafts.
+- The Resume ATS Analyzer evaluates resume–job alignment using a hybrid AI architecture.
+- ATS analysis combines deterministic skill coverage, resume completeness, semantic relevance, and Gemini qualitative analysis.
+- The ATS score uses backend-controlled weights rather than relying on the language model for numerical scoring.
+- Candidate profile skills and active parsed resume skills are combined for ATS skill analysis.
+- ATS AI insights are grounded in the supplied candidate and job context.
+- AI features are implemented as independent domain modules.
+- Context construction is separated from prompt construction.
+- Prompt construction is separated from the Gemini provider implementation.
+- Prompt responses are validated using Pydantic schemas.
+- RAG, vector databases, agents, and other advanced infrastructure are introduced only when the application's requirements justify them.
+- AI-generated candidate-facing content remains an assistive capability rather than an unquestionable source of truth.
