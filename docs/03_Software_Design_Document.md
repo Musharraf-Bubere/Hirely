@@ -6147,3 +6147,156 @@ AI-generated candidate-facing content is treated as an assistive draft rather th
 - The Cover Letter Generator currently does not require RAG or vector storage.
 - AI-generated cover letters are presented as drafts that candidates should review and personalize.
 - The architecture remains modular and ready for future AI capabilities.
+
+## Current AI Capability Model
+
+The implemented AI capabilities can be understood as:
+
+    Candidate
+        |
+        +---- Career Coach
+        |        |
+        |        +---- Contextual Guidance
+        |
+        +---- Cover Letter Generator
+        |        |
+        |        +---- Job-specific Application Draft
+        |
+        +---- Resume ATS Analyzer
+                 |
+                 +---- Resume–Job Fit Analysis
+
+These capabilities operate alongside the larger recruitment intelligence architecture.
+
+### Resume ATS Analyzer
+
+The Resume ATS Analyzer evaluates how well a candidate's active resume aligns with a specific active job.
+
+The V1 implementation uses a hybrid analysis architecture combining deterministic backend logic, semantic embeddings, and Gemini-based qualitative analysis.
+
+#### Deterministic Analysis
+
+The backend calculates:
+
+- Required skill coverage
+- Preferred skill coverage
+- Matched required skills
+- Missing required skills
+- Matched preferred skills
+- Missing preferred skills
+- Resume completeness
+
+Candidate skills are combined from the candidate profile and the active parsed resume before skill matching.
+
+#### Semantic Relevance
+
+The system generates embeddings for:
+
+- The candidate's resume representation
+- The target job representation
+
+Gemini embeddings are compared using cosine similarity and normalized into a semantic relevance score.
+
+#### AI Qualitative Analysis
+
+Gemini receives the structured resume and job context and generates:
+
+- Strengths
+- Improvement areas
+- Actionable suggestions
+- Overall qualitative summary
+
+The AI analysis is grounded in the supplied candidate and job information and is instructed not to invent skills, experience, or achievements.
+
+#### ATS Score
+
+The final ATS score combines deterministic and semantic signals using the following weights:
+
+| Component | Weight |
+|---|---:|
+| Required Skill Coverage | 45% |
+| Preferred Skill Coverage | 15% |
+| Semantic Relevance | 30% |
+| Resume Completeness | 10% |
+
+The final score is represented on a 0–100 scale.
+
+The ATS score is intentionally calculated by the backend rather than by the language model. This keeps the numerical evaluation deterministic and reproducible.
+
+#### Structured Output
+
+The ATS Analyzer uses Pydantic schemas to validate the structured response returned by the Gemini service.
+
+The response contains:
+
+- ATS score
+- Score breakdown
+- Required skills matched
+- Required skills missing
+- Preferred skills matched
+- Preferred skills missing
+- Strengths
+- Improvement areas
+- Suggestions
+- Summary
+
+#### Resume Requirement
+
+The ATS Analyzer operates on the candidate's active parsed resume.
+
+The resume must have completed parsing before ATS analysis can be performed. This ensures that the analysis is based on structured resume information rather than an unavailable or incomplete parsing result.
+
+#### API Integration
+
+The candidate-facing endpoint is:
+
+    POST /candidate/ats-analysis
+
+The request identifies the target job through its job ID.
+
+The backend:
+
+1. Authenticates the candidate.
+2. Retrieves the active job.
+3. Retrieves the candidate's active resume.
+4. Validates resume parsing status.
+5. Builds the candidate and job context.
+6. Performs deterministic skill and completeness analysis.
+7. Generates semantic embeddings.
+8. Calculates semantic relevance.
+9. Calculates the deterministic ATS score.
+10. Sends grounded context to Gemini.
+11. Validates the structured AI response.
+12. Returns the complete ATS analysis to the frontend.
+
+#### V1 Complexity Boundary
+
+The Resume ATS Analyzer intentionally does not introduce:
+
+- RAG
+- Vector databases
+- LangGraph
+- Autonomous agents
+- Background workers
+- Resume rewriting
+- PDF generation
+- Persistent ATS analysis history
+
+These capabilities may be considered later if product requirements justify them.
+
+The V1 design focuses on delivering reliable resume–job analysis using the existing Hirely AI infrastructure without introducing unnecessary architectural complexity.
+
+---
+
+These capabilities operate alongside the larger recruitment intelligence architecture.
+
+The future matching system remains responsible for:
+
+- Candidate representation
+- Job representation
+- Semantic matching
+- Candidate ranking
+- Match explanations
+- AI-powered recommendations
+
+The candidate assistance features complement this system rather than replacing it.
