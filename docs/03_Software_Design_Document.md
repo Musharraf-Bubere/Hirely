@@ -2063,18 +2063,18 @@ The candidate ranking workflow follows this sequence:
 
 The conceptual flow is:
 
-Candidate + Job  
-↓  
-Matching Engine  
-↓  
-MatchScoreResult  
-↓  
-Matching Service  
-↓  
-CandidateMatch  
-↓  
-Candidate Ranker  
-↓  
+Candidate + Job
+↓
+Matching Engine
+↓
+MatchScoreResult
+↓
+Matching Service
+↓
+CandidateMatch
+↓
+Candidate Ranker
+↓
 RankedCandidate
 
 ---
@@ -2173,8 +2173,8 @@ Hirely's initial ranking implementation preserves the original order of candidat
 
 For example:
 
-Candidate A → 0.91  
-Candidate B → 0.91  
+Candidate A → 0.91
+Candidate B → 0.91
 Candidate C → 0.85
 
 The result becomes:
@@ -6163,8 +6163,12 @@ The implemented AI capabilities can be understood as:
         |        +---- Job-specific Application Draft
         |
         +---- Resume ATS Analyzer
+        |        |
+        |        +---- Resume–Job Fit Analysis (Diagnostic)
+        |
+        +---- AI Resume Improvement
                  |
-                 +---- Resume–Job Fit Analysis
+                 +---- Actionable Optimization Plan (Prescriptive)
 
 These capabilities operate alongside the larger recruitment intelligence architecture.
 
@@ -6288,6 +6292,118 @@ The V1 design focuses on delivering reliable resume–job analysis using the exi
 
 ---
 
+### AI Resume Improvement Recommendations
+
+The AI Resume Improvement module translates resume–job fit diagnostics into prioritized, section-by-section, grounded recommendations to help candidates optimize their active resume for a specific opportunity.
+
+#### Diagnostic vs. Prescriptive Separation
+
+Hirely establishes a clear architectural distinction between analysis and improvement:
+
+- **Resume ATS Analyzer (Diagnostic):** Evaluates how well the resume matches the target job, calculates deterministic skill coverage and semantic similarity, and provides an overall fit score.
+- **AI Resume Improvement (Prescriptive):** Formulates concrete, prioritized actions and section-level edits that a candidate should make to highlight genuine experience and close alignment gaps.
+
+#### Deterministic vs. Generative AI Separation
+
+Numerical ATS scoring remains strictly deterministic and is calculated by backend logic using Hirely's established 4-component scoring weights:
+
+| Component | Weight | Calculation Method |
+|---|---:|---|
+| Required Skill Coverage | 45% | Deterministic overlap between combined candidate skills and job required skills |
+| Preferred Skill Coverage | 15% | Deterministic overlap between combined candidate skills and job preferred skills |
+| Semantic Relevance | 30% | Cosine similarity between candidate resume embedding and job embedding |
+| Resume Completeness | 10% | Deterministic evaluation of core resume sections (skills, experience, education, projects, summary) |
+
+Because Hirely intentionally does not persist ATS analysis to the database, deterministic signals are recalculated on the fly by `ResumeImprovementAnalyzer`, reusing `ats_analyzer.analyze()` and `ats_semantic_analyzer.calculate()`. It deliberately bypasses the ATS Gemini qualitative prompt, eliminating redundant LLM latency and token costs.
+
+Generative AI (Gemini 2.5 Flash) is invoked strictly for qualitative improvement generation, validated through Pydantic schemas.
+
+#### End-to-End Request Flow
+
+The improvement generation workflow executes in seven controlled stages:
+
+1. **Authentication & Authorization:** The request is received at `POST /candidate/resume-improvement`. FastAPI security dependencies ensure the caller is an authenticated candidate (HTTP 401 for unauthenticated requests, HTTP 403 for recruiters).
+2. **Active Job Validation:** The target job is verified via `job_service.get_active_job(db, job_id)`. If missing or inactive, HTTP 404 is raised.
+3. **Active Resume & Parsing Validation:** The candidate's active resume is retrieved via `resume_service.get_active_resume(db, candidate.id)`. The system verifies the resume exists, parsing status is `PARSED`, and parsed JSON data is non-empty (HTTP 400 if any check fails).
+4. **PII-Minimized Context Construction:** `ResumeImprovementContextBuilder` extracts candidate skills, profile data, parsed resume sections, and job requirements. Strict PII sanitization strips email, phone numbers, physical street addresses, raw database UUIDs, and internal file paths before prompt creation.
+5. **Deterministic Signal Calculation:** `ResumeImprovementAnalyzer` computes deterministic skill matches, missing skills, completeness, semantic similarity, and the 4-component ATS score. Empty or missing resume sections are detected automatically.
+6. **Structured Prompt Construction & Generation:** `ResumeImprovementPromptBuilder` builds a grounded prompt enforcing strict anti-fabrication constraints. Gemini is invoked via `gemini_service.generate_structured_content` with the Pydantic schema `ResumeImprovementAIResult`.
+7. **Response Validation & Assembly:** `ResumeImprovementService` merges the deterministic ATS signals with the structured Gemini output into `ResumeImprovementResult` and returns the final `ResumeImprovementResponse`.
+
+#### Pydantic Schema Architecture
+
+The module defines strict Pydantic schemas in `backend/app/ai/resume_improvement/schemas.py`:
+
+- **`ResumeImprovementRequest`:**
+  - `job_id: UUID` — Target job identifier.
+- **`ActionPriority` (Enum):** `"high"`, `"medium"`, `"low"`.
+- **`SectionStatus` (Enum):** `"strong"`, `"needs_improvement"`, `"missing"`.
+- **`ImprovementAction`:**
+  - `priority: ActionPriority` — Priority ranking.
+  - `category: str` — Area of improvement (e.g., `'Skills'`, `'Experience'`, `'Summary'`, `'Projects'`).
+  - `title: str` — Actionable action headline.
+  - `recommendation: str` — Specific modification advice.
+  - `rationale: str` — Explanation of why this improves alignment.
+  - `requires_candidate_verification: bool` — Mandatory flag when an unevidenced qualification requires candidate confirmation.
+- **`SectionImprovement`:**
+  - `section_name: str` — Target resume section.
+  - `current_status: SectionStatus` — Status classification.
+  - `suggestions: list[str]` — Actionable section suggestions.
+- **`ResumeImprovementAIResult`:** Gemini structured generation schema containing `overall_assessment`, `prioritized_actions`, `required_skill_recommendations`, `preferred_skill_recommendations`, `section_improvements`, `summary_improvements`, `experience_improvements`, `project_improvements`, and `skills_improvements`.
+- **`ResumeImprovementResult`:** Assembled result combining deterministic ATS score, score breakdown, missing required/preferred skills, and qualitative AI output.
+- **`ResumeImprovementResponse`:** Outer API envelope containing `job_id` and `resume_improvement`.
+
+#### Grounding & Anti-Fabrication Constraints
+
+Prompt rules enforce strict truthful representation:
+
+1. **No Invented Facts:** The model is prohibited from inventing employers, job titles, dates, degrees, certifications, metrics, percentages, achievements, or skills.
+2. **Conditional Guidance:** If an unevidenced skill from the job description could benefit the candidate, recommendations must be phrased conditionally (*"If you have hands-on experience with X, highlight how you used it... if you do not have experience with X, do not add it"*).
+3. **Verification Contract:** Any recommendation involving unevidenced capabilities must explicitly set `requires_candidate_verification: true`.
+
+#### Frontend Integration
+
+- **Route:** `/candidate/resume-improvement` registered in `frontend/src/App.jsx` under candidate protected routes.
+- **API Client:** `frontend/src/services/resumeImprovement.js` wrapping `POST /candidate/resume-improvement`.
+- **Page & Styling:** `frontend/src/pages/ResumeImprovement.jsx` and `frontend/src/pages/ResumeImprovement.css`.
+- **Navigation Touchpoints:**
+  - `JobDetail.jsx`: "Improve My Resume" button in the opportunity action panel.
+  - `ATSAnalyzer.jsx`: "Get Actionable Resume Improvements" header shortcut and post-analysis callout card.
+- **Interactive Capabilities:**
+  - Deterministic ATS score card displaying the 4 weighted signal bars with an explicit disclaimer pill.
+  - Strategy card presenting high-level executive focus.
+  - Tabbed interface switching between Prioritized Actions, Section Guidance, and Deep-Dive Suggestions.
+  - Priority filter buttons (`All`, `High`, `Medium`, `Low`).
+  - Prominent verification warning boxes for actions requiring candidate factual confirmation.
+  - One-click clipboard copy for recommendations.
+  - Contextual error banners (e.g. direct links to `/candidate/resumes` if no resume is active).
+
+#### Error Mapping & Safety Boundaries
+
+| Error Scenario | HTTP Status | Response Details |
+|---|---:|---|
+| Missing Auth Token | 401 | Handled by security dependency |
+| Recruiter Access | 403 | Role-based access control restriction |
+| Missing / Inactive Job | 404 | "Target job not found or inactive" |
+| No Active Resume / Unparsed / Empty Data | 400 | Descriptive bad request with upload guidance |
+| Upstream Gemini / Embedding Failure | 502 | "Upstream AI service error while generating resume improvements" |
+| Unexpected Internal Exception | 500 | Generic internal server error (no stack traces leaked) |
+
+#### V1 Complexity Boundary & Verified Limitations
+
+The Resume Improvement module V1 intentionally excludes:
+
+- Retrieval-Augmented Generation (RAG)
+- Vector databases (Pinecone, Qdrant, Chroma, PGVector)
+- Background job queues (Celery, Redis)
+- Autonomous multi-agent frameworks (LangGraph, CrewAI)
+- Automatic full-resume rewriting or automated PDF export
+- Database persistence for improvement history
+
+These boundaries keep the system lightweight, reproducible, cost-effective, and fully explainable.
+
+---
+
 These capabilities operate alongside the larger recruitment intelligence architecture.
 
 The future matching system remains responsible for:
@@ -6309,19 +6425,19 @@ This provides predictable scoring and makes the major scoring components indepen
 
 ### Hybrid AI Architecture
 
-The ATS Analyzer combines deterministic business logic, semantic embeddings, and generative AI.
+The ATS Analyzer and Resume Improvement services combine deterministic business logic, semantic embeddings, and generative AI.
 
-Deterministic logic handles measurable signals, embeddings provide semantic relevance, and Gemini provides qualitative interpretation.
+Deterministic logic handles measurable signals, embeddings provide semantic relevance, and Gemini provides qualitative interpretation and actionable guidance.
 
 ### Grounded Analysis
 
-ATS insights must be based only on the supplied resume and job information.
+ATS insights and resume improvements must be based only on the supplied resume and job information.
 
 The model is explicitly instructed not to invent skills, experience, qualifications, or achievements.
 
 ### No Premature Complexity
 
-The ATS Analyzer V1 does not require RAG, vector databases, agents, or other advanced infrastructure because the current use case can be effectively handled using structured context and embeddings.
+Resume Improvement V1 does not require RAG, vector databases, agents, or other advanced infrastructure because the current use case is effectively handled using structured context and embeddings.
 
 ## Key Takeaways
 
@@ -6329,10 +6445,12 @@ The ATS Analyzer V1 does not require RAG, vector databases, agents, or other adv
 - The AI Career Coach provides contextual career guidance.
 - The AI Cover Letter Generator creates job-specific application drafts.
 - The Resume ATS Analyzer evaluates resume–job alignment using a hybrid AI architecture.
-- ATS analysis combines deterministic skill coverage, resume completeness, semantic relevance, and Gemini qualitative analysis.
-- The ATS score uses backend-controlled weights rather than relying on the language model for numerical scoring.
+- The AI Resume Improvement module delivers prioritized, section-by-section, grounded optimization plans.
+- ATS analysis and resume improvement combine deterministic skill coverage, resume completeness, semantic relevance, and Gemini qualitative analysis.
+- The ATS score uses backend-controlled weights (45% required skills, 15% preferred skills, 30% semantic relevance, 10% completeness) rather than relying on the language model for numerical scoring.
 - Candidate profile skills and active parsed resume skills are combined for ATS skill analysis.
-- ATS AI insights are grounded in the supplied candidate and job context.
+- ATS and resume improvement insights are grounded in the supplied candidate and job context.
+- Recommendations requiring factual confirmation are flagged with candidate verification indicators.
 - AI features are implemented as independent domain modules.
 - Context construction is separated from prompt construction.
 - Prompt construction is separated from the Gemini provider implementation.

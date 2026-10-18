@@ -276,6 +276,26 @@ function JobDetail() {
     )
   }
 
+  function handleResumeImprovement() {
+    const token = localStorage.getItem(
+      'hirely_access_token',
+    )
+
+    if (!token) {
+      navigate('/login', {
+        state: {
+          from: `/jobs/${jobId}`,
+        },
+      })
+
+      return
+    }
+
+    navigate(
+      `/candidate/resume-improvement?job_id=${jobId}`,
+    )
+  }
+
   const matchSummary = useMemo(() => {
     if (!matchResult?.score) {
       return null
@@ -595,6 +615,19 @@ function JobDetail() {
                 </span>
 
                 Analyze My Resume
+              </button>
+
+              <button
+                type="button"
+                className="job-match-button"
+                onClick={handleResumeImprovement}
+                disabled={actionLoading !== ''}
+              >
+                <span aria-hidden="true">
+                  ⚡
+                </span>
+
+                Improve My Resume
               </button>
 
               {actionMessage && (

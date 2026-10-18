@@ -449,20 +449,30 @@ function ATSAnalyzer() {
                     </h2>
                   </div>
 
-                  <button
-                    type="button"
-                    className="ats-secondary-button"
-                    onClick={handleAnalyze}
-                    disabled={analyzing}
-                  >
-                    <span aria-hidden="true">
-                      ↻
-                    </span>
+                  <div className="ats-header-actions">
+                    <Link
+                      to={`/candidate/resume-improvement?job_id=${jobId}`}
+                      className="ats-action-link"
+                    >
+                      <span aria-hidden="true">⚡</span>
+                      Get Actionable Resume Improvements
+                    </Link>
 
-                    {analyzing
-                      ? 'Reanalyzing...'
-                      : 'Reanalyze'}
-                  </button>
+                    <button
+                      type="button"
+                      className="ats-secondary-button"
+                      onClick={handleAnalyze}
+                      disabled={analyzing}
+                    >
+                      <span aria-hidden="true">
+                        ↻
+                      </span>
+
+                      {analyzing
+                        ? 'Reanalyzing...'
+                        : 'Reanalyze'}
+                    </button>
+                  </div>
                 </div>
 
                 {analysisError && (
@@ -839,6 +849,30 @@ function ATSAnalyzer() {
                   <p>
                     {analysis.summary}
                   </p>
+                </section>
+
+                <section className="ats-improvement-cta">
+                  <div className="ats-improvement-cta-header">
+                    <span className="ats-overline">
+                      NEXT STEP: ACTIONABLE IMPROVEMENTS
+                    </span>
+
+                    <h3>
+                      Take your resume from diagnosis to concrete edits.
+                    </h3>
+
+                    <p>
+                      Generate prioritized, section-by-section improvements tailored to this role with grounded suggestions and verification flags.
+                    </p>
+                  </div>
+
+                  <Link
+                    to={`/candidate/resume-improvement?job_id=${jobId}`}
+                    className="primary-button ats-improvement-cta-button"
+                  >
+                    Get Actionable Resume Improvements
+                    <span aria-hidden="true">→</span>
+                  </Link>
                 </section>
 
                 <div className="ats-footer-note">

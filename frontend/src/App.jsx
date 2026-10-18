@@ -16,6 +16,7 @@ import CandidateResume from './pages/CandidateResume'
 import CareerCoach from './pages/CareerCoach'
 import CoverLetter from './pages/CoverLetter'
 import ATSAnalyzer from './pages/ATSAnalyzer'
+import ResumeImprovement from './pages/ResumeImprovement'
 
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import RecruiterJobs from './pages/RecruiterJobs'
@@ -104,6 +105,11 @@ function App() {
               <Route
                 path="/candidate/ats-analysis"
                 element={<ATSAnalyzer />}
+              />
+
+              <Route
+                path="/candidate/resume-improvement"
+                element={<ResumeImprovement />}
               />
             </Route>
           </Route>
