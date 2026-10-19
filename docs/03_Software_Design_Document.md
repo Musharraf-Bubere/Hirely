@@ -7137,3 +7137,123 @@ To prevent API abuse and cost overruns on expensive generative AI routes:
 
 - **Recruiter Match Explanations:** Upstream AI exceptions in `POST /jobs/{job_id}/candidates/match/explain` are safely caught and mapped to a sanitized HTTP 502 Bad Gateway response (`"Candidate Match Explanation service is temporarily unavailable."`).
 - **Resume Upload & Parsing:** `POST /resumes/{resume_id}/parse` sanitizes unexpected exceptions to generic HTTP 500 responses (`"Resume parsing failed due to an internal service error. Please try again."`), completely preventing raw exception details, internal file paths, or database connection strings from leaking to clients while logging full exception traces server-side.
+
+
+---
+
+# Day 33 — AI Evaluation Engineering & Quality Regression Infrastructure
+
+Day 33 introduces a rigorous, automated AI evaluation and regression testing framework for Hirely's Candidate Resume Evidence Assistant (RAG). The framework establishes version-controlled datasets, deterministic retrieval and grounding metrics, an offline CLI runner with automated CI regression gates, and an optional Ragas adapter for LLM-as-a-judge quality assessments.
+
+```
+       +--------------------------------------------------------------+
+       |             Versioned Evaluation Dataset (v1.0.0)            |
+       |  - 14 Benchmark Cases across 9 Evaluation Categories         |
+       |  - 3 Synthetic Parsed Resume Fixtures                        |
+       |  - Ground-Truth Chunk IDs, Quotes, and Security Invariants   |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |           Deterministic Evaluation Runner (CLI)              |
+       |  - Mode: Deterministic Offline (Zero API Key / Zero Cost)    |
+       |  - 256-D Controlled Semantic Domain Embedding Double         |
+       |  - Offline Mock LLM Service with Strict Grounding            |
+       +--------------------------------------------------------------+
+                                      |
+                     +----------------+----------------+
+                     |                                 |
+                     v                                 v
+       +-----------------------------+   +-----------------------------+
+       |      Retrieval Metrics      |   |   Grounding & Citation      |
+       |  - Hit Rate@K (>= 0.85)     |   |  - Citation Validity (100%) |
+       |  - Precision@K & Recall@K   |   |  - Verbatim Quote (100%)    |
+       |  - Mean Reciprocal Rank     |   |  - Correct Abstention (100%)|
+       |  - Empty Query Specificity  |   |  - Fail-Closed Gate (100%)  |
+       +-----------------------------+   +-----------------------------+
+                     |                                 |
+                     +----------------+----------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |              Security & Privacy Invariants                   |
+       |  - Prompt Injection Defense (Zero Override Capitulation)     |
+       |  - System Prompt Leakage Protection                          |
+       |  - PII Non-Leakage (Unmasked Email/Phone Sanitization)       |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |           CI Regression Gating & Report Generation           |
+       |  - Exit Code 0: All Hard Invariants & Quality Gates Passed   |
+       |  - Exit Code 1: Regression Detected (Halts CI Deployment)    |
+       |  - Sanitized JSON Benchmark Report Export (Zero Secrets)     |
+       +--------------------------------------------------------------+
+```
+
+### 1. Versioned Evaluation Dataset
+
+The evaluation dataset (`backend/app/ai/eval/datasets/candidate_evidence_eval_v1.json`) provides a reproducible benchmark across all expected real-world behaviors and adversarial vectors:
+
+| Category | Cases | Description / Testing Focus |
+| :--- | :--- | :--- |
+| `answerable_direct` | 2 | Single-topic technical queries directly answerable by a single evidence chunk (e.g., Kafka streaming pipelines). |
+| `answerable_multi_chunk` | 2 | Multi-facet queries requiring evidence synthesis across multiple sections (e.g., Microservices + Kubernetes). |
+| `paraphrased_query` | 2 | Conceptual paraphrases testing semantic retrieval robustness without lexical overlap. |
+| `insufficient_evidence` | 2 | Queries on topics missing from candidate resumes, testing strict abstention without hallucinations. |
+| `irrelevant_query` | 2 | Orthogonal, non-professional inquiries (sports tournaments, cooking recipes) testing specificity. |
+| `fabricated_citation_attempt` | 1 | Adversarial verification asserting that fictitious or unretrieved citation IDs are rejected. |
+| `prompt_injection_question` | 1 | Recruiter-injected payloads attempting to extract internal system prompt instructions. |
+| `prompt_injection_resume` | 1 | Malicious payloads embedded inside candidate resumes attempting to force false positive qualifications. |
+| `pii_leakage_check` | 1 | Explicit recruiter requests for candidate personal phone or email, testing privacy preservation. |
+
+**Integrity Validation (`backend/app/ai/eval/schemas.py`):**
+- Dataset and Case Pydantic schemas enforce duplicate ID prevention, fixture existence verification, and cross-field consistency.
+- Contradictory ground-truth states (such as `expected_has_evidence=True` with empty chunks or citations, or `expected_has_evidence=False` with populated citations) are rejected during dataset loading.
+
+### 2. Deterministic Mathematical Metrics
+
+The metrics module (`backend/app/ai/eval/metrics.py`) provides pure-Python, zero-dependency implementations of core evaluation metrics:
+
+- **Hit Rate@K:** Binary indicator if at least one expected chunk appears in the top-$K$ retrieved chunks:
+  $$\text{HitRate@}K = \mathbb{I}\left( |\text{TopK}(\text{Retrieved}) \cap \text{Expected}| > 0 \right)$$
+- **Precision@K:** Ratio of retrieved chunks in top-$K$ that are relevant:
+  $$\text{Precision@}K = \frac{|\text{TopK}(\text{Retrieved}) \cap \text{Expected}|}{K}$$
+- **Recall@K:** Proportion of all expected ground-truth chunks retrieved in top-$K$:
+  $$\text{Recall@}K = \frac{|\text{TopK}(\text{Retrieved}) \cap \text{Expected}|}{|\text{Expected}|}$$
+- **Mean Reciprocal Rank (MRR):** Reciprocal rank of the first relevant chunk in retrieved order:
+  $$\text{RR} = \frac{1}{\min \{ \text{rank}(c) : c \in \text{Expected} \}}$$
+- **Empty Query Specificity:** Fraction of unanswerable queries where the retriever correctly returned zero chunks above threshold (true negative rate).
+- **Citation Source Validity Rate:** Proportion of generated citations whose `source_id` is an authenticated member of the candidate's retrieved chunks ($1.0$ required).
+- **Verbatim Quote Rate:** Proportion of citation quotes that exist as normalized substrings within referenced chunk text ($1.0$ required).
+- **Correct Abstention Rate:** Binary agreement rate between actual evidence existence and expected evidence existence ($1.0$ required for unanswerable queries).
+- **Security Invariant Compliance:** Absolute pass rate across PII detection regexes and prompt injection leakage patterns ($100\%$ required).
+
+### 3. Offline Deterministic Runner CLI
+
+The CLI runner (`backend/app/ai/eval/runner.py`) enables automated, cost-free regression testing in local development and CI pipelines:
+
+- **Usage:** `python -m app.ai.eval.runner [--dataset PATH] [--threshold 0.45] [--top-k 4]`
+- **Deterministic Embedding Double (`DeterministicDomainEmbeddingService`):** Projects text into a 256-dimensional unit vector using domain keyword affinities and word dispersion, guaranteeing reproducible cosine similarities without calling external Gemini embedding APIs.
+- **Automated Regression Gates:** Evaluates aggregate scores against strict deployment gates:
+  - Security Invariants: $100\%$ pass rate (zero tolerance for prompt injection or PII leaks).
+  - Citation Validity: $1.0$ (zero tolerance for hallucinated sources).
+  - Verbatim Quotes: $1.0$ (zero tolerance for fabricated quote text).
+  - Retrieval Hit Rate@4: $\ge 0.85$.
+  - Mean Reciprocal Rank: $\ge 0.85$.
+- **Sanitized JSON Reporting:** Generates timestamped reports in `backend/app/ai/eval/reports/` with complete case details, summary metrics, and zero leaked credentials.
+
+### 4. Optional Ragas Framework Adapter
+
+The Ragas adapter (`backend/app/ai/eval/ragas_adapter.py`) provides an optional bridge to the Ragas evaluation ecosystem for offline developer analysis:
+
+- **Isolated Dependency:** Lazy imports ensure that `ragas` and `datasets` are never imported during runtime request processing or standard CI runs.
+- **Graceful Fallback:** If Ragas is not installed in the developer's environment, `is_ragas_available()` returns `False` and attempting instantiation provides clear guidance: `pip install ragas datasets`.
+- **Dataset Translation:** Automatically transforms Hirely evaluation results into standard Ragas schema format (`question`, `contexts`, `answer`, `ground_truth`) for automated LLM-as-a-judge scoring of faithfulness, answer relevancy, context precision, and context recall.
+
+### 5. Automated CI Integration
+
+The GitHub Actions workflow (`.github/workflows/backend-ci.yml`) runs on every push and pull request to `main`:
+1. Executes the complete deterministic backend test suite (`pytest -m "not integration and not eval_live"`).
+2. Executes the deterministic AI evaluation runner (`python -m app.ai.eval.runner`).
+3. Blocks merge if any regression gate or security invariant fails.

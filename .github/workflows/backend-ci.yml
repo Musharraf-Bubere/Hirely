@@ -1,0 +1,38 @@
+name: Backend CI & AI Evaluation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Backend Pytest & AI Evaluation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run Deterministic Backend Tests
+        working-directory: ./backend
+        run: |
+          pytest -m "not integration and not eval_live" -v
+
+      - name: Run Deterministic AI Evaluation Runner
+        working-directory: ./backend
+        run: |
+          python -m app.ai.eval.runner --dataset app/ai/eval/datasets/candidate_evidence_eval_v1.json
