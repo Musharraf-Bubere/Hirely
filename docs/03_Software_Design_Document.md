@@ -6556,6 +6556,164 @@ The Day 29 Job Description Analyzer V1 explicitly excludes:
 
 ---
 
+## Day 30: Recruiter AI — Advanced Candidate Search & Intelligence V1
+
+### Overview
+
+Day 30 introduces **Recruiter AI — Advanced Candidate Search & Intelligence V1**, fulfilling the vision of enabling recruiters to discover, evaluate, filter, and rank qualified talent for their specific job openings.
+
+Unlike opaque AI search engines or pure keyword matching, Candidate Intelligence integrates Hirely's deterministic matching engine (`recruiter_matching_service`), privacy-safe candidate profile synthesis, parsed resume career history extraction, live application tracking status correlation, and optional Gemini-powered qualitative match explanations into a single coherent recruiter workspace.
+
+Key Principles:
+- **Strict Recruiter Ownership:** Recruiters can only access candidate intelligence for jobs they explicitly own (`job.recruiter_id == recruiter.id`). Attempting to inspect other recruiters' jobs raises 403 Forbidden.
+- **Privacy-Safe Candidate Representation:** Personal Identifiable Information (PII) including email address, phone number, and physical street addresses are strictly excluded from candidate intelligence models. Recruiter views expose candidate names, professional headlines, locations, experience items, education history, and skills.
+- **Deterministic Scoring & Explainability:** Match scores (overall score, required skill match, preferred skill match, and semantic similarity) are computed mathematically via Hirely's hybrid matching algorithm rather than hallucinated by an LLM.
+- **Zero Database Mutation:** The search and intelligence endpoint is purely advisory/read-only. Executing a search or requesting explanations never mutates candidates, applications, or jobs.
+- **Live Search & Multidimensional Filtering:** Recruiters can filter in real time by free-text keywords (searching across candidate name, headline, skills, past job titles, and employers), minimum match score threshold, specific aligned skills, application workflow status, and custom sort criteria.
+
+---
+
+### Architectural Design
+
+```
+   Recruiter Browser (Recruiter Candidates Intelligence Workspace)
+                                 │
+                                 ▼
+   POST /recruiter/jobs/{job_id}/candidate-intelligence
+   (Payload: query, min_score, skill, application_status, sort_by, sort_order)
+                                 │
+                ┌────────────────┴────────────────┐
+                ▼                                 ▼
+           require_recruiter                Recruiter Profile &
+           Authentication                   Ownership Check
+                                            (job.recruiter_id == recruiter.id)
+                                                  │
+                                                  ▼
+                                     Verify Active Job Status
+                                     (Inactive jobs rejected with 400)
+                                                  │
+                                                  ▼
+                                     RecruiterMatchingService
+                                     (Deterministic Scoring: 45% Req,
+                                      15% Pref, 30% Semantic, 10% Comp)
+                                                  │
+                                                  ▼
+                                     Candidate Profile & Resume Correlation
+                                     - Privacy-Safe Candidate Identity
+                                     - Structured Experience & Education Snippets
+                                     - Application Status Correlation
+                                                  │
+                                                  ▼
+                                     Live Filtering & Dynamic Sorting
+                                     - Free-text query (name, headline, skills, titles)
+                                     - Score threshold, skill alignment, application stage
+                                                  │
+                                                  ▼
+                                     Optional AI Match Explanation Layer
+                                     (Gemini 2.5 Flash for Top N Candidates)
+                                                  │
+                                                  ▼
+                                     CandidateIntelligenceResponse
+                                     (Total, Filtered Count, Available Skills, Results)
+                                                  │
+                                                  ▼
+                                     Recruiter Intelligence UI
+                       (Filters, Profile Cards, Score Rings, Exp/Edu, Statuses)
+```
+
+---
+
+### Backend Components (`backend/app/ai/candidate_intelligence/`)
+
+1. **`schemas.py`:**
+   - `CandidateExperienceItem`: Structured experience record (`title`, `company`, `duration`, `description`).
+   - `CandidateEducationItem`: Structured education record (`degree`, `institution`, `year`).
+   - `CandidateProfileSummary`: Privacy-guarded profile information (`id`, `full_name`, `headline`, `location`, `years_of_experience`, `skills`, `recent_experience`, `education`). Strictly excludes email, phone, and address.
+   - `CandidateApplicationInfo`: Live application state (`has_applied: bool`, `application_id`, `status`, `applied_at`).
+   - `CandidateIntelligenceItem`: Complete intelligence record for each candidate (`candidate: CandidateProfileSummary`, `overall_score`, `rank`, `breakdown: MatchScoreBreakdown`, `matched_required_skills`, `missing_required_skills`, `matched_preferred_skills`, `missing_preferred_skills`, `explanation`, `application: CandidateApplicationInfo`).
+   - `CandidateIntelligenceFilterRequest`: Filter parameters (`query`, `min_score`, `skill`, `application_status`, `sort_by`, `sort_order`, `include_explanations`, `explanation_limit`).
+   - `CandidateIntelligenceResponse`: Response envelope (`job_id`, `total_candidates`, `filtered_candidates`, `available_skills`, `results`, `disclaimer`).
+
+2. **`service.py` (`CandidateIntelligenceService`):**
+   - Coordinates candidate matching with `recruiter_matching_service.get_job_matches`.
+   - Gathers candidate profile metadata (`Candidate` model).
+   - Extracts structured work history and education from active, parsed resumes (`Resume` model).
+   - Correlates live job application records (`Application` model) to determine whether the candidate has applied and their current pipeline stage.
+   - Applies live keyword search across candidate names, headlines, skills, past job titles, and company names.
+   - Applies deterministic filters: minimum score cutoff, skill containment, and application status.
+   - Executes flexible sorting by `overall_score`, `required_skills`, `preferred_skills`, `semantic_similarity`, `name`, or `rank` (in ascending or descending order).
+   - Generates advisory Gemini explanations for top candidate matches when requested.
+   - Does not perform any database commits or mutations.
+
+---
+
+### API Endpoint (`backend/app/api/recruiter.py`)
+
+- **Route:** `POST /recruiter/jobs/{job_id}/candidate-intelligence`
+- **Security Dependency:** `require_recruiter` (enforces authenticated recruiter role).
+- **Recruiter Profile Verification:** Resolves `Recruiter` by `user_id == current_user.id` (returns 404 if missing).
+- **Job Lookup & Ownership:** Queries `Job` by `id == job_id` (404 if not found). Verifies `job.recruiter_id == recruiter.id` (returns 403 Forbidden on ownership mismatch).
+- **Active Job Validation:** Verifies `job.is_active` (returns 400 Bad Request with guidance if job is closed or inactive).
+- **Service Invocation:** Executes `candidate_intelligence_service.get_candidate_intelligence(...)`.
+- **Upstream Handling:** Catches service and AI failures and returns 502 Bad Gateway with informative error diagnostics.
+
+---
+
+### Frontend Implementation
+
+1. **API Service:**
+   - `frontend/src/services/recruiter.js`: Added `getCandidateIntelligence(jobId, filters)` communicating with the endpoint with authentication headers.
+
+2. **Page & Styling:**
+   - `frontend/src/pages/RecruiterCandidates.jsx`: Comprehensive Candidate Intelligence UI replacing legacy static candidate table.
+   - `frontend/src/pages/RecruiterCandidates.css`: Premium dark/light responsive styling with visual hierarchy, score rings, badges, and qualification history cards.
+
+3. **UI Features:**
+   - **Search & Filter Toolbar:**
+     - Free-text search input with clear button and enter-key submission.
+     - Min score dropdown (All, ≥80%, ≥60%, ≥40%).
+     - Dynamic Skill Alignment filter populated from available job and candidate skills.
+     - Application Pipeline status filter (All, Applied, Pending, Reviewing, Shortlisted, Interviewing, Offered, Rejected, Withdrawn, Not Applied).
+     - Sorting selector (Match Score, Required Skills, Preferred Skills, Semantic Relevance, Name, Rank).
+     - Active filter pill bar and instant "Reset All Filters" control.
+   - **Candidate Intelligence Cards:**
+     - Privacy-safe identity header (candidate avatar with initials, full name, professional headline, location, and application status badge).
+     - Score ring displaying overall percentage match and tier styling.
+     - Interactive application stage updater for candidates who have applied.
+     - Tabular score breakdown (Required Skills, Preferred Skills, Semantic Relevance).
+     - Matched and Missing skill pill clouds.
+     - AI-generated executive match explanation.
+     - Professional background summary with expandable "Full Qualifications History" revealing detailed experience and education timelines.
+
+---
+
+### Error Mapping & Security Boundaries
+
+| Error Scenario | HTTP Status | Response Details |
+|---|---:|---|
+| Missing Auth Token | 401 | Handled by JWT security dependency |
+| Candidate Access Attempt | 403 | Role mismatch enforced by `require_recruiter` |
+| Different Recruiter Job Access | 403 | "You do not have permission to view candidate intelligence for this job" |
+| Recruiter Profile Missing | 404 | "Recruiter profile not found" |
+| Target Job Missing | 404 | "Job not found" |
+| Inactive / Closed Job | 400 | "Candidate intelligence is only available for active jobs" |
+| Upstream Service / AI Failure | 502 | "Candidate Intelligence service is temporarily unavailable." |
+| Unhandled Server Exception | 500 | Standard internal server error response |
+
+---
+
+### V1 Complexity Boundaries
+
+The Day 30 Candidate Intelligence V1 explicitly excludes:
+- Ingestion of external web candidates (only registered platform candidates with profiles/resumes are evaluated).
+- Persistence of recruiter search queries or candidate shortlists to database tables.
+- Automated unsolicited recruiter messaging or auto-outreach workflows.
+- Background worker queues or asynchronous task brokers.
+- Dedicated vector database infrastructure (leveraging deterministic math and semantic embeddings).
+- Candidate PII exposure (email, phone, home address are completely hidden in intelligence responses).
+
+---
+
 These capabilities operate alongside the larger recruitment intelligence architecture.
 
 The future matching system remains responsible for:

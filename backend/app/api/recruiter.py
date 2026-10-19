@@ -3,6 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.ai.candidate_intelligence.schemas import (
+    CandidateIntelligenceFilterRequest,
+    CandidateIntelligenceResponse,
+)
+from app.ai.candidate_intelligence.service import (
+    candidate_intelligence_service,
+)
 from app.ai.job_description_analyzer.schemas import (
     JobDescriptionAnalysisResponse,
 )
@@ -148,4 +155,71 @@ def analyze_job_description(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Job Description Analyzer service is temporarily unavailable.",
+        ) from exc
+
+
+@router.post(
+    "/jobs/{job_id}/candidate-intelligence",
+    response_model=CandidateIntelligenceResponse,
+)
+def get_candidate_intelligence(
+    job_id: UUID,
+    filters: CandidateIntelligenceFilterRequest | None = None,
+    current_user: User = Depends(require_recruiter),
+    db: Session = Depends(get_db),
+):
+    recruiter = (
+        db.query(Recruiter)
+        .filter(Recruiter.user_id == current_user.id)
+        .first()
+    )
+
+    if not recruiter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recruiter profile not found",
+        )
+
+    job = (
+        db.query(Job)
+        .filter(Job.id == job_id)
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    if job.recruiter_id != recruiter.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view candidate intelligence for this job",
+        )
+
+    if not job.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Target job is inactive",
+        )
+
+    try:
+        return candidate_intelligence_service.get_candidate_intelligence(
+            db=db,
+            recruiter=recruiter,
+            job=job,
+            filters=filters,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Candidate Intelligence service is temporarily unavailable.",
         ) from exc

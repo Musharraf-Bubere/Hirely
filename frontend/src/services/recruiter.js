@@ -57,3 +57,11 @@ export async function analyzeJobDescription(jobId) {
     auth: true,
   })
 }
+
+export async function getCandidateIntelligence(jobId, filters = {}) {
+  return api.post(
+    `/recruiter/jobs/${jobId}/candidate-intelligence`,
+    filters,
+    { auth: true },
+  )
+}
