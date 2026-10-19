@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import {
+  askCandidateEvidence,
   getCandidateIntelligence,
   getRecruiterJobs,
   updateApplicationStatus,
@@ -297,6 +298,7 @@ function CandidateCard({
   item,
   updatingStatus,
   onStatusChange,
+  onOpenEvidenceModal,
 }) {
   const [expanded, setExpanded] = useState(false)
   const cand = item.candidate
@@ -425,13 +427,23 @@ function CandidateCard({
               : 'Deterministic Match Verified'}
         </span>
 
-        <button
-          type="button"
-          className="candidate-expand-button"
-          onClick={() => setExpanded((prev) => !prev)}
-        >
-          {expanded ? 'Hide Full Qualifications ↑' : 'View Full Qualifications ↓'}
-        </button>
+        <div className="candidate-card-footer-actions">
+          <button
+            type="button"
+            className="candidate-ask-evidence-btn"
+            onClick={() => onOpenEvidenceModal(cand)}
+            title="Ask verification questions against candidate resume"
+          >
+            Ask Resume Evidence ✦
+          </button>
+          <button
+            type="button"
+            className="candidate-expand-button"
+            onClick={() => setExpanded((prev) => !prev)}
+          >
+            {expanded ? 'Hide Full Qualifications ↑' : 'View Full Qualifications ↓'}
+          </button>
+        </div>
       </div>
 
       {/* Full Qualifications Drawer */}
@@ -503,6 +515,243 @@ function CandidateCard({
   )
 }
 
+function CandidateEvidenceModal({
+  isOpen,
+  onClose,
+  candidate,
+  jobId,
+  jobTitle,
+}) {
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+
+  const suggestedQuestions = [
+    'Leadership and team mentorship experience',
+    'Cloud architecture and infrastructure scaling',
+    'Database optimization and performance tuning',
+    'Microservices and distributed systems experience',
+  ]
+
+  const handleAsk = async (questionToAsk) => {
+    const q = (questionToAsk || query).trim()
+    if (!q || q.length < 3) {
+      setError('Please enter a question with at least 3 characters.')
+      return
+    }
+
+    setQuery(q)
+    setLoading(true)
+    setError('')
+    setResult(null)
+
+    try {
+      const data = await askCandidateEvidence(jobId, candidate.id, {
+        query: q,
+        top_k: 4,
+      })
+      setResult(data)
+    } catch (err) {
+      setError(
+        err?.message || 'Unable to retrieve resume evidence. Please try again.',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isOpen || !candidate) return null
+
+  return (
+    <div className="candidate-evidence-modal-overlay" onClick={onClose}>
+      <div
+        className="candidate-evidence-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="evidence-modal-header">
+          <div>
+            <span className="candidate-section-eyebrow">Recruiter AI • Grounded RAG Verification</span>
+            <h3>Resume Evidence Assistant</h3>
+            <p className="evidence-candidate-subtitle">
+              Querying documented qualifications for <strong>{candidate.full_name}</strong> regarding <em>{jobTitle}</em>
+            </p>
+          </div>
+          <button
+            type="button"
+            className="evidence-modal-close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="evidence-modal-body">
+          {/* Suggested Quick Inquiries */}
+          <div className="evidence-suggestions-section">
+            <span className="evidence-suggestions-label">Suggested Verifications:</span>
+            <div className="evidence-suggestions-list">
+              {suggestedQuestions.map((sq) => (
+                <button
+                  key={sq}
+                  type="button"
+                  className="evidence-suggestion-pill"
+                  onClick={() => handleAsk(sq)}
+                  disabled={loading}
+                >
+                  {sq} ✦
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <form
+            className="evidence-query-form"
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleAsk()
+            }}
+          >
+            <div className="evidence-input-wrapper">
+              <span className="evidence-search-icon">🔍</span>
+              <input
+                type="text"
+                className="evidence-search-input"
+                placeholder="Ask specific question (e.g., Kafka streaming experience, team size, AWS migration)..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                disabled={loading}
+                maxLength={500}
+              />
+              {query && !loading && (
+                <button
+                  type="button"
+                  className="evidence-clear-btn"
+                  onClick={() => setQuery('')}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="evidence-submit-btn"
+              disabled={loading || query.trim().length < 3}
+            >
+              {loading ? (
+                <>
+                  <span className="candidate-button-spinner" />
+                  Verifying...
+                </>
+              ) : (
+                'Verify Evidence ✦'
+              )}
+            </button>
+          </form>
+
+          {/* Error Message */}
+          {error && (
+            <div className="evidence-error-banner">
+              <span>!</span>
+              <p>{error}</p>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="evidence-loading-state">
+              <div className="candidate-loading-orb">✦</div>
+              <h4>Retrieving Resume Evidence Chunks...</h4>
+              <p>Analyzing semantic relevance and validating exact verbatim quotations.</p>
+            </div>
+          )}
+
+          {/* Idle State */}
+          {!loading && !result && !error && (
+            <div className="evidence-idle-state">
+              <div className="evidence-idle-icon">📄</div>
+              <h4>Ask Any Resume Verification Inquiry</h4>
+              <p>
+                Hirely RAG retrieves matching experience bullets, project achievements, or certifications from the candidate&apos;s active resume. Answers are strictly grounded with exact section and employer citations.
+              </p>
+            </div>
+          )}
+
+          {/* Answer State */}
+          {!loading && result && (
+            <div className="evidence-result-container">
+              <div className="evidence-answer-card">
+                <div className="evidence-answer-header">
+                  <div className="evidence-badge-group">
+                    <span className={`evidence-status-badge ${result.has_evidence ? 'verified' : 'unverified'}`}>
+                      {result.has_evidence ? '✓ Evidence Found' : '✗ No Direct Evidence'}
+                    </span>
+                    <span className={`evidence-confidence-badge ${result.confidence}`}>
+                      Confidence: {String(result.confidence).toUpperCase()}
+                    </span>
+                    <span className="evidence-chunks-count">
+                      {result.retrieved_chunk_count} {result.retrieved_chunk_count === 1 ? 'chunk' : 'chunks'} retrieved
+                    </span>
+                  </div>
+                </div>
+
+                <div className="evidence-answer-content">
+                  <h5>Synthesized Evidence Answer:</h5>
+                  <p>{result.answer}</p>
+                </div>
+              </div>
+
+              {/* Citations List */}
+              {result.citations && result.citations.length > 0 ? (
+                <div className="evidence-citations-wrapper">
+                  <div className="evidence-citations-header">
+                    <h4>Documented Resume Citations ({result.citations.length})</h4>
+                    <span className="evidence-citations-note">Exact excerpts verified against active resume</span>
+                  </div>
+
+                  <div className="evidence-citations-list">
+                    {result.citations.map((cit, idx) => (
+                      <div key={`cit-${idx}`} className="evidence-citation-card">
+                        <div className="citation-card-header">
+                          <span className="citation-section-tag">{cit.section.toUpperCase()}</span>
+                          <span className="citation-role-org">
+                            <strong>{cit.role || 'Position'}</strong>
+                            {cit.organization && <span> • {cit.organization}</span>}
+                          </span>
+                          {cit.timeframe && (
+                            <span className="citation-timeframe">{cit.timeframe}</span>
+                          )}
+                        </div>
+                        <blockquote className="citation-quote">
+                          &ldquo;{cit.quote}&rdquo;
+                        </blockquote>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : result.has_evidence ? (
+                <div className="evidence-no-citations">
+                  <span>ℹ</span>
+                  <p>General relevance was detected, but no verbatim textual quote was confirmed.</p>
+                </div>
+              ) : null}
+
+              {/* Advisory Disclaimer */}
+              <div className="evidence-disclaimer-box">
+                <p>{result.disclaimer}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CandidateListSkeleton() {
   return (
     <div className="candidate-results-list">
@@ -532,6 +781,20 @@ export default function RecruiterCandidates() {
   const [updatingStatus, setUpdatingStatus] = useState('')
   const [actionSuccess, setActionSuccess] = useState('')
   const [error, setError] = useState('')
+
+  // Resume Evidence Modal State
+  const [evidenceCandidate, setEvidenceCandidate] = useState(null)
+  const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false)
+
+  const handleOpenEvidenceModal = (cand) => {
+    setEvidenceCandidate(cand)
+    setIsEvidenceModalOpen(true)
+  }
+
+  const handleCloseEvidenceModal = () => {
+    setIsEvidenceModalOpen(false)
+    setEvidenceCandidate(null)
+  }
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('')
@@ -1029,11 +1292,23 @@ export default function RecruiterCandidates() {
                 onStatusChange={(nextStatus) =>
                   handleStatusChange(item.application, nextStatus)
                 }
+                onOpenEvidenceModal={handleOpenEvidenceModal}
               />
             ))}
           </div>
         )}
       </section>
+
+      {/* Candidate Resume Evidence Assistant Modal */}
+      {isEvidenceModalOpen && evidenceCandidate && (
+        <CandidateEvidenceModal
+          isOpen={isEvidenceModalOpen}
+          onClose={handleCloseEvidenceModal}
+          candidate={evidenceCandidate}
+          jobId={jobId}
+          jobTitle={job?.title || 'Job Opening'}
+        />
+      )}
     </main>
   )
 }

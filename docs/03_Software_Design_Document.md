@@ -6714,6 +6714,262 @@ The Day 30 Candidate Intelligence V1 explicitly excludes:
 
 ---
 
+## Day 31: Recruiter AI — Candidate Resume Evidence Assistant V1 (RAG)
+
+### Overview
+
+Day 31 introduces **Recruiter AI — Candidate Resume Evidence Assistant V1**, implementing Hirely's first production-grade Retrieval-Augmented Generation (RAG) subsystem.
+
+While Day 30 delivers candidate discovery, ranking, and high-level matching, recruiters frequently need to verify specific, high-stakes claims or skills regarding a candidate (e.g., *"Does the candidate have production experience with Kafka?", "What distributed systems has this candidate built?", "Does the candidate hold an active AWS certification?"*).
+
+Candidate Resume Evidence Assistant provides an interactive, evidence-grounded Q&A assistant built directly into the Recruiter Candidate Intelligence workspace. Every answer is strictly anchored in chunks retrieved from the candidate's active parsed resume, backed by code-verified verbatim quotes and chunk IDs, and guarded against hallucination and prompt-injection attacks.
+
+Key Architectural Principles:
+- **Strict Recruiter Ownership:** Recruiter must be authenticated (`require_recruiter`) and must own the job associated with the candidate query (`job.recruiter_id == recruiter.id`). Unauthorized access returns `403 Forbidden`. Inactive jobs return `400 Bad Request`.
+- **Privacy-Preserving Resume Chunking:** Resumes are decomposed into logical, section-based chunks with provenance metadata (`chunk_id`, `chunk_type`, `label`, `start_year`, `end_year`). Personal Identifiable Information (PII) including email address, telephone numbers, and physical street addresses are stripped prior to chunking or embedding.
+- **Dynamic In-Memory Embedding Retrieval:** Reuses Hirely's production `EmbeddingService` (`gemini-embedding-2` with 768-dimensional embeddings) to compute query and chunk embeddings on-the-fly and rank by cosine similarity. Incompatible, malformed, or zero-magnitude vectors are safely guarded, and irrelevant chunks falling below a calibrated similarity threshold (default `0.45`) are discarded.
+- **Below-Threshold Short-Circuit:** If no chunks satisfy the similarity threshold (or the candidate has no relevant text for an out-of-scope query), the service immediately returns a graceful fallback (`has_evidence=False`, `confidence="none"`, `answer="No direct evidence addressing '{request.query}' was found in the candidate's documented resume."`) without invoking the Gemini LLM. This prevents hallucination and saves API cost/latency.
+- **Code-Enforced Fail-Closed Citation Verification:** LLMs cannot fabricate evidence. The backend inspects every returned citation:
+  1. The citation's `source_id` must match a chunk actually provided in the retrieved set.
+  2. The citation's `quote` must be a case-insensitive, normalized substring of that chunk's actual content.
+  If an LLM hallucinates a non-existent chunk ID or invents a non-verbatim quote, that citation is dropped. Crucially, if *any* citation fails verification (partial citation failure) or if all citations fail, the service fails closed with an insufficient-evidence response (`has_evidence=False`, `confidence="none"`), ensuring that no unsupported claims from invalid citations survive in the returned answer.
+- **Strict Anti-Hallucination & Prompt-Injection Guardrails:** Both candidate resume chunks (`<<<BEGIN EVIDENCE CHUNKS>>>`) and recruiter queries (`=== BEGIN UNTRUSTED RECRUITER QUESTION ===`) are enclosed in untrusted user-content delimiters. The model is instructed to output JSON matching `CandidateEvidenceAIResult` and decline out-of-scope or unevidenced questions.
+- **Zero Database Mutation:** The RAG workflow is purely read-only and analytical. No queries, embeddings, or answers are written to the database.
+
+---
+
+### Architectural Design
+
+```
+   Recruiter Candidates UI (RecruiterCandidates.jsx)
+   [ Candidate Card -> "Ask Resume Evidence ✦" ]
+                         │
+                         ▼
+   POST /recruiter/jobs/{job_id}/candidates/{candidate_id}/ask-evidence
+   Payload: { "query": "Does candidate have Kafka experience?", "top_k": 5 }
+                         │
+        ┌────────────────┴────────────────┐
+        ▼                                 ▼
+   require_recruiter                Recruiter Profile Check &
+   Authentication                   Ownership Isolation
+                                    (job.recruiter_id == recruiter.id)
+                                          │
+                                          ▼
+                               Verify Active Job Status
+                               (400 Bad Request if job closed/inactive)
+                                          │
+                                          ▼
+                               Candidate & Resume Lookup
+                               - Active parsed resume check (400 if missing)
+                                          │
+                                          ▼
+                               ResumeEvidenceChunker
+                               - Decompose ResumeData into typed chunks:
+                                 summary_0, exp_{i}, proj_{i}, edu_{i}, cert_{i}, skills_0
+                               - Strip Candidate PII (email, phone, address)
+                                          │
+                                          ▼
+                               CandidateEvidenceRetriever
+                               - Generate query embedding via EmbeddingService
+                               - Rank chunks by cosine_similarity
+                               - Filter by similarity threshold (>= 0.45)
+                               - Limit to top_k (1 to 8)
+                                          │
+                   ┌──────────────────────┴──────────────────────┐
+                   │                                             │
+      [ 0 Chunks >= Threshold ]                     [ >= 1 Chunks Retrieved ]
+                   │                                             │
+                   ▼                                             ▼
+      Below-Threshold Short-Circuit               EvidenceRAGPromptBuilder
+      - Skip Gemini API call                      - Construct grounded prompt
+      - Return has_evidence=False                 - Delimit untrusted user query
+      - confidence="none"                         - Delimit candidate evidence chunks
+                   │                                             │
+                   │                                             ▼
+                   │                              GeminiService.generate_structured
+                   │                              (gemini-2.5-flash -> CandidateEvidenceAIResult)
+                   │                                             │
+                   │                                             ▼
+                   │                              Code-Level Citation Verification
+                   │                              - Validate source_id in retrieved chunks
+                   │                              - Validate quote is verbatim substring
+                   │                              - Strip invalid citations; demote if empty
+                   │                                             │
+                   └──────────────────────┬──────────────────────┘
+                                          │
+                                          ▼
+                              CandidateEvidenceResponse
+                              (query, candidate_id, candidate_name, has_evidence,
+                               answer, confidence, citations, chunks_analyzed, disclaimer)
+                                          │
+                                          ▼
+                              CandidateEvidenceModal UI
+             (Slide-out Drawer, Question Pills, Grounded Answer, Confidence Badge,
+              Chunk Count, Verified Citation Cards with Verbatim Quotes)
+```
+
+---
+
+### Backend Architecture (`backend/app/ai/rag/`)
+
+1. **`schemas.py`:**
+   - `EvidenceChunk`: Single contextual evidence unit with `chunk_id` (e.g. `exp_0`, `proj_1`), `chunk_type` (`summary`, `experience`, `project`, `education`, `certification`, `skills`), `content` (PII-stripped text), and `metadata` (`label`, `start_year`, `end_year`).
+   - `CandidateEvidenceQueryRequest`: Inbound payload validating `query` (length 3 to 500 characters) and `top_k` (integer 1 to 8, default 5).
+   - `EvidenceCitation`: Citation linking an assertion to a verified source (`source_id`, `quote`, `relevance_reason`).
+   - `CandidateEvidenceAIResult`: Structured LLM response schema containing `has_evidence: bool`, `answer: str`, `confidence: EvidenceConfidence` (`high`, `medium`, `low`, `none`), and `citations: List[EvidenceCitation]`.
+   - `CandidateEvidenceResponse`: Complete API response schema extending AI result with `job_id`, `candidate_id`, `candidate_name`, `chunks_analyzed: int`, and static disclaimer: *"Evidence is extracted directly from the candidate's active parsed resume. Citations are verified against source resume chunks."*
+
+2. **`chunker.py` (`ResumeEvidenceChunker`):**
+   - Ingests structured `ResumeData`.
+   - Generates deterministic chunks:
+     - `summary_0`: Professional summary.
+     - `exp_{i}`: Work experience with company name, job title, date range, and bullet points.
+     - `proj_{i}`: Project entries with title, technologies, and descriptions.
+     - `edu_{i}`: Education entries with degree, institution, and graduation year.
+     - `cert_{i}`: Certifications and issuing organizations.
+     - `skills_0`: Aggregated technical and professional skills list.
+   - PII defense: explicitly skips all contact information (email, phone, home address) during chunk creation.
+
+3. **`retriever.py` (`CandidateEvidenceRetriever`):**
+   - Computes query embedding using `EmbeddingService` (`gemini-embedding-2`, 768 dimensions).
+   - Generates chunk embeddings using the same embedding model and dimensionality.
+   - Validates vector integrity: checks that embeddings are non-empty, finite, and non-zero magnitude.
+   - Safely guards cosine similarity against zero-magnitude, non-finite, or dimension-mismatched vectors.
+   - Applies calibrated similarity threshold (`RELEVANCE_THRESHOLD = 0.45`).
+   - Slices top $K$ relevant chunks in descending similarity order.
+   - Discards chunks with similarity $< 0.45$.
+
+4. **`prompts.py` (`EvidenceRAGPromptBuilder`):**
+   - Formats evidence chunks with clear tags `[CHUNK ID: ...]`.
+   - Injects strict grounding guidelines:
+     - Answer ONLY using the provided resume evidence chunks.
+     - Never invent, assume, or extrapolate facts.
+     - If evidence is absent or insufficient, set `has_evidence=false`, `confidence="none"`, and state that no evidence exists.
+     - Every citation must include the exact `source_id` and a verbatim excerpt in `quote`.
+   - Delimits untrusted recruiter query within `=== BEGIN UNTRUSTED RECRUITER QUESTION ===` to prevent prompt-injection attacks.
+
+5. **`service.py` (`CandidateEvidenceRAGService`):**
+   - Coordinates ownership and state validation:
+     - Recruiter owns the job (`job.recruiter_id == recruiter.id`).
+     - Job is active (`job.is_active`).
+     - Candidate exists and has an active parsed resume (`resume.parsed_data`).
+   - Executes chunking and similarity retrieval.
+   - Short-circuits with fallback answer if 0 chunks meet the threshold.
+   - Calls `GeminiService.generate_structured` with `CandidateEvidenceAIResult`.
+   - Runs deterministic, code-level fail-closed citation validation:
+     - Rejects any citation whose `source_id` is not in the retrieved chunk list.
+     - Rejects any citation whose `quote` is not a substring of the chunk's text.
+     - If *any* citation fails verification (partial failure) or zero citations survive, immediately fails closed (`has_evidence=False`, `confidence="none"`), preventing unverified claims from persisting in the synthesized answer prose.
+   - Guarantees zero database mutations.
+
+---
+
+### Evaluation Set & Calibration Results
+
+The retrieval subsystem is calibrated against a representative 4-case evaluation set in automated tests (`backend/tests/test_rag_retriever.py`):
+
+| Test Case | Recruiter Query | Expected Top Chunk | Observed Result | Relevance Status |
+|---|---|---|---|---|
+| **Skill Query** | *"Does candidate know Python and FastAPI?"* | `exp_0` / `skills_0` | High similarity (> 0.70) | Relevant |
+| **Experience Query** | *"Tell me about candidate's role at Tech Corp"* | `exp_0` | High similarity (> 0.75) | Relevant |
+| **Education Query** | *"What degree does candidate have?"* | `edu_0` | High similarity (> 0.80) | Relevant |
+| **Out-of-Scope Query** | *"What is the candidate's favorite food?"* | None | All chunks < 0.45 | Discarded (Short-Circuit) |
+
+---
+
+### API Endpoint Contract
+
+- **Route:** `POST /recruiter/jobs/{job_id}/candidates/{candidate_id}/ask-evidence`
+- **Method:** `POST`
+- **Authentication:** `require_recruiter` Bearer JWT.
+- **Request Body:**
+  ```json
+  {
+    "query": "Does this candidate have experience with Kubernetes and Docker?",
+    "top_k": 5
+  }
+  ```
+- **Response Body (200 OK):**
+  ```json
+  {
+    "query": "Does this candidate have experience with Kubernetes and Docker?",
+    "candidate_id": "c1a2b3c4-...",
+    "candidate_name": "Jane Doe",
+    "has_evidence": true,
+    "answer": "Jane Doe has extensive experience with Docker and Kubernetes, having deployed containerized microservices at Tech Corp.",
+    "confidence": "high",
+    "citations": [
+      {
+        "source_id": "exp_0",
+        "quote": "Containerized microservices using Docker and orchestrated deployments on Kubernetes clusters",
+        "relevance_reason": "Directly documents production Docker and Kubernetes deployment experience."
+      }
+    ],
+    "chunks_analyzed": 5,
+    "disclaimer": "Evidence is extracted directly from the candidate's active parsed resume. Citations are verified against source resume chunks."
+  }
+  ```
+
+---
+
+### Frontend Implementation
+
+1. **Service Integration (`frontend/src/services/recruiter.js`):**
+   - `askCandidateEvidence(jobId, candidateId, { query, top_k })` handles authenticated API communication.
+
+2. **UI Integration (`frontend/src/pages/RecruiterCandidates.jsx`):**
+   - Added `"Ask Resume Evidence ✦"` button to every candidate card.
+   - Implemented `CandidateEvidenceModal`:
+     - Clean slide-out / modal interface.
+     - One-click suggested question chips:
+       - *"What are their core technical skills?"*
+       - *"Tell me about their most recent work experience."*
+       - *"Do they have leadership or team lead experience?"*
+       - *"What education or certifications do they hold?"*
+     - Free-text query input with keyboard shortcut (`Enter`).
+     - Real-time loading indicator with analytical pulsing state.
+     - Confidence indicator pill (`high`, `medium`, `low`, `none`).
+     - Evidence status tag and analyzed chunk count badge.
+     - Structured verified citation cards displaying:
+       - Source chunk badge (`exp_0`, `proj_1`, etc.).
+       - Verbatim excerpt quote block.
+       - Relevance rationale.
+     - Fallback empty state when no evidence is found or question is out of scope.
+
+3. **Styling (`frontend/src/pages/RecruiterCandidates.css`):**
+   - High-contrast, responsive modal overlay with smooth transitions.
+   - Themed citation cards with quotation highlights.
+   - Clear distinction between grounded findings and unevidenced queries.
+
+---
+
+### Error Mapping & Security Boundaries
+
+| Error Scenario | HTTP Status | Response Details |
+|---|---:|---|
+| Missing Auth Token | 401 | Handled by JWT security dependency |
+| Candidate Access Attempt | 403 | Role mismatch enforced by `require_recruiter` |
+| Different Recruiter Job Access | 403 | "You do not have permission to query candidate evidence for this job" |
+| Recruiter Profile Missing | 404 | "Recruiter profile not found" |
+| Target Job Missing | 404 | "Job not found" |
+| Inactive / Closed Job | 400 | "Candidate evidence query is only available for active jobs" |
+| Candidate Missing | 404 | "Candidate not found" |
+| Candidate Has No Active Resume | 400 | "Candidate does not have an active parsed resume for evidence analysis" |
+| Upstream Service / AI Failure | 502 | "Candidate Evidence Assistant is temporarily unavailable." |
+
+---
+
+### V1 Complexity Boundaries
+
+The Day 31 Candidate Resume Evidence Assistant V1 explicitly excludes:
+- External vector databases (Pinecone, Chroma, Milvus, Qdrant) or pgvector PostgreSQL extensions. In-memory cosine similarity over structured resume chunks provides rapid retrieval latency without extra infrastructure overhead.
+- Background task queues (Celery, RQ, Redis) or async job processing. Single-candidate resume RAG operates synchronously well within typical HTTP timeouts.
+- Autonomous multi-step agent loops or dynamic tool-calling. RAG executes as a deterministic 3-step pipeline (Chunk → Retrieve → Generate/Validate).
+- Database persistence of query logs or conversation threads. Recruiter inquiries are ephemeral evidence checks.
+- PII transmission to external LLMs. Contact details are scrubbed prior to chunking and prompt construction.
+
+---
+
 These capabilities operate alongside the larger recruitment intelligence architecture.
 
 The future matching system remains responsible for:

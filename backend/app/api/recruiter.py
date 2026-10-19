@@ -16,8 +16,16 @@ from app.ai.job_description_analyzer.schemas import (
 from app.ai.job_description_analyzer.service import (
     job_description_analyzer_service,
 )
+from app.ai.rag.schemas import (
+    CandidateEvidenceQueryRequest,
+    CandidateEvidenceResponse,
+)
+from app.ai.rag.service import (
+    candidate_evidence_rag_service,
+)
 from app.api.dependencies import require_recruiter
 from app.db.session import get_db
+from app.models.candidate import Candidate
 from app.models.job import Job
 from app.models.recruiter import Recruiter
 from app.models.user import User
@@ -222,4 +230,85 @@ def get_candidate_intelligence(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Candidate Intelligence service is temporarily unavailable.",
+        ) from exc
+
+
+@router.post(
+    "/jobs/{job_id}/candidates/{candidate_id}/ask-evidence",
+    response_model=CandidateEvidenceResponse,
+)
+def ask_candidate_evidence(
+    job_id: UUID,
+    candidate_id: UUID,
+    request: CandidateEvidenceQueryRequest,
+    current_user: User = Depends(require_recruiter),
+    db: Session = Depends(get_db),
+):
+    recruiter = (
+        db.query(Recruiter)
+        .filter(Recruiter.user_id == current_user.id)
+        .first()
+    )
+
+    if not recruiter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recruiter profile not found",
+        )
+
+    job = (
+        db.query(Job)
+        .filter(Job.id == job_id)
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    if job.recruiter_id != recruiter.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to query candidate evidence for this job",
+        )
+
+    if not job.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Target job is inactive",
+        )
+
+    candidate = (
+        db.query(Candidate)
+        .filter(Candidate.id == candidate_id)
+        .first()
+    )
+
+    if not candidate:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate not found",
+        )
+
+    try:
+        return candidate_evidence_rag_service.ask_candidate_evidence(
+            db=db,
+            recruiter=recruiter,
+            job=job,
+            candidate_id=candidate_id,
+            request=request,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Candidate Resume Evidence Assistant is temporarily unavailable.",
         ) from exc

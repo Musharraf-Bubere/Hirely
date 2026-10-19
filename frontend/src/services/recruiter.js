@@ -65,3 +65,11 @@ export async function getCandidateIntelligence(jobId, filters = {}) {
     { auth: true },
   )
 }
+
+export async function askCandidateEvidence(jobId, candidateId, payload) {
+  return api.post(
+    `/recruiter/jobs/${jobId}/candidates/${candidateId}/ask-evidence`,
+    payload,
+    { auth: true },
+  )
+}
