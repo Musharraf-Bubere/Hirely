@@ -104,6 +104,13 @@ class CoverLetterContextBuilder:
             }
         )
 
+        # Sanitize contact PII from resume data before prompt serialization
+        safe_resume = None
+        if resume_data:
+            safe_resume = resume_data.model_copy(
+                update={"email": None, "phone": None}
+            )
+
         return CoverLetterContext(
             candidate=CoverLetterCandidateContext(
                 name=full_name or None,
@@ -111,7 +118,7 @@ class CoverLetterContextBuilder:
                 bio=bio,
                 location=location,
                 skills=normalized_candidate_skills,
-                resume=resume_data,
+                resume=safe_resume,
             ),
             job=CoverLetterJobContext(
                 title=job_title,

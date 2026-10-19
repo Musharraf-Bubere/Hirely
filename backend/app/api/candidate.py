@@ -25,6 +25,7 @@ from app.api.dependencies import (
     get_current_candidate,
     require_candidate,
 )
+from app.core.rate_limit import check_ai_rate_limit
 from app.db.session import get_db
 from app.models.candidate import Candidate
 from app.models.user import User
@@ -149,6 +150,7 @@ def update_profile(
 def career_coach(
     data: CareerCoachRequest,
     candidate: Candidate = Depends(get_current_candidate),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     try:
@@ -171,6 +173,7 @@ def career_coach(
 def generate_cover_letter(
     data: CoverLetterRequest,
     candidate: Candidate = Depends(get_current_candidate),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     job = get_active_job(
@@ -204,6 +207,7 @@ def generate_cover_letter(
 def analyze_resume_ats(
     data: ATSAnalysisRequest,
     candidate: Candidate = Depends(get_current_candidate),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     job = get_active_job(
@@ -242,6 +246,7 @@ def analyze_resume_ats(
 def improve_resume(
     data: ResumeImprovementRequest,
     candidate: Candidate = Depends(get_current_candidate),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     job = get_active_job(

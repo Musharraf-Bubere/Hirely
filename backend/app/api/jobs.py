@@ -11,6 +11,7 @@ from app.api.dependencies import (
 from app.ai.services.recruiter_matching_service import (
     recruiter_matching_service,
 )
+from app.core.rate_limit import check_ai_rate_limit
 
 from app.db.session import get_db
 
@@ -458,12 +459,14 @@ def explain_candidates_for_job(
     explanation_limit: int = Query(
         default=5,
         ge=1,
+        le=20,
         description=(
             "Number of top-ranked candidates that should "
             "receive an AI-generated match explanation."
         ),
     ),
     current_user: User = Depends(require_recruiter),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     # -----------------------------------------------------
@@ -518,8 +521,16 @@ def explain_candidates_for_job(
     # 4. Run matching + explanation workflow
     # -----------------------------------------------------
 
-    return recruiter_matching_service.rank_and_explain_candidates(
-        db=db,
-        job=job,
-        explanation_limit=explanation_limit,
-    )
+    try:
+        return recruiter_matching_service.rank_and_explain_candidates(
+            db=db,
+            job=job,
+            explanation_limit=explanation_limit,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Candidate Match Explanation service is temporarily unavailable.",
+        ) from exc

@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from app.models.resume import Resume
@@ -18,6 +19,8 @@ from app.services.resume import (
 )
 from app.schemas.resume import ResumeResponse
 from app.services.resume_skill import sync_resume_skills_to_candidate
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/resumes", tags=["Resumes"])
 
@@ -143,7 +146,8 @@ def parse_resume_endpoint(
         ) from exc
 
     except Exception as exc:
+        logger.exception("Resume parsing failed unexpectedly for candidate %s: %s", candidate.id, type(exc).__name__)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Resume parsing failed: {str(exc)}",
+            detail="Resume parsing failed due to an internal service error. Please try again.",
         ) from exc

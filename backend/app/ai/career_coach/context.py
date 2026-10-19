@@ -75,6 +75,13 @@ class CareerCoachContextBuilder:
 
         full_name = f"{first_name} {last_name}".strip()
 
+        # Sanitize contact PII from resume data before prompt serialization
+        safe_resume = None
+        if resume_data:
+            safe_resume = resume_data.model_copy(
+                update={"email": None, "phone": None}
+            )
+
         return CareerCoachCandidateContext(
             name=full_name or None,
             headline=headline,
@@ -87,7 +94,7 @@ class CareerCoachContextBuilder:
                     if skill and skill.strip()
                 }
             ),
-            resume=resume_data,
+            resume=safe_resume,
             applications=applications or [],
         )
 

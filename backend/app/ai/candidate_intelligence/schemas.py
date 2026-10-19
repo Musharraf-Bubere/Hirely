@@ -59,6 +59,7 @@ class CandidateIntelligenceItem(BaseModel):
 class CandidateIntelligenceFilterRequest(BaseModel):
     query: str | None = Field(
         default=None,
+        max_length=200,
         description="Keyword search query across candidate name, headline, bio, and skills.",
     )
     min_score: float | None = Field(

@@ -1,11 +1,15 @@
-from typing import TypeVar
+import logging
+import random
+import time
+from typing import Any, Callable, TypeVar
 
 from google import genai
-from google.genai import errors
+from google.genai import errors, types
 from pydantic import BaseModel
 
 from app.ai.config import ai_settings
 
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -13,11 +17,52 @@ T = TypeVar("T", bound=BaseModel)
 class GeminiService:
     def __init__(self):
         self.client = genai.Client(
-            api_key=ai_settings.gemini_api_key
+            api_key=ai_settings.gemini_api_key,
+            http_options=types.HttpOptions(timeout=30.0),
         )
 
         self.model = ai_settings.gemini_model
         self.fallback_model = ai_settings.gemini_fallback_model
+
+    def _is_retryable_exception(self, exc: Exception) -> bool:
+        if isinstance(exc, TimeoutError):
+            return True
+        if hasattr(errors, "httpx") and isinstance(exc, errors.httpx.TimeoutException):
+            return True
+        if isinstance(exc, errors.ClientError) and getattr(exc, "code", None) == 429:
+            return True
+        if isinstance(exc, errors.ServerError) and getattr(exc, "code", None) in (500, 502, 504):
+            return True
+        return False
+
+    def _execute_with_retry(
+        self,
+        func: Callable[..., Any],
+        *args: Any,
+        max_retries: int = 2,
+        base_delay: float = 1.0,
+        backoff_factor: float = 2.0,
+        **kwargs: Any,
+    ) -> Any:
+        attempts = 0
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except Exception as exc:
+                if attempts >= max_retries or not self._is_retryable_exception(exc):
+                    raise
+
+                attempts += 1
+                delay = base_delay * (backoff_factor ** (attempts - 1)) + random.uniform(0.0, 0.25)
+                logger.warning(
+                    "Gemini API transient failure (%s: %s). Retrying attempt %s/%s in %.2fs...",
+                    type(exc).__name__,
+                    exc,
+                    attempts,
+                    max_retries,
+                    delay,
+                )
+                time.sleep(delay)
 
     def _generate_content(
         self,
@@ -39,7 +84,8 @@ class GeminiService:
         config: dict | None = None,
     ):
         try:
-            return self._generate_content(
+            return self._execute_with_retry(
+                self._generate_content,
                 model=self.model,
                 prompt=prompt,
                 config=config,
@@ -55,12 +101,14 @@ class GeminiService:
             if self.fallback_model == self.model:
                 raise
 
-            print(
-                f"Gemini model '{self.model}' is temporarily unavailable. "
-                f"Falling back to '{self.fallback_model}'."
+            logger.warning(
+                "Gemini model '%s' is temporarily unavailable (503). Falling back to '%s'.",
+                self.model,
+                self.fallback_model,
             )
 
-            return self._generate_content(
+            return self._execute_with_retry(
+                self._generate_content,
                 model=self.fallback_model,
                 prompt=prompt,
                 config=config,

@@ -7023,3 +7023,117 @@ Resume Improvement V1 does not require RAG, vector databases, agents, or other a
 - Prompt responses are validated using Pydantic schemas.
 - RAG, vector databases, agents, and other advanced infrastructure are introduced only when the application's requirements justify them.
 - AI-generated candidate-facing content remains an assistive capability rather than an unquestionable source of truth.
+
+---
+
+# Day 32 — AI Security Guardrails & Reliability Architecture
+
+Day 32 strengthens Hirely's end-to-end AI security posture, prompt injection defenses, error sanitization, provider fault tolerance, and API abuse prevention across all candidate and recruiter AI features.
+
+```
+       +--------------------------------------------------------------+
+       |                  Client Request (HTTP / JWT)                 |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |               Rate Limiting & Authentication                 |
+       |  - JWT Bearer Authentication & Role Enforcement              |
+       |  - Sliding-Window Rate Limiter (30 req / 60s per user)       |
+       |  - HTTP 429 Too Many Requests with Retry-After Header        |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |               Input Validation & Schema Bounds               |
+       |  - JobCreateRequest: title [3, 255], description [10, 15000] |
+       |  - CandidateIntelligenceFilter: query <= 200 chars           |
+       |  - Recruiter Explanations: explanation_limit in [1, 20]      |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |               PII Sanitization & Context Building            |
+       |  - Email and Phone stripped from ResumeData before prompt    |
+       |  - Candidate & Job context cleanly separated from system     |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |               Prompt Hardening & Delimiters                  |
+       |  - Context Delimiters: <<<BEGIN CONTEXT>>> ... <<<END>>>     |
+       |  - Untrusted Question Delimiters: === BEGIN === ... === END  |
+       |  - Strict Anti-Injection & System Instruction Preservation   |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |           Gemini Service Reliability & Fault Tolerance       |
+       |  - HTTP Timeout: 30.0s (types.HttpOptions)                   |
+       |  - Bounded Retries: Max 2 retries on 429, 500, 502, 504      |
+       |  - Exponential Backoff (1.0s base, 2x, jitter)               |
+       |  - Automatic Fallback: Immediate failover on HTTP 503        |
+       |  - Fast Fail: 400, 401, 403, 404 raised without retries      |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |               Safe Error Sanitization                        |
+       |  - Upstream failures return sanitized 502 Bad Gateway        |
+       |  - Internal resume parsing failures return generic 500       |
+       |  - Zero internal stack traces or database info leaked        |
+       +--------------------------------------------------------------+
+```
+
+### 1. Privacy & PII Sanitization Controls
+
+To safeguard candidate privacy and prevent unnecessary personally identifiable information (PII) from being transmitted to external foundation models:
+- **Career Coach Context Sanitization:** `CareerCoachContextBuilder` actively strips candidate `email` and `phone` attributes from active parsed resume data (`resume_data.model_copy(update={"email": None, "phone": None})`) prior to prompt serialization.
+- **Cover Letter Context Sanitization:** `CoverLetterContextBuilder` actively sanitizes candidate `email` and `phone` attributes before constructing prompt context.
+- **Privacy Grounding:** Candidate names, headline, bio, skills, experience, education, projects, and certifications are preserved for high-quality guidance, while direct contact vectors remain strictly server-side.
+
+### 2. Input Boundaries & Prompt Injection Hardening
+
+All generative AI prompt templates in Hirely implement structured delimiters and anti-injection instructions:
+- **Career Coach:** Wraps candidate context in `<<<BEGIN CANDIDATE CONTEXT>>>` and candidate questions in `=== BEGIN UNTRUSTED CANDIDATE QUESTION ===`. Instructs Gemini to treat delimited text as raw data and reject instruction overrides or system prompt extraction.
+- **Cover Letter Generator:** Wraps candidate context in `<<<BEGIN CANDIDATE CONTEXT>>>` and job description in `<<<BEGIN JOB CONTEXT>>>`.
+- **Resume Parser:** Wraps raw uploaded resume text in `<<<BEGIN UNTRUSTED RESUME TEXT>>>` and `<<<END UNTRUSTED RESUME TEXT>>>`, with explicit instructions to ignore prompt injection directives embedded inside candidate resumes.
+- **ATS Analyzer & Resume Improvement:** Both services wrap candidate, job, and deterministic signals contexts in explicit boundaries accompanied by security rules prohibiting instructions inside context from altering output structure.
+- **Schema Validation Length Bounds:**
+  - `JobCreateRequest.title`: `min_length=3, max_length=255`
+  - `JobCreateRequest.description`: `min_length=10, max_length=15000`
+  - `CandidateIntelligenceFilterRequest.query`: `max_length=200`
+  - `POST /jobs/{job_id}/candidates/match/explain`: `explanation_limit` constrained to `ge=1, le=20`
+
+### 3. Upstream Provider Reliability & Fault Tolerance
+
+The backend `GeminiService` implements robust enterprise resilience controls:
+- **Request Timeout:** Initialized with `types.HttpOptions(timeout=30.0)` to eliminate unbounded hanging requests.
+- **Bounded Exponential Backoff Retries:** The `_execute_with_retry` wrapper executes up to 2 retries (total 3 attempts) with exponential backoff ($1.0\text{s} \times 2^{\text{attempt}-1} + \text{jitter}$) exclusively on transient errors:
+  - HTTP 429 (`errors.ClientError` with code 429)
+  - HTTP 500, 502, 504 (`errors.ServerError` with transient codes)
+  - `TimeoutError` and HTTP transport timeouts
+- **Fast Fail on Permanent Client Errors:** Non-retryable errors (e.g. 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found) fail immediately without wasteful retries.
+- **Intelligent Model Fallback:** HTTP 503 Service Unavailable triggers immediate failover to `ai_settings.gemini_fallback_model` without retrying the unavailable primary model, maximizing uptime during localized Google Cloud outages.
+
+### 4. Sliding-Window Rate Limiting
+
+To prevent API abuse and cost overruns on expensive generative AI routes:
+- **`app.core.rate_limit.InMemoryRateLimiter`:** Implements a thread-safe sliding-window limiter backed by double-ended queues (`collections.deque`) and a mutex lock (`threading.Lock()`).
+- **Default Policy:** Allows up to 30 requests per 60-second sliding window per authenticated user.
+- **Standards-Compliant Response:** Exceeding the quota returns HTTP 429 Too Many Requests with a `Retry-After` header indicating seconds until the oldest request leaves the window.
+- **Targeted AI Endpoints:**
+  - `POST /candidate/career-coach`
+  - `POST /candidate/cover-letter`
+  - `POST /candidate/ats-analysis`
+  - `POST /candidate/resume-improvement`
+  - `POST /recruiter/jobs/{job_id}/description-analysis`
+  - `POST /recruiter/jobs/{job_id}/candidate-intelligence`
+  - `POST /recruiter/jobs/{job_id}/candidates/{candidate_id}/ask-evidence`
+  - `POST /jobs/{job_id}/candidates/match/explain`
+- **Architecture Scope:** Process-local in-memory storage provides zero-overhead limiting for single-process deployments. For multi-worker distributed clusters, a Redis-backed token bucket or sliding-window rate limiter is recommended.
+
+### 5. Safe Error Handling & Information Leakage Prevention
+
+- **Recruiter Match Explanations:** Upstream AI exceptions in `POST /jobs/{job_id}/candidates/match/explain` are safely caught and mapped to a sanitized HTTP 502 Bad Gateway response (`"Candidate Match Explanation service is temporarily unavailable."`).
+- **Resume Upload & Parsing:** `POST /resumes/{resume_id}/parse` sanitizes unexpected exceptions to generic HTTP 500 responses (`"Resume parsing failed due to an internal service error. Please try again."`), completely preventing raw exception details, internal file paths, or database connection strings from leaking to clients while logging full exception traces server-side.

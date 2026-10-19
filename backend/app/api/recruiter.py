@@ -24,6 +24,7 @@ from app.ai.rag.service import (
     candidate_evidence_rag_service,
 )
 from app.api.dependencies import require_recruiter
+from app.core.rate_limit import check_ai_rate_limit
 from app.db.session import get_db
 from app.models.candidate import Candidate
 from app.models.job import Job
@@ -108,6 +109,7 @@ def get_my_jobs(
 def analyze_job_description(
     job_id: UUID,
     current_user: User = Depends(require_recruiter),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     recruiter = (
@@ -174,6 +176,7 @@ def get_candidate_intelligence(
     job_id: UUID,
     filters: CandidateIntelligenceFilterRequest | None = None,
     current_user: User = Depends(require_recruiter),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     recruiter = (
@@ -242,6 +245,7 @@ def ask_candidate_evidence(
     candidate_id: UUID,
     request: CandidateEvidenceQueryRequest,
     current_user: User = Depends(require_recruiter),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     recruiter = (
