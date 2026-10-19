@@ -11,6 +11,27 @@ jobs:
     name: Backend Pytest & AI Evaluation
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: hirely_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:password@localhost:5432/hirely_test
+      JWT_SECRET_KEY: ci-testing-jwt-secret-key-minimum-32-chars-long
+      GEMINI_API_KEY: ci-dummy-gemini-key-for-deterministic-eval
+      PYTHONPATH: .
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -25,12 +46,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov psycopg-binary
+
+      - name: Run database migrations
+        working-directory: ./backend
+        run: |
+          python -m alembic upgrade head
 
       - name: Run Deterministic Backend Tests
         working-directory: ./backend
         run: |
-          pytest -m "not integration and not eval_live" -v
+          python -m pytest -m "not integration and not eval_live" -v
 
       - name: Run Deterministic AI Evaluation Runner
         working-directory: ./backend
