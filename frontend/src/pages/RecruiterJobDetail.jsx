@@ -213,22 +213,38 @@ export default function RecruiterJobDetail() {
         <div>
           <strong>Ready to hire?</strong>
           <span>
-            Find and evaluate candidates for this opportunity.
+            Find candidates or run an AI quality analysis on this job description.
           </span>
         </div>
 
-        <Link
-          to={`/recruiter/jobs/${job.id}/candidates`}
-          className="recruiter-detail-primary-button"
-        >
-          Find Candidates →
-        </Link>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <Link
+            to={`/recruiter/jobs/${job.id}/description-analysis`}
+            className="recruiter-detail-secondary-button"
+          >
+            Analyze JD ✦
+          </Link>
+
+          <Link
+            to={`/recruiter/jobs/${job.id}/candidates`}
+            className="recruiter-detail-primary-button"
+          >
+            Find Candidates →
+          </Link>
+        </div>
       </section>
 
       <section className="recruiter-detail-grid">
         <div className="recruiter-detail-main-column">
           <article className="recruiter-detail-card">
-            <div className="recruiter-detail-card-header">
+            <div
+              className="recruiter-detail-card-header"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div>
                 <span className="recruiter-detail-card-eyebrow">
                   Opportunity
@@ -236,6 +252,18 @@ export default function RecruiterJobDetail() {
 
                 <h2>Job Description</h2>
               </div>
+
+              <Link
+                to={`/recruiter/jobs/${job.id}/description-analysis`}
+                className="recruiter-detail-secondary-button"
+                style={{
+                  minHeight: '36px',
+                  padding: '0 14px',
+                  fontSize: '12px',
+                }}
+              >
+                Analyze JD ✦
+              </Link>
             </div>
 
             <div className="recruiter-detail-description">
@@ -324,6 +352,27 @@ export default function RecruiterJobDetail() {
               className="recruiter-detail-ai-link"
             >
               Explore matching →
+            </Link>
+          </article>
+
+          <article className="recruiter-detail-card recruiter-detail-ai-card">
+            <div className="recruiter-detail-ai-icon">✦</div>
+
+            <span className="recruiter-detail-card-eyebrow">
+              Recruiter AI
+            </span>
+
+            <h2>Job Description Analyzer</h2>
+
+            <p>
+              Evaluate JD quality, detect ambiguities or missing details, align skills, and review an improved advisory draft.
+            </p>
+
+            <Link
+              to={`/recruiter/jobs/${job.id}/description-analysis`}
+              className="recruiter-detail-ai-link"
+            >
+              Analyze description →
             </Link>
           </article>
         </aside>

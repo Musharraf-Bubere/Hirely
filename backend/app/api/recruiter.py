@@ -1,8 +1,17 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.ai.job_description_analyzer.schemas import (
+    JobDescriptionAnalysisResponse,
+)
+from app.ai.job_description_analyzer.service import (
+    job_description_analyzer_service,
+)
 from app.api.dependencies import require_recruiter
 from app.db.session import get_db
+from app.models.job import Job
 from app.models.recruiter import Recruiter
 from app.models.user import User
 from app.schemas.job import JobResponse
@@ -75,3 +84,68 @@ def get_my_jobs(
         db=db,
         recruiter=recruiter,
     )
+
+
+@router.post(
+    "/jobs/{job_id}/description-analysis",
+    response_model=JobDescriptionAnalysisResponse,
+)
+def analyze_job_description(
+    job_id: UUID,
+    current_user: User = Depends(require_recruiter),
+    db: Session = Depends(get_db),
+):
+    recruiter = (
+        db.query(Recruiter)
+        .filter(Recruiter.user_id == current_user.id)
+        .first()
+    )
+
+    if not recruiter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recruiter profile not found",
+        )
+
+    job = (
+        db.query(Job)
+        .filter(Job.id == job_id)
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    if job.recruiter_id != recruiter.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to analyze this job",
+        )
+
+    if not job.description or not job.description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job description cannot be empty for analysis",
+        )
+
+    try:
+        return job_description_analyzer_service.analyze_job_description(
+            db=db,
+            recruiter=recruiter,
+            job=job,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Job Description Analyzer service is temporarily unavailable.",
+        ) from exc

@@ -6404,6 +6404,158 @@ These boundaries keep the system lightweight, reproducible, cost-effective, and 
 
 ---
 
+## Day 29: Recruiter AI — Job Description Analyzer V1
+
+### Overview
+
+Day 29 introduces **Recruiter AI — Job Description Analyzer V1**, extending Hirely's recruitment intelligence to recruiters. While prior modules assisted candidates with resumes and cover letters, this feature empowers recruiters to evaluate their own job descriptions for clarity, completeness, responsibility specificity, required vs. preferred skill alignment, and structural readiness before candidates apply.
+
+The analysis is strictly advisory:
+- Evaluates the job description using Gemini structured generation.
+- Yields a bounded heuristic quality score (0–100).
+- Pinpoints high-, medium-, and low-priority issues across clarity, completeness, requirements, skills, tone, and structure.
+- Details missing information that candidates frequently seek (e.g., compensation, team structure, working mode).
+- Audits skill consistency (evaluating required and preferred skills, identifying unmentioned tagged skills, and proposing complementary skills).
+- Offers an advisory improved draft with explicit bracketed placeholders (e.g., `[Insert Manager Title]`).
+- **Zero Database Mutation:** The system never mutates, overrides, or auto-publishes the job description in the database.
+
+---
+
+### Architectural Design
+
+```
+   Recruiter Browser (Job Description Analyzer UI)
+                         │
+                         ▼
+   POST /recruiter/jobs/{job_id}/description-analysis
+                         │
+        ┌────────────────┴────────────────┐
+        ▼                                 ▼
+   require_recruiter                Recruiter Profile &
+   Authentication                   Ownership Check
+                                   (job.recruiter_id == recruiter.id)
+                                          │
+                                          ▼
+                             JobDescriptionContextBuilder
+                             (Normalize job metadata & skills)
+                                          │
+                                          ▼
+                             JobDescriptionPromptBuilder
+                             (Anti-fabrication & injection defense)
+                                          │
+                                          ▼
+                             gemini_service.generate_structured
+                             (Pydantic Schema: JobDescriptionAIResult)
+                                          │
+                                          ▼
+                             JobDescriptionAnalyzerService
+                             (Assemble Result + Advisory Disclaimer)
+                                          │
+                                          ▼
+                             JobDescriptionAnalysisResponse
+                                          │
+                                          ▼
+                                   Recruiter UI
+                      (Score, Issues, Skills Audit, Draft)
+```
+
+---
+
+### Backend Components (`backend/app/ai/job_description_analyzer/`)
+
+1. **`schemas.py`:**
+   - `IssuePriority` (Enum: `high`, `medium`, `low`)
+   - `IssueCategory` (Enum: `clarity`, `completeness`, `requirements`, `skills`, `tone`, `structure`)
+   - `JobDescriptionIssue`: Pydantic model for individual issues (`priority`, `category`, `title`, `explanation`, `suggested_action`).
+   - `JobSkillsAnalysis`: Skill consistency analysis (`required_skills_evaluation`, `preferred_skills_evaluation`, `unmentioned_skills_in_description`, `suggested_skills_to_add`).
+   - `JobDescriptionAIResult`: Raw structured Gemini schema (`quality_score: int ge=0 le=100`, `overall_assessment`, `strengths`, `issues`, `missing_information`, `skills_analysis`, `improvement_recommendations`, `improved_description`).
+   - `JobDescriptionAnalysisResult`: Assembled result model containing the AI result fields and an explicit `disclaimer` string.
+   - `JobDescriptionAnalysisResponse`: Outer API response envelope (`job_id: UUID`, `analysis: JobDescriptionAnalysisResult`).
+
+2. **`context.py` (`JobDescriptionContextBuilder`):**
+   - Extracts job properties (`title`, `description`, `location`, `employment_type`, `experience_level`, `salary_min`, `salary_max`, `is_active`).
+   - Deduplicates and normalizes required and preferred skills case-insensitively while preserving canonical casing.
+   - Rejects empty or whitespace-only job descriptions with descriptive `ValueError`.
+
+3. **`prompts.py` (`JobDescriptionPromptBuilder`):**
+   - Context Grounding: Instructs the model to ground all evaluations strictly on the provided job data.
+   - Anti-Fabrication Constraints: Prohibits inventing company benefits, perks, compensation numbers, or arbitrary qualifications not requested by the role.
+   - Explicit Placeholders: Mandates bracketed placeholders (e.g. `[Insert Reporting Manager]`, `[Insert Expected Travel %]`) for unknown fields.
+   - Prompt Injection Defense: Delimits untrusted job description input and instructs the model to ignore any instructions embedded inside the job description.
+
+4. **`service.py` (`JobDescriptionAnalyzerService`):**
+   - Validates that the requesting recruiter owns the job (`job.recruiter_id == recruiter.id`).
+   - Validates that the job description is not empty.
+   - Fetches associated required and preferred skills from `JobSkill` relationships.
+   - Coordinates context building, prompt compilation, and Gemini structured generation.
+   - Appends the advisory disclaimer and returns the final `JobDescriptionAnalysisResponse`.
+   - Never calls `db.commit()` or mutates the `Job` model instance.
+
+---
+
+### API Endpoint (`backend/app/api/recruiter.py`)
+
+- **Route:** `POST /recruiter/jobs/{job_id}/description-analysis`
+- **Security Dependency:** `require_recruiter` (enforces authenticated recruiter role).
+- **Recruiter Profile Verification:** Resolves `Recruiter` by `user_id == current_user.id` (returns 404 if missing).
+- **Job Lookup & Ownership:** Queries `Job` by `id == job_id` (404 if not found). Verifies `job.recruiter_id == recruiter.id` (returns 403 Forbidden on ownership mismatch).
+- **Input Validation:** Verifies job description is non-empty (returns 400 Bad Request if missing/blank).
+- **Upstream Handling:** Catches Gemini / network failures and raises 502 Bad Gateway with a clear user-facing error message.
+
+---
+
+### Frontend Implementation
+
+1. **API Service:**
+   - `frontend/src/services/jobDescriptionAnalyzer.js` exporting `analyzeJobDescription(jobId)` calling `POST /recruiter/jobs/${jobId}/description-analysis` with `{ auth: true }`.
+   - Re-exported in `frontend/src/services/recruiter.js`.
+
+2. **Page & Styling:**
+   - `frontend/src/pages/JobDescriptionAnalyzer.jsx`
+   - `frontend/src/pages/JobDescriptionAnalyzer.css`
+   - Route `/recruiter/jobs/:jobId/description-analysis` registered in `frontend/src/App.jsx` under recruiter protected routes.
+
+3. **UI Features:**
+   - **Quality Score Gauge:** Bounded 0–100 score with visual rating tiers (`Exceptional`, `Solid`, `Needs Polish`, `Requires Significant Revision`).
+   - **Advisory Banner:** Visible disclaimer declaring that the review is purely advisory and Hirely does not alter the saved job description.
+   - **Tabbed Navigation:**
+     - *Overview & Strengths:* Key strengths, strategic improvement recommendations, and critical missing details.
+     - *Issues & Gaps:* Prioritized cards with priority badges (High, Medium, Low), category tags (Clarity, Completeness, Requirements, Skills, Tone, Structure), explanation, and recommended action. Interactive priority filter chips (`All`, `High`, `Medium`, `Low`).
+     - *Skills Alignment:* Required vs. preferred evaluation, unmentioned tagged skills highlight, and suggested complementary skills.
+     - *Advisory Draft:* Formatted improved draft with explicit placeholders, and a one-click copy button with visual confirmation.
+   - **Entry Points:**
+     - `RecruiterJobDetail.jsx`: "Analyze JD ✦" in the action bar, button in the Job Description card header, and a dedicated AI card in the sidebar.
+     - `RecruiterJobs.jsx`: "Analyze JD ✦" action link in the job card actions toolbar.
+
+---
+
+### Error Mapping & Security Boundaries
+
+| Error Scenario | HTTP Status | Response Details |
+|---|---:|---|
+| Missing Auth Token | 401 | Handled by JWT security dependency |
+| Candidate Access Attempt | 403 | Role mismatch enforced by `require_recruiter` |
+| Different Recruiter Job Access | 403 | "You do not have permission to analyze this job" |
+| Recruiter Profile Missing | 404 | "Recruiter profile not found" |
+| Target Job Missing | 404 | "Job not found" |
+| Empty Job Description | 400 | "Job description cannot be empty for analysis" |
+| Upstream Gemini Failure | 502 | "Job Description Analyzer service is temporarily unavailable." |
+| Unhandled Server Exception | 500 | Standard internal server error response |
+
+---
+
+### V1 Complexity Boundaries
+
+The Day 29 Job Description Analyzer V1 explicitly excludes:
+- Database persistence for analysis reports or version diff history.
+- Background task queues (Celery, RQ, Redis).
+- Vector databases (PGVector, Pinecone, Chroma).
+- Autonomous multi-agent orchestration frameworks.
+- Automatic database mutation or auto-publishing of job descriptions.
+- Candidate intelligence or candidate search (reserved for Day 30+).
+
+---
+
 These capabilities operate alongside the larger recruitment intelligence architecture.
 
 The future matching system remains responsible for:

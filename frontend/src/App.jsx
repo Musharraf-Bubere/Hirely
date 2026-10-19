@@ -23,6 +23,7 @@ import RecruiterJobs from './pages/RecruiterJobs'
 import CreateJob from './pages/CreateJob'
 import RecruiterJobDetail from './pages/RecruiterJobDetail'
 import RecruiterCandidates from './pages/RecruiterCandidates'
+import JobDescriptionAnalyzer from './pages/JobDescriptionAnalyzer'
 
 import { AuthProvider } from './context/AuthContext'
 
@@ -148,6 +149,12 @@ function App() {
               <Route
                 path="/recruiter/jobs/:jobId"
                 element={<RecruiterJobDetail />}
+              />
+
+              {/* Recruiter Job Description Analyzer */}
+              <Route
+                path="/recruiter/jobs/:jobId/description-analysis"
+                element={<JobDescriptionAnalyzer />}
               />
 
               {/* AI Candidate Matching */}

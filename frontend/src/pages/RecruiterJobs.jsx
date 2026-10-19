@@ -280,6 +280,14 @@ export default function RecruiterJobs() {
 
                   <div className="recruiter-job-actions">
                     <Link
+                      to={`/recruiter/jobs/${job.id}/description-analysis`}
+                      className="recruiter-outline-button"
+                      title="Analyze Job Description"
+                    >
+                      Analyze JD ✦
+                    </Link>
+
+                    <Link
                       to={`/recruiter/jobs/${job.id}`}
                       className="recruiter-outline-button"
                     >

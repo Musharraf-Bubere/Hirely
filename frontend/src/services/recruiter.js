@@ -51,3 +51,9 @@ export async function updateApplicationStatus(
     { auth: true },
   )
 }
+
+export async function analyzeJobDescription(jobId) {
+  return api.post(`/recruiter/jobs/${jobId}/description-analysis`, null, {
+    auth: true,
+  })
+}
