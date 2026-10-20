@@ -17,11 +17,11 @@ RUN groupadd -g 1000 appgroup && \
 WORKDIR /app
 
 # Copy dependency specifications
-COPY backend/requirements.txt /app/backend/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
 # Install python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/backend/requirements.txt
+    pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy backend source code and migrations
 COPY backend /app/backend
