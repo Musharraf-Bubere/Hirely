@@ -79,8 +79,19 @@ class ResumeParserService:
         )
 
     def parse_file(self, file_path: str | Path) -> ResumeData:
-        resume_text = self.resume_loader.load_text(file_path)
+        local_candidate = Path(file_path)
+        if local_candidate.exists() and local_candidate.is_file():
+            resume_text = self.resume_loader.load_text(local_candidate)
+            return self.parse(resume_text)
 
+        from app.storage.storage_service import storage_service
+
+        if storage_service.backend == "r2":
+            with storage_service.open_file_for_reading(file_path) as local_temp_path:
+                resume_text = self.resume_loader.load_text(local_temp_path)
+                return self.parse(resume_text)
+
+        resume_text = self.resume_loader.load_text(file_path)
         return self.parse(resume_text)
 
 

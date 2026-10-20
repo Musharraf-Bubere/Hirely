@@ -970,23 +970,36 @@ Run:
 
 # 🔑 Environment Variables
 
-Create a `.env` file inside the backend directory.
+Create a `.env` file inside the backend directory (or root directory).
 
-Example:
+Hirely supports two storage backends:
+- **`local` (default)**: Resumes are stored on the local filesystem (ideal for development and Docker volumes).
+- **`r2`**: Resumes are stored in Cloudflare R2 (S3-compatible object storage, required for stateless cloud deployments like Render).
 
-    DATABASE_URL=postgresql://username:password@localhost:5432/hirely
-    SECRET_KEY=your_secret_key
-    GEMINI_API_KEY=your_gemini_api_key
+Example `.env`:
 
-> ⚠️ **Never commit `.env` files, passwords, API keys, JWT secrets, or other credentials to GitHub.**
+```env
+DATABASE_URL=postgresql+psycopg://username:password@localhost:5432/hirely
+JWT_SECRET_KEY=your_jwt_secret_key
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+GEMINI_API_KEY=your_gemini_api_key
 
-For public repositories, use a `.env.example` file containing placeholder values only.
+# Resume Storage Backend ('local' or 'r2')
+STORAGE_BACKEND=local
+RESUME_STORAGE_DIR=app/storage/resumes
 
-Example:
+# Cloudflare R2 (Required only when STORAGE_BACKEND=r2)
+R2_ACCOUNT_ID=your_cloudflare_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+R2_BUCKET_NAME=hirely-resumes
+# R2_ENDPOINT_URL is optional; auto-constructed as https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com
+```
 
-    DATABASE_URL=
-    SECRET_KEY=
-    GEMINI_API_KEY=
+> ⚠️ **Never commit `.env` files, passwords, API keys, JWT secrets, or R2 credentials to GitHub.**
+
+For public repositories, refer to [`.env.example`](.env.example) for placeholder values.
 
 ---
 
@@ -1024,8 +1037,10 @@ docker compose logs -f backend
 docker compose down
 ```
 
-> **Storage Limitation & Operational Architecture Note**:
-> In the local development container setup, uploaded candidate resumes are stored in the Docker volume `resume_uploads` mounted at `/app/backend/uploads` (configured via `RESUME_STORAGE_DIR`). This persists files across container recreation for single-node development. For multi-instance horizontal cloud scaling, a persistent distributed object store (such as AWS S3 or Google Cloud Storage) is required.
+> **Storage Architecture & Cloudflare R2 Integration**:
+> Hirely provides dual storage backend capabilities:
+> - **Local Disk (`STORAGE_BACKEND=local`)**: Resumes are stored in the local filesystem / Docker volume `resume_uploads` mounted at `/app/backend/uploads` (configured via `RESUME_STORAGE_DIR`). This persists files across container recreation for single-node development without cloud dependencies.
+> - **Cloudflare R2 (`STORAGE_BACKEND=r2`)**: Resumes are stored in Cloudflare R2 object storage (S3-compatible API). On serverless or ephemeral container hosts (such as Render's free tier), local disk changes are discarded on container spin-down. With R2 configured, resume uploads are streamed directly to object storage with UUID keys (`resumes/<uuid>.pdf`), parsed via bounded temporary streaming with guaranteed unlinking, and permanently retained across container lifecycles.
 >
 > **Database Connection Pool Budgeting**:
 > Connection pools are configured per worker process. The maximum database connections across the deployment follow the formula:

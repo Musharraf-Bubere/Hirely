@@ -14,3 +14,4 @@ google-genai==2.21.0
 python-multipart==0.0.32
 langchain-core==1.6.1
 langchain-docling==3.0.0
+boto3==1.43.115

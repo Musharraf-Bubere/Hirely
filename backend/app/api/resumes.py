@@ -16,6 +16,7 @@ from app.ai.parsers.resume_parser import ResumeParserService
 from app.services.resume import (
     activate_resume,
     create_resume,
+    delete_resume,
     get_resumes,
     parse_resume,
 )
@@ -167,4 +168,43 @@ def parse_resume_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Resume parsing failed due to an internal service error. Please try again.",
+        ) from exc
+
+
+@router.delete(
+    "/{resume_id}",
+    status_code=status.HTTP_200_OK,
+)
+def delete_resume_endpoint(
+    resume_id: UUID,
+    candidate=Depends(get_current_candidate),
+    db: Session = Depends(get_db),
+):
+    resume = (
+        db.query(Resume)
+        .filter(
+            Resume.id == resume_id,
+            Resume.candidate_id == candidate.id,
+        )
+        .first()
+    )
+
+    if not resume:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    try:
+        delete_resume(
+            db=db,
+            candidate=candidate,
+            resume=resume,
+        )
+        candidate_embedding_cache.invalidate(candidate.id)
+        return {"status": "success", "message": "Resume deleted successfully"}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
         ) from exc

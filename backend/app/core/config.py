@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[3]
@@ -27,8 +27,40 @@ class Settings(BaseSettings):
     # Reverse proxy trust configuration: false by default
     trust_proxy_headers: bool = False
 
-    # Resume upload storage path (relative to backend root or absolute)
+    # Storage configuration: "local" (default) or "r2"
+    storage_backend: str = "local"
     resume_storage_dir: str = "app/storage/resumes"
+    r2_account_id: str | None = None
+    r2_access_key_id: str | None = None
+    r2_secret_access_key: str | None = None
+    r2_bucket_name: str | None = None
+    r2_endpoint_url: str | None = None
+
+    @property
+    def computed_r2_endpoint_url(self) -> str | None:
+        if self.r2_endpoint_url:
+            return self.r2_endpoint_url
+        if self.r2_account_id:
+            return f"https://{self.r2_account_id}.r2.cloudflarestorage.com"
+        return None
+
+    @model_validator(mode="after")
+    def validate_storage_settings(self) -> "Settings":
+        if self.storage_backend.lower() == "r2":
+            missing = []
+            if not self.r2_access_key_id:
+                missing.append("R2_ACCESS_KEY_ID")
+            if not self.r2_secret_access_key:
+                missing.append("R2_SECRET_ACCESS_KEY")
+            if not self.r2_bucket_name:
+                missing.append("R2_BUCKET_NAME")
+            if not self.r2_endpoint_url and not self.r2_account_id:
+                missing.append("R2_ENDPOINT_URL or R2_ACCOUNT_ID")
+            if missing:
+                raise ValueError(
+                    f"R2 storage backend is configured, but required parameters are missing: {', '.join(missing)}"
+                )
+        return self
 
     # Database connection pool configuration
     # Note: pool capacity (db_pool_size + db_max_overflow) is allocated per worker process.

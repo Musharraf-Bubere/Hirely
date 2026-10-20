@@ -31,5 +31,7 @@ htmlcov/
 # Uploaded resume files
 backend/app/storage/resumes/*.pdf
 backend/app/storage/resumes/*.docx
+backend/app/storage/resumes/
+/app/
 backend/uploads/
 uploads/

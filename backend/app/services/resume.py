@@ -114,3 +114,23 @@ def get_resumes(
         .limit(limit)
         .all()
     )
+
+
+def delete_resume(
+    db: Session,
+    candidate: Candidate,
+    resume: Resume,
+) -> bool:
+    if resume.candidate_id != candidate.id:
+        raise ValueError("Resume does not belong to candidate")
+
+    file_path = resume.file_path
+    db.delete(resume)
+    db.commit()
+
+    if file_path:
+        from app.storage.storage_service import storage_service
+
+        storage_service.delete_file(file_path)
+
+    return True
