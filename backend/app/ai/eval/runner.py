@@ -130,7 +130,12 @@ class DeterministicOfflineAIService:
     def __init__(self, current_case: RAGEvalCase | None = None):
         self.current_case = current_case
 
-    def generate_structured(self, prompt: str, response_schema: type) -> Any:
+    def generate_structured(
+        self,
+        prompt: str,
+        response_schema: type,
+        max_output_tokens: int | None = None,
+    ) -> Any:
         if not self.current_case or not self.current_case.expected_has_evidence:
             return CandidateEvidenceAIResult(
                 has_evidence=False,

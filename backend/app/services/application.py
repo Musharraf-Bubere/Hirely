@@ -37,13 +37,17 @@ def create_application(
 def get_candidate_applications(
     db: Session,
     candidate: Candidate,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Application]:
     return (
         db.query(Application)
         .filter(
             Application.candidate_id == candidate.id,
         )
-        .order_by(Application.created_at.desc())
+        .order_by(Application.created_at.desc(), Application.id.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
@@ -51,6 +55,8 @@ def get_candidate_applications(
 def get_recruiter_applications(
     db: Session,
     recruiter_id,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Application]:
     return (
         db.query(Application)
@@ -58,7 +64,9 @@ def get_recruiter_applications(
         .filter(
             Job.recruiter_id == recruiter_id,
         )
-        .order_by(Application.created_at.desc())
+        .order_by(Application.created_at.desc(), Application.id.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 

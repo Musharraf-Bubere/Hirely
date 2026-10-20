@@ -112,7 +112,6 @@ def test_parse_resume_success():
         db.commit()
         db.close()
 
-
 def test_parse_resume_failure_marks_resume_failed():
     db = SessionLocal()
 
@@ -161,3 +160,41 @@ def test_parse_resume_failure_marks_resume_failed():
 
         db.commit()
         db.close()
+
+
+def test_resume_parser_service_rejects_empty_text():
+    from unittest.mock import Mock
+    from app.ai.parsers.resume_parser import ResumeParserService
+    import pytest
+
+    parser = ResumeParserService(ai_service=Mock())
+    with pytest.raises(ValueError, match="Resume text is empty or contains only whitespace"):
+        parser.parse("")
+
+    with pytest.raises(ValueError, match="Resume text is empty or contains only whitespace"):
+        parser.parse("   \n\t  ")
+
+
+def test_resume_parser_service_bounds_oversized_text():
+    from unittest.mock import Mock
+    from app.ai.parsers.resume_parser import ResumeParserService, MAX_PROMPT_RESUME_CHARS
+    from app.ai.config import ai_settings
+
+    mock_ai = Mock()
+    mock_ai.generate_structured.return_value = ResumeData(name="Candidate", email="cand@example.com")
+
+    parser = ResumeParserService(ai_service=mock_ai, max_prompt_chars=1000)
+
+    # Supply 5000 characters of text
+    oversized_text = "Experienced Developer with skills. " * 200
+    assert len(oversized_text) > 5000
+
+    result = parser.parse(oversized_text)
+
+    assert result.name == "Candidate"
+    mock_ai.generate_structured.assert_called_once()
+    call_args = mock_ai.generate_structured.call_args
+    prompt = call_args.args[0] if call_args.args else call_args.kwargs["prompt"]
+    # Verify the bounded text is inside prompt and does not exceed limit
+    assert "Experienced Developer" in prompt
+    assert len(prompt) < len(oversized_text)

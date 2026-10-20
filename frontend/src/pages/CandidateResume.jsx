@@ -25,9 +25,9 @@ function CandidateResume() {
 
   async function loadResumes() {
     try {
-      setError('')
-
       const data = await getResumes()
+
+      setError('')
 
       setResumes(data)
     } catch (err) {

@@ -1,8 +1,20 @@
 from pathlib import Path
+import logging
 
+from app.ai.config import ai_settings
 from app.ai.loaders.resume_loader import ResumeLoader
 from app.ai.parsers.schemas import ResumeData
 from app.ai.services.gemini_service import gemini_service
+
+logger = logging.getLogger(__name__)
+
+# Maximum characters allowed for resume text when constructing the parsing prompt.
+# Protects against token/context exhaustion, excessive compute latency, and prompt injection amplification.
+# Note: In CPython, hard execution timeouts cannot safely interrupt synchronous native C-extension
+# parser routines without full multi-process isolation (e.g., Celery / multiprocessing workers).
+# Bounding extracted text length and document structure provides deterministic runtime bounds
+# within the existing application architecture.
+MAX_PROMPT_RESUME_CHARS = 40_000
 
 
 class ResumeParserService:
@@ -10,12 +22,24 @@ class ResumeParserService:
         self, 
         ai_service=gemini_service,
         resume_loader=None,
+        max_prompt_chars: int = MAX_PROMPT_RESUME_CHARS,
     ):
-        
         self.ai_service = ai_service
         self.resume_loader = resume_loader or ResumeLoader()
+        self.max_prompt_chars = max_prompt_chars
 
     def parse(self, resume_text: str) -> ResumeData:
+        if not resume_text or not resume_text.strip():
+            raise ValueError("Resume text is empty or contains only whitespace")
+
+        if len(resume_text) > self.max_prompt_chars:
+            logger.warning(
+                "Resume text (%d chars) exceeded maximum prompt bound (%d chars); truncating safely",
+                len(resume_text),
+                self.max_prompt_chars,
+            )
+            resume_text = resume_text[: self.max_prompt_chars]
+
         prompt = f"""
         Extract structured candidate information from the resume below.
 
@@ -56,6 +80,6 @@ class ResumeParserService:
         resume_text = self.resume_loader.load_text(file_path)
 
         return self.parse(resume_text)
-    
+
 
 resume_parser_service = ResumeParserService()

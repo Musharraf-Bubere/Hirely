@@ -1006,6 +1006,27 @@ ReDoc:
 
     http://127.0.0.1:8000/redoc
 
+## 🐳 Docker Compose (Development Setup)
+
+Hirely provides a containerized development environment with PostgreSQL and the FastAPI backend:
+
+```bash
+# Build and launch PostgreSQL and backend services
+docker compose up -d --build
+
+# Run database migrations inside the backend container
+docker compose exec backend alembic upgrade head
+
+# View service logs
+docker compose logs -f backend
+
+# Stop services
+docker compose down
+```
+
+> **Storage Limitation & Operational Architecture Note**:
+> In the local development container setup, uploaded candidate resumes are stored in the Docker volume `resume_uploads` mounted at `/app/backend/uploads`. This is designed for single-node local development. For multi-instance horizontal cloud scaling, a persistent distributed object store (such as AWS S3 or Google Cloud Storage) is required.
+
 ## 🌐 Frontend
 
 Navigate to the frontend:

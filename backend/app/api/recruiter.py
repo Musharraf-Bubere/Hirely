@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.ai.candidate_intelligence.schemas import (
@@ -90,6 +90,8 @@ def get_recruiter_profile(
     response_model=list[JobResponse],
 )
 def get_my_jobs(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(require_recruiter),
     db: Session = Depends(get_db),
 ):
@@ -108,6 +110,8 @@ def get_my_jobs(
     return get_recruiter_jobs(
         db=db,
         recruiter=recruiter,
+        skip=skip,
+        limit=limit,
     )
 
 

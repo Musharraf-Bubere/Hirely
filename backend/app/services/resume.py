@@ -98,6 +98,8 @@ def get_active_resume(
 def get_resumes(
     db: Session,
     candidate: Candidate,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Resume]:
     return (
         db.query(Resume)
@@ -106,6 +108,9 @@ def get_resumes(
         )
         .order_by(
             Resume.created_at.desc(),
+            Resume.id.desc(),
         )
+        .offset(skip)
+        .limit(limit)
         .all()
     )

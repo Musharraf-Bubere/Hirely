@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -31,6 +31,8 @@ router = APIRouter(
     response_model=list[ApplicationResponse],
 )
 def list_my_applications(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(require_candidate),
     db: Session = Depends(get_db),
 ):
@@ -46,6 +48,8 @@ def list_my_applications(
     return get_candidate_applications(
         db=db,
         candidate=candidate,
+        skip=skip,
+        limit=limit,
     )
 
 
@@ -54,6 +58,8 @@ def list_my_applications(
     response_model=list[ApplicationResponse],
 )
 def list_recruiter_applications(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(require_recruiter),
     db: Session = Depends(get_db),
 ):
@@ -69,6 +75,8 @@ def list_recruiter_applications(
     return get_recruiter_applications(
         db=db,
         recruiter_id=recruiter.id,
+        skip=skip,
+        limit=limit,
     )
 
 

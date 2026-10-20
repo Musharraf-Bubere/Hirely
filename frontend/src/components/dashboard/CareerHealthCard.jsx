@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 function CareerHealthCard({
-  profile,
+  // profile,
   profileCompletion,
   resumeReady,
   activeResume,

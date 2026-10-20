@@ -3,7 +3,7 @@ from uuid import UUID
 
 from app.models.resume import Resume
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_candidate
@@ -19,7 +19,7 @@ from app.services.resume import (
     get_resumes,
     parse_resume,
 )
-from app.schemas.resume import ResumeResponse
+from app.schemas.resume import ResumeResponse, ResumeUploadResponse
 from app.services.resume_skill import sync_resume_skills_to_candidate
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/resumes", tags=["Resumes"])
 
 
-@router.post("")
+@router.post(
+    "",
+    response_model=ResumeUploadResponse,
+)
 def upload_resume(
     resume: UploadFile = File(...),
     candidate=Depends(get_current_candidate),
@@ -48,9 +51,12 @@ def upload_resume(
     )
 
     return {
+        "id": resume_record.id,
         "filename": resume.filename,
         "content_type": resume.content_type,
-        "file_path": file_path,
+        "parsing_status": resume_record.parsing_status,
+        "is_active": resume_record.is_active,
+        "created_at": resume_record.created_at,
     }
 
 
@@ -59,12 +65,16 @@ def upload_resume(
     response_model=list[ResumeResponse],
 )
 def list_resumes(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     candidate=Depends(get_current_candidate),
     db: Session = Depends(get_db),
 ):
     return get_resumes(
         db=db,
         candidate=candidate,
+        skip=skip,
+        limit=limit,
     )
 
 @router.patch(

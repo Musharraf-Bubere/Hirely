@@ -59,6 +59,7 @@ function CandidateDashboard() {
     return () => {
       ignore = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const profileCompletion = useMemo(() => {

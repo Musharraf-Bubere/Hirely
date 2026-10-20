@@ -32,11 +32,15 @@ def create_job(
 
 def get_active_jobs(
     db: Session,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Job]:
     return (
         db.query(Job)
         .filter(Job.is_active.is_(True))
-        .order_by(Job.created_at.desc())
+        .order_by(Job.created_at.desc(), Job.id.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
@@ -58,12 +62,16 @@ def get_active_job(
 def get_recruiter_jobs(
     db: Session,
     recruiter: Recruiter,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Job]:
     return (
         db.query(Job)
         .filter(
             Job.recruiter_id == recruiter.id,
         )
-        .order_by(Job.created_at.desc())
+        .order_by(Job.created_at.desc(), Job.id.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )

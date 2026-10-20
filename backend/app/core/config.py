@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     # Reverse proxy trust configuration: false by default
     trust_proxy_headers: bool = False
 
+    # Database connection pool configuration
+    # Note: pool capacity (db_pool_size + db_max_overflow) is per worker process.
+    # Total connections to PostgreSQL = (db_pool_size + db_max_overflow) * workers.
+    # Must be sized within PostgreSQL's max_connections limit.
+    db_pool_size: int = 10
+    db_max_overflow: int = 20
+    db_pool_timeout: int = 30
+    db_pool_recycle: int = 1800
+    db_pool_pre_ping: bool = True
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: Any) -> list[str]:

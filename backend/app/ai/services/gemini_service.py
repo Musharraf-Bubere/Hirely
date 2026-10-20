@@ -24,6 +24,22 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=BaseModel)
 
 
+def get_token_limit_for_schema(response_schema: type) -> int:
+    """Centralized schema-appropriate max_output_tokens mapping."""
+    name = getattr(response_schema, "__name__", "")
+    mapping = {
+        "ResumeData": ai_settings.resume_parser_max_tokens,
+        "CoverLetterResponse": ai_settings.cover_letter_max_tokens,
+        "CareerCoachResponse": ai_settings.career_coach_max_tokens,
+        "ResumeImprovementAIResult": ai_settings.resume_improvement_max_tokens,
+        "ATSAnalysisResult": ai_settings.ats_analyzer_max_tokens,
+        "JobDescriptionAIResult": ai_settings.job_description_max_tokens,
+        "CandidateEvidenceAIResult": ai_settings.rag_max_tokens,
+        "MatchExplanation": ai_settings.match_explanation_max_tokens,
+    }
+    return mapping.get(name, ai_settings.default_max_output_tokens)
+
+
 class GeminiService:
     def __init__(self):
         self.client = genai.Client(
@@ -182,9 +198,17 @@ class GeminiService:
             self._extract_and_record_usage(response, self.fallback_model, duration_ms)
             return response
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(
+        self,
+        prompt: str,
+        max_output_tokens: int | None = None,
+    ) -> str:
+        tokens = max_output_tokens or ai_settings.default_max_output_tokens
         response = self._generate_with_fallback(
-            prompt=prompt
+            prompt=prompt,
+            config={
+                "max_output_tokens": tokens,
+            },
         )
 
         if not response.text:
@@ -198,12 +222,15 @@ class GeminiService:
         self,
         prompt: str,
         response_schema: type[T],
+        max_output_tokens: int | None = None,
     ) -> T:
+        tokens = max_output_tokens or get_token_limit_for_schema(response_schema)
         response = self._generate_with_fallback(
             prompt=prompt,
             config={
                 "response_mime_type": "application/json",
                 "response_schema": response_schema,
+                "max_output_tokens": tokens,
             },
         )
 

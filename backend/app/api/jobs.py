@@ -94,9 +94,11 @@ def create_new_job(
     response_model=list[JobResponse],
 )
 def list_active_jobs(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    return get_active_jobs(db=db)
+    return get_active_jobs(db=db, skip=skip, limit=limit)
 
 
 # ---------------------------------------------------------

@@ -145,3 +145,37 @@ def test_stream_position_restored_after_success():
     # Confirm stream can be read cleanly from beginning
     read_back = upload_file.file.read(4)
     assert read_back == b"PK\x03\x04"
+
+
+def test_docx_missing_content_types_rejected():
+    # Archive has word/document.xml but missing [Content_Types].xml
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, "w") as zf:
+        zf.writestr("word/document.xml", "<w:document/>")
+    incomplete_docx = buffer.getvalue()
+
+    upload_file = UploadFile(
+        filename="missing_content_types.docx",
+        file=BytesIO(incomplete_docx),
+    )
+
+    with pytest.raises(ValueError, match="archive does not contain a valid Word document structure"):
+        validate_resume_file(upload_file)
+    assert upload_file.file.tell() == 0
+
+
+def test_docx_missing_word_document_rejected():
+    # Archive has [Content_Types].xml but missing word/document.xml
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, "w") as zf:
+        zf.writestr("[Content_Types].xml", "<Types/>")
+    incomplete_docx = buffer.getvalue()
+
+    upload_file = UploadFile(
+        filename="missing_word_doc.docx",
+        file=BytesIO(incomplete_docx),
+    )
+
+    with pytest.raises(ValueError, match="archive does not contain a valid Word document structure"):
+        validate_resume_file(upload_file)
+    assert upload_file.file.tell() == 0

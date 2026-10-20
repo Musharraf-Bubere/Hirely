@@ -18,7 +18,9 @@ def validate_resume_file(file: UploadFile) -> None:
     Guarantees:
     - Rejects empty, oversized, mismatched, or unsupported file formats.
     - PDF: Verifies %PDF- signature.
-    - DOCX: Verifies ZIP signature and confirms Word document structure (word/document.xml).
+    - DOCX: Verifies ZIP signature and confirms Word document structure
+      requiring both [Content_Types].xml and word/document.xml.
+    - Performs in-memory structure inspection without extracting archives to disk.
     - Restores the underlying file stream position to 0 upon completion or error.
     - Emits safe validation errors without leaking server filesystem paths or file content.
     """
@@ -56,14 +58,19 @@ def validate_resume_file(file: UploadFile) -> None:
             try:
                 with zipfile.ZipFile(file.file, "r") as zf:
                     namelist = zf.namelist()
+                    has_content_types = "[Content_Types].xml" in namelist
                     has_word_doc = any(
                         name in namelist for name in ("word/document.xml", "word/document2.xml")
                     )
-                    if not has_word_doc:
+                    if not (has_content_types and has_word_doc):
                         raise ValueError(
                             "Invalid DOCX file: archive does not contain a valid Word document structure"
                         )
-            except zipfile.BadZipFile as exc:
+            except (zipfile.BadZipFile, zipfile.LargeZipFile, EOFError, KeyError) as exc:
+                raise ValueError("Invalid DOCX file: archive is corrupted or malformed") from exc
+            except ValueError:
+                raise
+            except Exception as exc:
                 raise ValueError("Invalid DOCX file: archive is corrupted or malformed") from exc
     finally:
         file.file.seek(0)

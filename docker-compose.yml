@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hirely-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hirely_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-hirely_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirely_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hirely_user} -d ${POSTGRES_DB:-hirely_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: hirely-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hirely_user}:${POSTGRES_PASSWORD:-hirely_dev_password}@db:5432/${POSTGRES_DB:-hirely_dev}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-docker-jwt-secret-key-min-32-chars}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-dev-dummy-gemini-key}
+      ENVIRONMENT: development
+      DEBUG: "true"
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      DB_POOL_SIZE: 10
+      DB_MAX_OVERFLOW: 20
+      DB_POOL_TIMEOUT: 30
+      DB_POOL_RECYCLE: 1800
+      DB_POOL_PRE_PING: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Local volume for uploads during development.
+      # Note: Local volume storage is suitable for single-node development only.
+      # Multi-instance production deployments require persistent shared object storage (e.g., S3/GCS).
+      - resume_uploads:/app/backend/uploads
+
+volumes:
+  postgres_data:
+    driver: local
+  resume_uploads:
+    driver: local

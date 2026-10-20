@@ -36,21 +36,36 @@ async function apiRequest(endpoint, options = {}) {
           : undefined,
   })
 
-  let data = null
-
   const contentType = response.headers.get('content-type')
-
-  if (contentType?.includes('application/json')) {
-    data = await response.json()
-  } else {
-    data = await response.text()
-  }
+  const data = contentType?.includes('application/json')
+    ? await response.json()
+    : await response.text()
 
   if (!response.ok) {
+    // Session expiration handling
+    if (response.status === 401) {
+      const isAuthAttempt =
+        endpoint.includes('/auth/login') || endpoint.includes('/auth/register')
+
+      if (!isAuthAttempt) {
+        localStorage.removeItem('hirely_access_token')
+
+        if (
+          typeof window !== 'undefined' &&
+          window.location &&
+          !window.location.pathname.startsWith('/login')
+        ) {
+          window.location.href = '/login?session_expired=true'
+        }
+      }
+    }
+
     const message =
       typeof data === 'object' && data?.detail
         ? data.detail
-        : 'Something went wrong. Please try again.'
+        : response.status === 401
+          ? 'Your session has expired. Please log in again.'
+          : 'Something went wrong. Please try again.'
 
     throw new Error(message)
   }

@@ -50,6 +50,8 @@ function Login() {
   }
 
   const from = location.state?.from
+  const sessionExpired =
+    new URLSearchParams(location.search).get('session_expired') === 'true'
 
   return (
     <section className="auth-section">
@@ -63,6 +65,12 @@ function Login() {
             Access your candidate or recruiter account.
           </p>
         </div>
+
+        {sessionExpired && !error && (
+          <div className="info-message" role="status">
+            Your session has expired. Please log in again.
+          </div>
+        )}
 
         {error && (
           <div className="error-message" role="alert">

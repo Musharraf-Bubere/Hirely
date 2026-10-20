@@ -93,7 +93,10 @@ def test_candidate_can_upload_resume():
 
         assert data["filename"] == "test_resume.pdf"
         assert data["content_type"] == "application/pdf"
-        assert data["file_path"]
+        assert "file_path" not in data
+        assert "id" in data
+        assert data["parsing_status"] == "PENDING"
+        assert data["is_active"] is False
 
         # ---------------------------------------------------------
         # Verify Resume database record
@@ -108,7 +111,8 @@ def test_candidate_can_upload_resume():
         )
 
         assert resume is not None
-        assert resume.file_path == data["file_path"]
+        assert str(resume.id) == data["id"]
+        assert resume.file_path
         assert resume.parsing_status == "PENDING"
         assert resume.is_active is False
 
