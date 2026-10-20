@@ -132,7 +132,11 @@ def token_for(user):
 # 1. Recruiter can access own job
 # ---------------------------------------------------------
 
-def test_recruiter_can_match_candidates_for_own_job():
+def test_recruiter_can_match_candidates_for_own_job(monkeypatch):
+    monkeypatch.setattr(
+        "app.ai.embeddings.service.EmbeddingService.embed_text",
+        lambda self, text: [1.0, 0.0, 0.0],
+    )
     db = SessionLocal()
 
     recruiter_user = None
@@ -518,7 +522,11 @@ def test_recruiter_cannot_match_candidates_for_another_recruiters_job():
 # 7. Candidate without active resume is skipped
 # ---------------------------------------------------------
 
-def test_recruiter_matching_skips_candidates_without_active_resume():
+def test_recruiter_matching_skips_candidates_without_active_resume(monkeypatch):
+    monkeypatch.setattr(
+        "app.ai.embeddings.service.EmbeddingService.embed_text",
+        lambda self, text: [1.0, 0.0, 0.0],
+    )
     db = SessionLocal()
 
     recruiter_user = None
@@ -600,7 +608,11 @@ def test_recruiter_matching_skips_candidates_without_active_resume():
 # 8. Candidate with pending resume is skipped
 # ---------------------------------------------------------
 
-def test_recruiter_matching_skips_pending_resume():
+def test_recruiter_matching_skips_pending_resume(monkeypatch):
+    monkeypatch.setattr(
+        "app.ai.embeddings.service.EmbeddingService.embed_text",
+        lambda self, text: [1.0, 0.0, 0.0],
+    )
     db = SessionLocal()
 
     recruiter_user = None
