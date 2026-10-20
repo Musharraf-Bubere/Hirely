@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import BaseModel, Field
 
 from app.ai.matching.engine import MatchingEngine
@@ -11,6 +13,15 @@ from app.ai.matching.results import (
 from app.ai.services.match_explanation_service import MatchExplanationService
 from app.ai.services.matching_service import MatchingService
 from app.ai.matching.explanation import MatchExplanationInput
+
+
+class MultiCandidateMatchingInput(BaseModel):
+    candidates: list[MatchingInput]
+
+
+class ExplanationRequest(BaseModel):
+    ranked_matches: list[RankedMatchResult]
+    explanation_limit: int = Field(ge=1)
 
 
 class MatchingOrchestrator:
@@ -159,12 +170,3 @@ class MatchingOrchestrator:
                 )
 
         return results
-
-
-class MultiCandidateMatchingInput(BaseModel):
-    candidates: list[MatchingInput]
-
-
-class ExplanationRequest(BaseModel):
-    ranked_matches: list[RankedMatchResult]
-    explanation_limit: int = Field(ge=1)
