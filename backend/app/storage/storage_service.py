@@ -3,10 +3,13 @@ from uuid import uuid4
 
 from fastapi import UploadFile
 
+from app.core.config import settings
+
 
 class StorageService:
-    def __init__(self, storage_dir: str | Path = "app/storage/resumes"):
-        self.storage_dir = Path(storage_dir)
+    def __init__(self, storage_dir: str | Path | None = None):
+        dir_path = storage_dir if storage_dir is not None else settings.resume_storage_dir
+        self.storage_dir = Path(dir_path)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
 
     def save_resume(self, file: UploadFile) -> str:

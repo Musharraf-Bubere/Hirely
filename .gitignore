@@ -30,3 +30,6 @@ htmlcov/
 
 # Uploaded resume files
 backend/app/storage/resumes/*.pdf
+backend/app/storage/resumes/*.docx
+backend/uploads/
+uploads/

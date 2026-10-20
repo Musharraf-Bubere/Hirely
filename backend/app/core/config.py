@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Reverse proxy trust configuration: false by default
     trust_proxy_headers: bool = False
 
+    # Resume upload storage path (relative to backend root or absolute)
+    resume_storage_dir: str = "app/storage/resumes"
+
     # Database connection pool configuration
     # Note: pool capacity (db_pool_size + db_max_overflow) is allocated per worker process.
     # Formula: maximum connections = (db_pool_size + db_max_overflow) * worker processes

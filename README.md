@@ -1025,12 +1025,15 @@ docker compose down
 ```
 
 > **Storage Limitation & Operational Architecture Note**:
-> In the local development container setup, uploaded candidate resumes are stored in the Docker volume `resume_uploads` mounted at `/app/backend/uploads`. This is designed for single-node local development. For multi-instance horizontal cloud scaling, a persistent distributed object store (such as AWS S3 or Google Cloud Storage) is required.
+> In the local development container setup, uploaded candidate resumes are stored in the Docker volume `resume_uploads` mounted at `/app/backend/uploads` (configured via `RESUME_STORAGE_DIR`). This persists files across container recreation for single-node development. For multi-instance horizontal cloud scaling, a persistent distributed object store (such as AWS S3 or Google Cloud Storage) is required.
 >
 > **Database Connection Pool Budgeting**:
 > Connection pools are configured per worker process. The maximum database connections across the deployment follow the formula:
 > `maximum connections = (pool_size + max_overflow) * worker processes`
 > Default settings (`DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`) across 4 Uvicorn workers consume at most `(5 + 10) * 4 = 60` connections. This fits comfortably within PostgreSQL's default `max_connections = 100`, leaving 40 connections reserved for superuser administration (`superuser_reserved_connections = 3`), Alembic schema migrations, and operational headroom.
+>
+> **Document Processing & In-Process Parser Limitations**:
+> In-process resume parsing relies on Docling's native C/C++ parser (`docling-parse`). In CPython, synchronous native routines cannot be forcibly killed via Python thread or signal timeouts in-process. While pre-parse checks (10 MB upload limit, magic bytes, ZIP structure, 50 MB uncompressed limit, 1,000 entry bounds) and Docling's `max_num_pages=10` constrain memory and token usage, true deterministic execution timeouts and hard denial-of-service resilience require process isolation (e.g. running parser jobs in dedicated Celery worker subprocesses with OS-level SIGKILL timeouts) before accepting untrusted documents at production scale.
 
 ## 🌐 Frontend
 
@@ -1062,7 +1065,11 @@ Hirely uses Pytest for backend testing.
 
 ## Run Non-Integration Tests
 
-    pytest -m "not integration"
+    pytest -m "not integration and not eval_live"
+
+## Run Deterministic AI Evaluation Suite
+
+    python -m app.ai.eval.runner --dataset app/ai/eval/datasets/candidate_evidence_eval_v1.json
 
 ## Run ATS Tests
 
@@ -1070,8 +1077,14 @@ Hirely uses Pytest for backend testing.
     pytest tests/test_ats_analyzer_api.py
     pytest tests/test_ats_analyzer_service.py
 
-## Frontend Production Build
+## Frontend Automated Tests
 
+    cd frontend
+    npm test
+
+## Frontend Lint & Production Build
+
+    npm run lint
     npm run build
 
 Testing focuses on:
