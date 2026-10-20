@@ -33,8 +33,12 @@ class StorageService:
         bucket_name: str | None = None,
         endpoint_url: str | None = None,
     ):
-        chosen_backend = backend or storage_backend or settings.storage_backend
-        self.storage_backend = chosen_backend.lower()
+        chosen_backend = (backend or storage_backend or settings.storage_backend).strip().lower()
+        if chosen_backend not in {"local", "r2"}:
+            raise ValueError(
+                f"Unsupported storage backend: '{chosen_backend}'. Only 'local' and 'r2' are accepted."
+            )
+        self.storage_backend = chosen_backend
         self.backend = self.storage_backend
         dir_path = storage_dir if storage_dir is not None else settings.resume_storage_dir
         self.storage_dir = Path(dir_path)
@@ -43,6 +47,27 @@ class StorageService:
         self._s3_client = s3_client
         self.bucket_name = bucket_name or settings.r2_bucket_name
         self.endpoint_url = endpoint_url or settings.computed_r2_endpoint_url
+
+    @staticmethod
+    def _validate_object_key(file_path_or_key: str | Path) -> str:
+        """
+        Validates an R2 object key.
+        Explicitly rejects keys with leading slashes, backslashes, or unsafe
+        path traversal components before any normalization occurs.
+        """
+        raw_key = str(file_path_or_key)
+        if not raw_key or not raw_key.strip():
+            raise ValueError("Invalid storage object key: key cannot be empty")
+
+        if raw_key.startswith("/") or raw_key.startswith("\\"):
+            raise ValueError("Invalid storage object key: leading slashes are not allowed")
+
+        normalized = raw_key.replace("\\", "/")
+        parts = normalized.split("/")
+        if any(part in {"..", "."} for part in parts) or ".." in normalized:
+            raise ValueError("Invalid storage object key: unsafe traversal components are not allowed")
+
+        return normalized
 
     @property
     def s3_client(self) -> Any:
@@ -134,9 +159,7 @@ class StorageService:
             raise FileNotFoundError(f"Resume file not found: {file_path_or_key}")
 
         # 2. R2 Object retrieval
-        key = str(file_path_or_key).replace("\\", "/").lstrip("/")
-        if ".." in key or key.startswith("/"):
-            raise ValueError("Invalid storage object key")
+        key = self._validate_object_key(file_path_or_key)
 
         raw_ext = Path(key).suffix.lower()
         extension = raw_ext if raw_ext in {".pdf", ".docx"} else ".pdf"
@@ -204,9 +227,10 @@ class StorageService:
         if rel_path.is_file():
             return rel_path.read_bytes()
 
-        key = str(file_path_or_key).replace("\\", "/").lstrip("/")
-        if ".." in key or key.startswith("/"):
-            raise ValueError("Invalid storage object key")
+        if self.storage_backend == "local":
+            raise FileNotFoundError(f"Resume file not found: {file_path_or_key}")
+
+        key = self._validate_object_key(file_path_or_key)
 
         try:
             head = self.s3_client.head_object(Bucket=self.bucket_name, Key=key)
@@ -248,9 +272,7 @@ class StorageService:
         if self.backend == "local":
             return True
 
-        key = str(file_path_or_key).replace("\\", "/").lstrip("/")
-        if ".." in key or key.startswith("/"):
-            raise ValueError("Invalid storage object key")
+        key = self._validate_object_key(file_path_or_key)
 
         try:
             self.s3_client.delete_object(Bucket=self.bucket_name, Key=key)

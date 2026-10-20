@@ -88,6 +88,21 @@ def test_config_r2_storage_backend_custom_endpoint():
     assert cfg.computed_r2_endpoint_url == "https://custom-r2.example.com"
 
 
+def test_config_rejects_unsupported_storage_backend():
+    """Settings must explicitly reject unsupported storage backends like s3 or azure."""
+    for invalid in ["s3", "azure", "gcs", "custom_cloud"]:
+        with pytest.raises(ValidationError) as exc_info:
+            Settings(
+                DATABASE_URL="postgresql+psycopg://user:pass@localhost:5432/hirely",
+                JWT_SECRET_KEY="test_secret_key_for_testing_purposes",
+                GEMINI_API_KEY="test_gemini_key",
+                STORAGE_BACKEND=invalid,
+            )
+        err = str(exc_info.value)
+        assert "Unsupported STORAGE_BACKEND" in err
+        assert "Only 'local' and 'r2' are accepted" in err
+
+
 # ============================================================================
 # 2. StorageService Initialization & R2 Upload Tests
 # ============================================================================
@@ -274,8 +289,15 @@ def test_storage_service_r2_streaming_download_callback_size_limit(tmp_path: Pat
             pass
 
 
-def test_storage_service_rejects_path_traversal_keys(tmp_path: Path):
-    """Keys with path traversal elements are rejected safely."""
+def test_storage_service_rejects_unsupported_backend(tmp_path: Path):
+    """StorageService must explicitly reject backends other than 'local' and 'r2'."""
+    for invalid in ["s3", "azure", "invalid"]:
+        with pytest.raises(ValueError, match="Unsupported storage backend"):
+            StorageService(storage_dir=tmp_path, backend=invalid)
+
+
+def test_storage_service_rejects_unsafe_object_keys(tmp_path: Path):
+    """Leading slashes, backslashes, and traversal components must be rejected explicitly."""
     mock_s3 = MagicMock()
     service = StorageService(
         storage_dir=tmp_path,
@@ -284,9 +306,60 @@ def test_storage_service_rejects_path_traversal_keys(tmp_path: Path):
         bucket_name="my-bucket",
     )
 
-    with pytest.raises(ValueError, match="Invalid storage object key"):
-        with service.open_file_for_reading("../secret.pdf"):
-            pass
+    invalid_keys = [
+        "/resumes/secret.pdf",
+        "//resumes/secret.pdf",
+        "\\resumes\\secret.pdf",
+        "../secret.pdf",
+        "resumes/../../secret.pdf",
+        "resumes/./secret.pdf",
+        "resumes/..\\secret.pdf",
+        "",
+        "   ",
+    ]
+
+    for bad_key in invalid_keys:
+        # Test open_file_for_reading
+        with pytest.raises(ValueError, match="Invalid storage object key"):
+            with service.open_file_for_reading(bad_key):
+                pass
+
+        # Test read_file_bytes
+        with pytest.raises(ValueError, match="Invalid storage object key"):
+            service.read_file_bytes(bad_key)
+
+        # Test delete_file
+        with pytest.raises(ValueError, match="Invalid storage object key"):
+            service.delete_file(bad_key)
+
+
+def test_storage_service_accepts_valid_generated_r2_keys(tmp_path: Path):
+    """Standard generated R2 keys are accepted without error."""
+    mock_s3 = MagicMock()
+    mock_s3.head_object.return_value = {"ContentLength": 100}
+
+    def fake_download(bucket, key, fileobj, Callback=None):
+        fileobj.write(b"content")
+
+    mock_s3.download_fileobj.side_effect = fake_download
+
+    service = StorageService(
+        storage_dir=tmp_path,
+        backend="r2",
+        s3_client=mock_s3,
+        bucket_name="my-bucket",
+    )
+
+    valid_keys = [
+        "resumes/d683bfb2-111d-4599-936f-b4e1165cd84e.pdf",
+        "resumes/00000000-0000-0000-0000-000000000000.docx",
+        Path("resumes/d683bfb2-111d-4599-936f-b4e1165cd84e.pdf"),
+    ]
+
+    for key in valid_keys:
+        with service.open_file_for_reading(key) as temp_p:
+            assert temp_p.exists()
+        assert not temp_p.exists()
 
 
 def test_storage_service_backward_compatibility_existing_local_file(tmp_path: Path):

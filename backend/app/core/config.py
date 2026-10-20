@@ -44,9 +44,24 @@ class Settings(BaseSettings):
             return f"https://{self.r2_account_id}.r2.cloudflarestorage.com"
         return None
 
+    @field_validator("storage_backend")
+    @classmethod
+    def validate_storage_backend(cls, v: str) -> str:
+        backend = (v or "").strip().lower()
+        if backend not in {"local", "r2"}:
+            raise ValueError(
+                f"Unsupported STORAGE_BACKEND: '{v}'. Only 'local' and 'r2' are accepted."
+            )
+        return backend
+
     @model_validator(mode="after")
     def validate_storage_settings(self) -> "Settings":
-        if self.storage_backend.lower() == "r2":
+        backend = (self.storage_backend or "").strip().lower()
+        if backend not in {"local", "r2"}:
+            raise ValueError(
+                f"Unsupported STORAGE_BACKEND: '{self.storage_backend}'. Only 'local' and 'r2' are accepted."
+            )
+        if backend == "r2":
             missing = []
             if not self.r2_access_key_id:
                 missing.append("R2_ACCESS_KEY_ID")
