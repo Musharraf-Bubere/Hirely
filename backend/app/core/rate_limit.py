@@ -1,9 +1,9 @@
 """
-In-memory sliding-window rate limiter for expensive AI endpoints.
+In-memory sliding-window rate limiter for expensive AI and sensitive authentication endpoints.
 
-NOTE: This rate limiter is process-local and designed for single-worker
+NOTE: This rate limiter is process-local and operates in memory for single-worker
 deployments. In multi-worker or distributed production environments,
-a Redis-backed sliding-window rate limiter should be used.
+a shared Redis-backed sliding-window rate limiter should be used.
 """
 
 from collections import defaultdict, deque
@@ -12,9 +12,10 @@ import threading
 import time
 from typing import DefaultDict
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 
 from app.api.dependencies import get_current_user
+from app.core.config import settings
 from app.core.observability import AIFeature, ai_metrics, get_correlation_id
 from app.models.user import User
 
@@ -24,11 +25,18 @@ logger = logging.getLogger(__name__)
 class InMemoryRateLimiter:
     """
     Thread-safe sliding-window in-memory rate limiter using deques.
+    Keeps memory bounded by evicting stale keys when key capacity is reached.
     """
 
-    def __init__(self, max_requests: int = 30, window_seconds: float = 60.0):
+    def __init__(
+        self,
+        max_requests: int = 30,
+        window_seconds: float = 60.0,
+        max_keys: int = 10000,
+    ):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
+        self.max_keys = max_keys
         self._lock = threading.Lock()
         self._requests: DefaultDict[str, deque[float]] = defaultdict(deque)
 
@@ -45,6 +53,15 @@ class InMemoryRateLimiter:
         window_start = now - self.window_seconds
 
         with self._lock:
+            # Bounded key cleanup when capacity limit is reached
+            if len(self._requests) >= self.max_keys and key not in self._requests:
+                stale_keys = [
+                    k for k, q in self._requests.items()
+                    if not q or q[-1] <= window_start
+                ]
+                for k in stale_keys:
+                    del self._requests[k]
+
             timestamps = self._requests[key]
 
             # Evict timestamps older than the sliding window
@@ -70,7 +87,52 @@ class InMemoryRateLimiter:
                 self._requests.clear()
 
 
+# Process-local rate limiter instances
 ai_rate_limiter = InMemoryRateLimiter(max_requests=30, window_seconds=60.0)
+auth_rate_limiter = InMemoryRateLimiter(max_requests=10, window_seconds=60.0)
+
+
+def get_client_ip(request: Request) -> str:
+    """
+    Safely extract client IP for anonymous rate limiting.
+    Does NOT trust arbitrary X-Forwarded-For headers unless explicitly enabled in settings.
+    """
+    if getattr(settings, "trust_proxy_headers", False):
+        forwarded = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+            if client_ip and len(client_ip) <= 64:
+                return client_ip
+
+    if request.client and request.client.host:
+        return request.client.host
+
+    return "unknown_client"
+
+
+def check_auth_rate_limit(request: Request) -> str:
+    """
+    FastAPI dependency enforcing anonymous client sliding-window rate limit on auth endpoints.
+    Uses client IP as key to mitigate brute-force credential stuffing and registration spam.
+    """
+    client_ip = get_client_ip(request)
+    allowed, retry_after = auth_rate_limiter.is_allowed(client_ip)
+    if not allowed:
+        ai_metrics.record_rate_limit_rejection()
+        logger.warning(
+            "Auth request rate limit exceeded",
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.RATE_LIMITER.value,
+                "retry_after": retry_after,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many authentication requests. Please wait before trying again.",
+            headers={"Retry-After": str(retry_after)},
+        )
+    return client_ip
 
 
 def check_ai_rate_limit(

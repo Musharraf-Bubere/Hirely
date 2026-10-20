@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_candidate
+from app.core.rate_limit import check_ai_rate_limit
+from app.ai.services.candidate_preparation_service import candidate_embedding_cache
 from app.db.session import get_db
 from app.storage.file_validation import validate_resume_file
 from app.storage.storage_service import storage_service
@@ -87,11 +89,13 @@ def activate_resume_endpoint(
         )
 
     try:
-        return activate_resume(
+        activated = activate_resume(
             db=db,
             candidate=candidate,
             resume=resume,
         )
+        candidate_embedding_cache.invalidate(candidate.id)
+        return activated
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -105,6 +109,7 @@ def activate_resume_endpoint(
 def parse_resume_endpoint(
     resume_id: UUID,
     candidate=Depends(get_current_candidate),
+    _rate_limit=Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     resume = (
@@ -136,6 +141,8 @@ def parse_resume_endpoint(
             candidate=candidate,
             resume=resume,
         )
+
+        candidate_embedding_cache.invalidate(candidate.id)
 
         return resume
 

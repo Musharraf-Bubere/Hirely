@@ -185,6 +185,7 @@ def apply_to_job(
 def match_candidate_to_job(
     job_id: UUID,
     current_user: User = Depends(require_candidate),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     # -----------------------------------------------------
@@ -303,6 +304,7 @@ def match_candidate_to_job(
     from app.ai.services.candidate_preparation_service import (
         CandidatePreparationInput,
         CandidatePreparationService,
+        candidate_embedding_cache,
     )
     from app.ai.services.job_preparation_service import (
         JobPreparationInput,
@@ -325,6 +327,7 @@ def match_candidate_to_job(
     candidate_preparation_service = CandidatePreparationService(
         representation_builder=candidate_representation_builder,
         embedding_service=embedding_service,
+        cache=candidate_embedding_cache,
     )
 
     job_preparation_service = JobPreparationService(
@@ -395,6 +398,7 @@ def match_candidate_to_job(
 def match_candidates_to_job(
     job_id: UUID,
     current_user: User = Depends(require_recruiter),
+    _rate_limit: User = Depends(check_ai_rate_limit),
     db: Session = Depends(get_db),
 ):
     # -----------------------------------------------------

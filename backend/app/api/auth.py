@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.rate_limit import check_auth_rate_limit
 from app.core.security import create_access_token
 from app.db.session import get_db
 from app.schemas.auth import RegisterRequest, UserResponse, LoginRequest, TokenResponse
@@ -21,6 +22,7 @@ router = APIRouter(
 )
 def register(
     data: RegisterRequest,
+    _rate_limit: str = Depends(check_auth_rate_limit),
     db: Session = Depends(get_db),
 ):
 
@@ -35,11 +37,12 @@ def register(
     return user
 
 @router.post(
-        "/login",
-        response_model=TokenResponse,
+    "/login",
+    response_model=TokenResponse,
 )
 def login(
     data: LoginRequest,
+    _rate_limit: str = Depends(check_auth_rate_limit),
     db: Session = Depends(get_db),
 ):
     user = authenticate_user(

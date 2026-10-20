@@ -9,6 +9,7 @@ from app.ai.parsers.schemas import ResumeData
 from app.ai.services.candidate_preparation_service import (
     CandidatePreparationInput,
     CandidatePreparationService,
+    candidate_embedding_cache,
 )
 from app.ai.services.job_preparation_service import (
     JobPreparationInput,
@@ -301,6 +302,7 @@ class RecruiterMatchingService:
 candidate_preparation_service = CandidatePreparationService(
     representation_builder=candidate_representation_builder,
     embedding_service=embedding_service,
+    cache=candidate_embedding_cache,
 )
 
 job_preparation_service = JobPreparationService(
