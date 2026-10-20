@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -24,6 +25,11 @@ from app.ai.rag.service import (
     candidate_evidence_rag_service,
 )
 from app.api.dependencies import require_recruiter
+from app.core.observability import (
+    AIFeature,
+    classify_exception,
+    get_correlation_id,
+)
 from app.core.rate_limit import check_ai_rate_limit
 from app.db.session import get_db
 from app.models.candidate import Candidate
@@ -33,6 +39,9 @@ from app.models.user import User
 from app.schemas.job import JobResponse
 from app.schemas.recruiter import RecruiterProfileResponse
 from app.services.job import get_recruiter_jobs
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -162,6 +171,17 @@ def analyze_job_description(
     except HTTPException:
         raise
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Job Description Analyzer service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.JOB_DESCRIPTION_ANALYZER.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Job Description Analyzer service is temporarily unavailable.",
@@ -230,6 +250,17 @@ def get_candidate_intelligence(
     except HTTPException:
         raise
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Candidate Intelligence service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.CANDIDATE_INTELLIGENCE.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Candidate Intelligence service is temporarily unavailable.",
@@ -312,6 +343,17 @@ def ask_candidate_evidence(
     except HTTPException:
         raise
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Candidate Resume Evidence Assistant service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.RAG.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Candidate Resume Evidence Assistant is temporarily unavailable.",

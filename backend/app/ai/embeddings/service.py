@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from google import genai
 from google.genai import types
 
 from app.ai.config import ai_settings
+from app.core.observability import AIFeature, observe_ai_operation
 
 
 class EmbeddingService:
@@ -17,23 +20,28 @@ class EmbeddingService:
         if not text.strip():
             raise ValueError("Text cannot be empty")
 
-        response = self.client.models.embed_content(
+        with observe_ai_operation(
+            feature=AIFeature.EMBEDDING.value,
+            operation="embed_text",
             model=self.model,
-            contents=text,
-            config=types.EmbedContentConfig(
-                output_dimensionality=self.output_dimensionality
-            ),
-        )
+        ):
+            response = self.client.models.embed_content(
+                model=self.model,
+                contents=text,
+                config=types.EmbedContentConfig(
+                    output_dimensionality=self.output_dimensionality
+                ),
+            )
 
-        if not response.embeddings:
-            raise RuntimeError("Gemini returned no embeddings")
+            if not response.embeddings:
+                raise RuntimeError("Gemini returned no embeddings")
 
-        embedding = response.embeddings[0]
+            embedding = response.embeddings[0]
 
-        if not embedding.values:
-            raise RuntimeError("Gemini returned an empty embedding")
+            if not embedding.values:
+                raise RuntimeError("Gemini returned an empty embedding")
 
-        return list(embedding.values)
+            return list(embedding.values)
 
 
 embedding_service = EmbeddingService()

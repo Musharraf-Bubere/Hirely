@@ -7257,3 +7257,158 @@ The GitHub Actions workflow (`.github/workflows/backend-ci.yml`) runs on every p
 1. Executes the complete deterministic backend test suite (`pytest -m "not integration and not eval_live"`).
 2. Executes the deterministic AI evaluation runner (`python -m app.ai.eval.runner`).
 3. Blocks merge if any regression gate or security invariant fails.
+
+
+---
+
+# Day 34 — Privacy-Preserving AI Observability Architecture
+
+Day 34 establishes an enterprise-grade, privacy-first observability layer for all AI workloads across Hirely. The design delivers end-to-end request tracing via correlation IDs, structured single-line JSON logging, controlled error taxonomy, thread-safe bounded latency and cost tracking, and fail-safe instrumentation—all implemented using Python standard library primitives with zero external network egress or third-party telemetry dependencies.
+
+```
+       +--------------------------------------------------------------+
+       |               Incoming HTTP Request (X-Request-ID)           |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |                  CorrelationIdMiddleware                     |
+       |  - Validates inbound X-Request-ID (1-64 chars, safe regex)    |
+       |  - Prevents CRLF injection; generates uuid4() fallback       |
+       |  - Sets async ContextVar (isolated across concurrent reqs)   |
+       |  - Injects X-Request-ID into HTTP response headers           |
+       +--------------------------------------------------------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |             observe_ai_operation() Context Manager           |
+       |  - High-precision wall-clock timing (monotonic_ns)           |
+       |  - Fail-safe execution wrapper (never interrupts app logic)  |
+       |  - Records latency, status, feature, and token usage         |
+       +--------------------------------------------------------------+
+                                      |
+                      +---------------+---------------+
+                      |                               |
+                      v                               v
+       +-----------------------------+ +-----------------------------+
+       |  StructuredJsonFormatter    | |     AIMetricsCollector      |
+       |  - Single-line JSON output  | |  - Thread-safe Mutex Locks  |
+       |  - ISO-8601 UTC timestamps  | |  - Bounded deques (N=1000)  |
+       |  - Request correlation ID   | |  - p50, p90, p95 latencies  |
+       |  - PII & Credential Scrub   | |  - Token & Cost Accrual     |
+       |  - Controlled Error Codes   | |  - Rate-limit rejections    |
+       +-----------------------------+ +-----------------------------+
+                      |                               |
+                      +---------------+---------------+
+                                      |
+                                      v
+       +--------------------------------------------------------------+
+       |                 Strict Privacy & Security Rule               |
+       |  - ZERO prompt or model completion text logged or stored     |
+       |  - ZERO candidate raw resumes, emails, or phone numbers      |
+       |  - ZERO API keys, bearer tokens, or secrets recorded         |
+       |  - ZERO external telemetry network calls (Process-Local)     |
+       +--------------------------------------------------------------+
+```
+
+### 1. Request Correlation & Context Propagation
+
+Cross-service request tracing connects incoming HTTP requests, application services, and downstream AI operations:
+
+- **`contextvars` Isolation (`app.core.observability.context`):** Correlation IDs and operational metadata are stored in thread-safe, async-safe Python context variables (`_correlation_id_ctx`, `_feature_ctx`, `_operation_ctx`, `_token_usage_ctx`). Concurrently handled requests in ASGI maintain strict state isolation.
+- **Inbound Header Sanitization:**
+  - Header: `X-Request-ID`
+  - Validation: Length must be between 1 and 64 characters matching regex `^[a-zA-Z0-9_\-\.]+$`.
+  - Anti-Injection: Strips whitespace, Carriage Returns (`\r`), and Line Feeds (`\n`) to prevent HTTP response splitting and log injection attacks.
+  - Safe Fallback: If `X-Request-ID` is missing, blank, or malformed, a cryptographically random `uuid.uuid4().hex` identifier is automatically minted.
+- **Middleware Integration (`app.core.observability.middleware`):** `CorrelationIdMiddleware` sets the context before passing control down the ASGI chain and automatically attaches the normalized correlation ID to the response headers (`response.headers["X-Request-ID"]`).
+
+### 2. Privacy-Preserving Structured JSON Logging
+
+Standardized, machine-parsable logging format allows reliable log ingestion into systems like Datadog, CloudWatch, or ELK without risking sensitive recruitment data leakage:
+
+- **Single-Line Formatting (`StructuredJsonFormatter`):** Emits exactly one valid JSON object per log record, ending in a single newline character. All multi-line exception tracebacks and internal formatting are sanitized.
+- **Enriched Standard Envelope:** Every log line includes:
+  - `timestamp`: ISO-8601 UTC timestamp (`YYYY-MM-DDTHH:MM:SS.mmmmmmZ`).
+  - `level`: Log severity (`INFO`, `WARNING`, `ERROR`, `CRITICAL`).
+  - `logger`: Originating logger name.
+  - `message`: Scrubbed, human-readable log message.
+  - `correlation_id`: Current active request correlation ID (or `None`).
+  - `extra`: Structured operational fields (`feature`, `operation`, `duration_ms`, `status`, `error_category`, `exception_type`, `token_usage`, `chunks_analyzed`, `citations_valid`).
+- **Defense-in-Depth Sanitization (`app.core.observability.sanitizer`):**
+  - Text Scrubbing: Built-in regular expressions scrub accidental exposures of emails, phone numbers, bearer authorization tokens, and API key patterns.
+  - Controlled Exception Classification: `classify_exception()` maps raw exceptions to low-cardinality enum values (`AIErrorCategory`) and exception class names (e.g., `TimeoutError`, `APIConnectionError`). Raw exception strings, stack frames, database connection strings, and model payloads are strictly stripped from production error logs.
+
+### 3. Controlled Observability Schemas & Error Taxonomy
+
+To prevent high-cardinality label explosion in metric stores and ensure uniform telemetry across all AI modules:
+
+- **`AIFeature` Enum:** Fixed vocabulary for AI modules (`rag`, `career_coach`, `cover_letter`, `ats_analyzer`, `resume_improvement`, `job_description_analyzer`, `candidate_intelligence`, `recruiter_matching`, `match_explanation`, `resume_parser`, `embedding`, `rate_limiter`, `gemini_client`, `http_request`).
+- **`AIErrorCategory` Enum:** Standardized error categories (`timeout`, `rate_limit`, `authentication`, `model_unavailable`, `upstream_server_error`, `client_error`, `validation_failed`, `citation_invalid`, `internal_error`, `unknown`).
+- **`AIOperationStatus` Enum:** Operation states (`success`, `error`, `retry`, `fallback`).
+- **`AITokenUsage` Schema:** Tracks prompt tokens, completion tokens, total tokens, and estimated cost in USD.
+- **Token Cost Estimation:** Verified pricing matrix for supported models:
+  - `gemini-2.5-flash`: \$0.075 / 1M prompt tokens, \$0.30 / 1M completion tokens.
+  - `gemini-2.0-flash`: \$0.10 / 1M prompt tokens, \$0.40 / 1M completion tokens.
+  - `gemini-1.5-flash`: \$0.075 / 1M prompt tokens, \$0.30 / 1M completion tokens.
+  - `gemini-embedding-2`: \$0.00 / 1M tokens (free-tier / negligible baseline).
+
+### 4. Thread-Safe In-Memory AI Metrics Collector
+
+Hirely collects real-time operational AI metrics without external dependencies:
+
+- **Concurrency & Thread Safety:** Backed by `threading.Lock()` guarding all counter, gauge, and histogram updates.
+- **Bounded Latency Tracking:** Uses `collections.deque(maxlen=1000)` per feature to store rolling latency durations. This bounds memory consumption to fixed byte limits regardless of traffic volume.
+- **Statistical Summaries:** Computes $p50$, $p90$, and $p95$ percentiles using nearest-rank index calculation over sorted rolling windows.
+- **Tracked Metric Dimensions:**
+  - `ai_operations_total`: Total invocations partitioned by `feature`, `status`, and `error_category`.
+  - `ai_operation_duration_ms`: Rolling latency percentiles ($p50$, $p90$, $p95$) partitioned by `feature`.
+  - `ai_tokens_total`: Accumulated input, output, and total token usage.
+  - `ai_estimated_cost_usd`: Accumulated model operational costs.
+  - `ai_rate_limit_rejections_total`: Sliding-window rate limit violations partitioned by endpoint/feature.
+  - `ai_retries_total`: Transient error retry attempts.
+  - `ai_fallbacks_total`: Failover activations to secondary backup models.
+
+### 5. Fail-Safe Context Manager Observer
+
+The `observe_ai_operation` context manager encapsulates instrumented operations:
+
+- **Clean Developer API:**
+  ```python
+  with observe_ai_operation(AIFeature.RAG, "ask_candidate_evidence") as observer:
+      result = do_rag_query(...)
+      observer.set_rag_metadata(chunks_analyzed=5, citations_valid=True)
+  ```
+- **Zero Business Impact Guarantee:** Every internal metric recording and log formatting call is wrapped in a fail-safe `try...except` block. If observability code encounters an unexpected error (e.g., formatting failure or lock contention), the error is logged to stderr and suppressed; business recruitment workflows are never interrupted or failed due to observability failures.
+- **Automatic Token Usage Extraction:** Seamlessly reads Gemini `usage_metadata` (`prompt_token_count`, `candidates_token_count`) from model responses, records token and cost metrics, and clears ephemeral context variables upon completion.
+
+### 6. Full AI Infrastructure Instrumentation
+
+All Hirely AI endpoints and core services are comprehensively instrumented:
+
+- **Gemini Service (`backend/app/ai/services/gemini_service.py`):**
+  - Sanitized logging on transient retry attempts with attempt counter and exponential backoff delay.
+  - Model fallback tracking when primary model fails with HTTP 503.
+  - Token extraction and recording from response `usage_metadata`.
+- **Embedding Service (`backend/app/ai/embeddings/service.py`):**
+  - Execution timing and status monitoring for all embedding generation calls.
+- **RAG Candidate Evidence Assistant (`backend/app/ai/rag/service.py`):**
+  - Observation of chunk counts, similarity retrieval durations, LLM generation, and code-level citation verification status.
+- **AI Rate Limiter (`backend/app/core/rate_limit.py`):**
+  - Increments `ai_rate_limit_rejections_total` on sliding-window quota breach.
+- **API Exception Handlers (`jobs.py`, `candidate.py`, `recruiter.py`):**
+  - Structured, sanitized error logging enriched with `correlation_id`, `feature`, and low-cardinality `error_category` prior to returning HTTP 502 responses to users.
+
+### 7. Strict Privacy & Security Safeguards
+
+- **Zero Prompt / Completion Logging:** Raw prompts, model outputs, candidate resumes, and recruiter inquiries are strictly excluded from logging statements and metrics payloads. Only operational metadata (duration, token counts, error categories, chunk IDs) is recorded.
+- **PII Scrubbing:** Candidate contact information (email addresses, phone numbers) is proactively scrubbed from logs through defense-in-depth regexes.
+- **Zero Unauthenticated Telemetry Endpoints:** No public or unauthenticated metrics scraping routes are exposed. All metrics remain process-local in memory.
+- **No External Egress:** Telemetry does not transmit data over the network to external SaaS vendors (e.g., PostHog, Langfuse, Datadog agents), satisfying strict compliance and candidate data sovereignty standards.
+
+### 8. Architectural Limitations & Production Evolution
+
+- **Process-Local Scope:** The in-memory metrics collector lives in process memory; metric counters reset when the server restarts, and counters are isolated per Uvicorn/FastAPI worker process.
+- **Horizontal Scaling Path:** For multi-instance, clustered production deployments:
+  - Logs are output to `stdout` in single-line JSON format, allowing standard log collectors (FluentBit, Vector, Promtail) to scrape logs without application code changes.
+  - When distributed cross-process aggregation is required, `AIMetricsCollector` is designed to be cleanly backed by a Redis counter store or exposed via an authenticated `/internal/metrics` endpoint formatted for Prometheus scraping via an isolated private VPC.

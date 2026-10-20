@@ -7,6 +7,7 @@ a Redis-backed sliding-window rate limiter should be used.
 """
 
 from collections import defaultdict, deque
+import logging
 import threading
 import time
 from typing import DefaultDict
@@ -14,7 +15,10 @@ from typing import DefaultDict
 from fastapi import Depends, HTTPException, status
 
 from app.api.dependencies import get_current_user
+from app.core.observability import AIFeature, ai_metrics, get_correlation_id
 from app.models.user import User
+
+logger = logging.getLogger(__name__)
 
 
 class InMemoryRateLimiter:
@@ -74,9 +78,19 @@ def check_ai_rate_limit(
 ) -> User:
     """
     FastAPI dependency enforcing per-user sliding-window rate limit on AI endpoints.
+    Emits privacy-preserving telemetry on rejection without exposing user identifiers.
     """
     allowed, retry_after = ai_rate_limiter.is_allowed(str(current_user.id))
     if not allowed:
+        ai_metrics.record_rate_limit_rejection()
+        logger.warning(
+            "AI request rate limit exceeded",
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.RATE_LIMITER.value,
+                "retry_after": retry_after,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="AI request rate limit exceeded. Please wait before submitting more inquiries.",

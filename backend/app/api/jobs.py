@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -11,7 +12,14 @@ from app.api.dependencies import (
 from app.ai.services.recruiter_matching_service import (
     recruiter_matching_service,
 )
+from app.core.observability import (
+    AIFeature,
+    classify_exception,
+    get_correlation_id,
+)
 from app.core.rate_limit import check_ai_rate_limit
+
+logger = logging.getLogger(__name__)
 
 from app.db.session import get_db
 
@@ -530,6 +538,17 @@ def explain_candidates_for_job(
     except HTTPException:
         raise
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Candidate Match Explanation service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.MATCH_EXPLANATION.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Candidate Match Explanation service is temporarily unavailable.",

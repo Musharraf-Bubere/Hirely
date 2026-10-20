@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -25,6 +27,11 @@ from app.api.dependencies import (
     get_current_candidate,
     require_candidate,
 )
+from app.core.observability import (
+    AIFeature,
+    classify_exception,
+    get_correlation_id,
+)
 from app.core.rate_limit import check_ai_rate_limit
 from app.db.session import get_db
 from app.models.candidate import Candidate
@@ -39,6 +46,9 @@ from app.services.candidate import (
     update_candidate_profile,
 )
 from app.services.job import get_active_job
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -160,6 +170,17 @@ def career_coach(
             request=data,
         )
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Career Coach service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.CAREER_COACH.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Career Coach service is temporarily unavailable.",
@@ -194,6 +215,17 @@ def generate_cover_letter(
             job=job,
         )
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Cover Letter service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.COVER_LETTER.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Cover Letter service is temporarily unavailable.",
@@ -233,6 +265,17 @@ def analyze_resume_ats(
             detail=str(exc),
         ) from exc
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "ATS Analysis service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.ATS_ANALYZER.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="ATS Analysis service is temporarily unavailable.",
@@ -274,6 +317,17 @@ def improve_resume(
     except HTTPException:
         raise
     except Exception as exc:
+        category, exc_name = classify_exception(exc)
+        logger.error(
+            "Resume Improvement service failure: %s",
+            exc_name,
+            extra={
+                "correlation_id": get_correlation_id(),
+                "feature": AIFeature.RESUME_IMPROVEMENT.value,
+                "error_category": category.value,
+                "exception_type": exc_name,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Resume Improvement service is temporarily unavailable.",
