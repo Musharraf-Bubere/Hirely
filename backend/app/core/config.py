@@ -28,11 +28,13 @@ class Settings(BaseSettings):
     trust_proxy_headers: bool = False
 
     # Database connection pool configuration
-    # Note: pool capacity (db_pool_size + db_max_overflow) is per worker process.
-    # Total connections to PostgreSQL = (db_pool_size + db_max_overflow) * workers.
-    # Must be sized within PostgreSQL's max_connections limit.
-    db_pool_size: int = 10
-    db_max_overflow: int = 20
+    # Note: pool capacity (db_pool_size + db_max_overflow) is allocated per worker process.
+    # Formula: maximum connections = (db_pool_size + db_max_overflow) * worker processes
+    # Default: (5 + 10) * 4 Uvicorn workers = 60 connections, comfortably within PostgreSQL's
+    # default max_connections (100) and leaving 40 connections for superuser reservations (3),
+    # Alembic migrations, and operational buffers.
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
     db_pool_timeout: int = 30
     db_pool_recycle: int = 1800
     db_pool_pre_ping: bool = True

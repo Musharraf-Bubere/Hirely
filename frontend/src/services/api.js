@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  import.meta.env?.VITE_API_BASE_URL || 'http://localhost:8000'
 
 async function apiRequest(endpoint, options = {}) {
   const {
@@ -45,17 +45,27 @@ async function apiRequest(endpoint, options = {}) {
     // Session expiration handling
     if (response.status === 401) {
       const isAuthAttempt =
-        endpoint.includes('/auth/login') || endpoint.includes('/auth/register')
+        endpoint.startsWith('/auth/login') ||
+        endpoint.startsWith('/auth/register') ||
+        endpoint === '/auth/login' ||
+        endpoint === '/auth/register'
 
       if (!isAuthAttempt) {
         localStorage.removeItem('hirely_access_token')
 
-        if (
-          typeof window !== 'undefined' &&
-          window.location &&
-          !window.location.pathname.startsWith('/login')
-        ) {
-          window.location.href = '/login?session_expired=true'
+        if (typeof window !== 'undefined') {
+          try {
+            window.dispatchEvent(new CustomEvent('auth:session_expired'))
+          } catch {
+            window.dispatchEvent(new Event('auth:session_expired'))
+          }
+
+          if (
+            window.location &&
+            !window.location.pathname.startsWith('/login')
+          ) {
+            window.location.href = '/login?session_expired=true'
+          }
         }
       }
     }
@@ -67,7 +77,10 @@ async function apiRequest(endpoint, options = {}) {
           ? 'Your session has expired. Please log in again.'
           : 'Something went wrong. Please try again.'
 
-    throw new Error(message)
+    const error = new Error(message)
+    error.status = response.status
+    error.data = data
+    throw error
   }
 
   return data

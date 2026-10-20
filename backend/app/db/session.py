@@ -15,11 +15,15 @@ def create_database_engine(database_url: str | None = None) -> Engine:
     Operational notes:
     - Queue pool arguments (pool_size, max_overflow, pool_timeout, pool_recycle) are applied
       to production RDBMS drivers such as PostgreSQL.
-    - SQLite engines (used in lightweight tests or embedded modes) do not support QueuePool
+    - SQLite engines (used in tests or embedded modes) do not support QueuePool
       and are excluded from these arguments to avoid configuration errors.
-    - Sizing: Total active database connections across the deployment equals:
-      (pool_size + max_overflow) * number_of_worker_processes.
-      Ensure this product does not exceed PostgreSQL's configured `max_connections` (minus superuser reservations).
+    - Connection budgeting formula:
+      maximum connections = (pool_size + max_overflow) * worker processes
+      With default pool_size=5 and max_overflow=10 across 4 Uvicorn workers:
+      (5 + 10) * 4 = 60 maximum application connections.
+      This fits comfortably within PostgreSQL's default max_connections=100 limit,
+      leaving 40 connections for superuser reservations (default 3), Alembic migrations,
+      and operational headroom.
     """
     url = database_url or settings.database_url
     engine_kwargs: dict[str, Any] = {

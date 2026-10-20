@@ -135,3 +135,24 @@ def test_resume_loader_corrupted_document_raises_value_error():
             loader.load(Path("corrupt.pdf"))
     finally:
         resume_loader_module.DoclingLoader = original_loader
+
+
+def test_resume_loader_configures_page_limit_on_docling():
+    mock_docling_loader = Mock()
+    mock_docling_loader.load.return_value = [Mock(page_content="Valid page")]
+
+    loader = ResumeLoader(max_documents=7)
+
+    import app.ai.loaders.resume_loader as resume_loader_module
+    original_loader = resume_loader_module.DoclingLoader
+    mock_constructor = Mock(return_value=mock_docling_loader)
+    resume_loader_module.DoclingLoader = mock_constructor
+
+    try:
+        loader.load(Path("test_resume.pdf"))
+        mock_constructor.assert_called_once_with(
+            file_path="test_resume.pdf",
+            convert_kwargs={"max_num_pages": 7},
+        )
+    finally:
+        resume_loader_module.DoclingLoader = original_loader

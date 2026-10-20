@@ -5,7 +5,9 @@ from fastapi import UploadFile
 
 
 ALLOWED_RESUME_EXTENSIONS = {".pdf", ".docx"}
-MAX_RESUME_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_RESUME_SIZE = 10 * 1024 * 1024  # 10 MB upload limit
+MAX_DOCX_UNCOMPRESSED_SIZE = 50 * 1024 * 1024  # 50 MB safe decompression limit
+MAX_DOCX_ENTRIES = 1_000  # Maximum zip archive members
 PDF_MAGIC_BYTES = b"%PDF-"
 ZIP_MAGIC_BYTES = b"PK\x03\x04"
 
@@ -20,6 +22,8 @@ def validate_resume_file(file: UploadFile) -> None:
     - PDF: Verifies %PDF- signature.
     - DOCX: Verifies ZIP signature and confirms Word document structure
       requiring both [Content_Types].xml and word/document.xml.
+    - Pre-parse DOS defense: Bounds DOCX uncompressed size (<= 50 MB) and entry count (<= 1,000)
+      to prevent zip-bomb decompression attacks before document extraction.
     - Performs in-memory structure inspection without extracting archives to disk.
     - Restores the underlying file stream position to 0 upon completion or error.
     - Emits safe validation errors without leaking server filesystem paths or file content.
@@ -57,7 +61,19 @@ def validate_resume_file(file: UploadFile) -> None:
             file.file.seek(0)
             try:
                 with zipfile.ZipFile(file.file, "r") as zf:
-                    namelist = zf.namelist()
+                    infolist = zf.infolist()
+                    if len(infolist) > MAX_DOCX_ENTRIES:
+                        raise ValueError(
+                            "Invalid DOCX file: archive contains too many files"
+                        )
+
+                    total_uncompressed = sum(info.file_size for info in infolist)
+                    if total_uncompressed > MAX_DOCX_UNCOMPRESSED_SIZE:
+                        raise ValueError(
+                            "Invalid DOCX file: archive contents exceed safe decompression limits"
+                        )
+
+                    namelist = [info.filename for info in infolist]
                     has_content_types = "[Content_Types].xml" in namelist
                     has_word_doc = any(
                         name in namelist for name in ("word/document.xml", "word/document2.xml")

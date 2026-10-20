@@ -1026,6 +1026,11 @@ docker compose down
 
 > **Storage Limitation & Operational Architecture Note**:
 > In the local development container setup, uploaded candidate resumes are stored in the Docker volume `resume_uploads` mounted at `/app/backend/uploads`. This is designed for single-node local development. For multi-instance horizontal cloud scaling, a persistent distributed object store (such as AWS S3 or Google Cloud Storage) is required.
+>
+> **Database Connection Pool Budgeting**:
+> Connection pools are configured per worker process. The maximum database connections across the deployment follow the formula:
+> `maximum connections = (pool_size + max_overflow) * worker processes`
+> Default settings (`DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`) across 4 Uvicorn workers consume at most `(5 + 10) * 4 = 60` connections. This fits comfortably within PostgreSQL's default `max_connections = 100`, leaving 40 connections reserved for superuser administration (`superuser_reserved_connections = 3`), Alembic schema migrations, and operational headroom.
 
 ## 🌐 Frontend
 

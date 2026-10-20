@@ -26,15 +26,33 @@ export function AuthProvider({ children }) {
       try {
         const currentUser = await getCurrentUser()
         setUser(currentUser)
-      } catch {
-        logoutUser()
-        setUser(null)
+      } catch (err) {
+        // Only clear authentication state if the backend explicitly rejected the token (401).
+        // Transient network errors or 5xx server issues should not wipe saved credentials.
+        if (err?.status === 401) {
+          logoutUser()
+          setUser(null)
+        }
       } finally {
         setLoading(false)
       }
     }
 
     loadUser()
+  }, [])
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      logoutUser()
+      setUser(null)
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:session_expired', handleSessionExpired)
+      return () => {
+        window.removeEventListener('auth:session_expired', handleSessionExpired)
+      }
+    }
   }, [])
 
   async function login(credentials) {

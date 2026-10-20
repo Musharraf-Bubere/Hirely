@@ -10,10 +10,12 @@ logger = logging.getLogger(__name__)
 
 # Maximum characters allowed for resume text when constructing the parsing prompt.
 # Protects against token/context exhaustion, excessive compute latency, and prompt injection amplification.
-# Note: In CPython, hard execution timeouts cannot safely interrupt synchronous native C-extension
-# parser routines without full multi-process isolation (e.g., Celery / multiprocessing workers).
-# Bounding extracted text length and document structure provides deterministic runtime bounds
-# within the existing application architecture.
+# Operational & Architecture Note:
+# In CPython, hard execution timeouts cannot safely interrupt synchronous native C-extension
+# parser routines within the same process. While pre-parse checks, page bounds, and text length limits
+# constrain memory and LLM token usage, true deterministic execution timeouts and complete denial-of-service
+# resilience require process isolation (e.g., executing document parsing in dedicated Celery / multiprocessing
+# worker processes with OS-level SIGKILL timeouts), which is identified as a production requirement.
 MAX_PROMPT_RESUME_CHARS = 40_000
 
 

@@ -179,3 +179,41 @@ def test_docx_missing_word_document_rejected():
     with pytest.raises(ValueError, match="archive does not contain a valid Word document structure"):
         validate_resume_file(upload_file)
     assert upload_file.file.tell() == 0
+
+
+def test_docx_exceeds_uncompressed_size_limit_rejected():
+    from unittest.mock import patch
+    docx_bytes = _create_minimal_docx()
+    upload_file = UploadFile(
+        filename="huge.docx",
+        file=BytesIO(docx_bytes),
+    )
+
+    with patch("zipfile.ZipFile.infolist") as mock_infolist:
+        info1 = zipfile.ZipInfo("[Content_Types].xml")
+        info1.file_size = 30 * 1024 * 1024
+        info2 = zipfile.ZipInfo("word/document.xml")
+        info2.file_size = 30 * 1024 * 1024
+        mock_infolist.return_value = [info1, info2]
+
+        with pytest.raises(ValueError, match="archive contents exceed safe decompression limits"):
+            validate_resume_file(upload_file)
+    assert upload_file.file.tell() == 0
+
+
+def test_docx_exceeds_entry_count_limit_rejected():
+    from unittest.mock import patch
+    docx_bytes = _create_minimal_docx()
+    upload_file = UploadFile(
+        filename="many_files.docx",
+        file=BytesIO(docx_bytes),
+    )
+
+    with patch("zipfile.ZipFile.infolist") as mock_infolist:
+        mock_infolist.return_value = [
+            zipfile.ZipInfo(f"file_{i}.txt") for i in range(1001)
+        ]
+
+        with pytest.raises(ValueError, match="archive contains too many files"):
+            validate_resume_file(upload_file)
+    assert upload_file.file.tell() == 0

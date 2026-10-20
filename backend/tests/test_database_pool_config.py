@@ -11,11 +11,19 @@ def test_database_pool_settings_defaults():
         jwt_secret_key="test-secret-key-at-least-32-chars-long",
         _env_file=None,
     )
-    assert settings.db_pool_size == 10
-    assert settings.db_max_overflow == 20
+    assert settings.db_pool_size == 5
+    assert settings.db_max_overflow == 10
     assert settings.db_pool_timeout == 30
     assert settings.db_pool_recycle == 1800
     assert settings.db_pool_pre_ping is True
+
+    # Budget formula verification: (pool_size + max_overflow) * worker_processes
+    workers = 4
+    total_app_connections = (settings.db_pool_size + settings.db_max_overflow) * workers
+    assert total_app_connections == 60
+    # Must leave at least 15% headroom under standard PostgreSQL max_connections (100)
+    # for superuser reserved connections (3), Alembic migrations, and admin sessions
+    assert total_app_connections <= 80
 
 
 def test_sqlite_engine_compatibility():
@@ -35,7 +43,7 @@ def test_postgresql_engine_pool_arguments():
         args, kwargs = mock_create_engine.call_args
         assert args[0] == "postgresql+psycopg://user:pass@localhost:5432/hirely"
         assert kwargs["pool_pre_ping"] is True
-        assert kwargs["pool_size"] == 10
-        assert kwargs["max_overflow"] == 20
+        assert kwargs["pool_size"] == 5
+        assert kwargs["max_overflow"] == 10
         assert kwargs["pool_timeout"] == 30
         assert kwargs["pool_recycle"] == 1800

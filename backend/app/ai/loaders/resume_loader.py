@@ -12,6 +12,19 @@ MAX_EXTRACTED_TEXT_CHARS = 50_000
 
 
 class ResumeLoader:
+    """
+    Document loader for extracting text from resume files (PDF and DOCX) via Docling.
+
+    Operational & Architecture Note:
+    Docling's document conversion pipeline relies on synchronous native C/C++ libraries (docling-parse).
+    In CPython, synchronous native routines cannot be safely interrupted by Python signals or thread
+    timeouts within the same process. While pre-parse validation, max_num_pages, and character bounds
+    constrain memory and LLM prompt consumption, true deterministic execution timeouts and hard denial-of-service
+    resilience require process isolation (e.g., executing parser jobs in separate subprocesses or dedicated
+    Celery task workers with OS-level SIGKILL timeouts). Process isolation is identified as a required
+    architecture enhancement for distributed multi-instance production deployments.
+    """
+
     def __init__(
         self,
         max_documents: int = MAX_RESUME_DOCUMENTS,
@@ -22,12 +35,20 @@ class ResumeLoader:
 
     def load(self, file_path: str | Path) -> list[Document]:
         try:
-            loader = DoclingLoader(file_path=str(file_path))
+            # Instruct Docling to bound page processing up to max_documents during conversion
+            loader = DoclingLoader(
+                file_path=str(file_path),
+                convert_kwargs={"max_num_pages": self.max_documents},
+            )
             documents = loader.load()
         except FileNotFoundError:
             raise
         except Exception as exc:
-            logger.warning("DoclingLoader failed to parse resume %s: %s", file_path, exc)
+            # Privacy-preserving logging: do not log file contents or raw path
+            logger.warning(
+                "DoclingLoader failed to parse resume document: %s",
+                type(exc).__name__,
+            )
             raise ValueError("Unable to read resume document: malformed or corrupted file") from exc
 
         if not documents:
@@ -35,8 +56,7 @@ class ResumeLoader:
 
         if len(documents) > self.max_documents:
             logger.warning(
-                "Resume %s exceeded maximum allowed document count (%d > %d); truncating to %d",
-                file_path,
+                "Resume exceeded maximum allowed document count (%d > %d); truncating to %d",
                 len(documents),
                 self.max_documents,
                 self.max_documents,

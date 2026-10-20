@@ -50,8 +50,10 @@ function Login() {
   }
 
   const from = location.state?.from
+  const searchParams = new URLSearchParams(location.search)
   const sessionExpired =
-    new URLSearchParams(location.search).get('session_expired') === 'true'
+    searchParams.get('session_expired') === 'true' ||
+    searchParams.get('expired') === 'true'
 
   return (
     <section className="auth-section">
