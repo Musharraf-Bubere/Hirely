@@ -1,149 +1,142 @@
-# Hirely
+# Hirely — Project Overview
 
-> **Version:** 0.1.0 (Planning Phase)  
-> **Project Type:** AI-Powered Career Suite  
-> **Status:** In Planning
-
----
-
-# Elevator Pitch
-
-**Hirely** is an AI-powered career platform designed to simplify and enhance the job application process. It assists job seekers by providing intelligent resume analysis, resume scoring, personalized cover letter generation, and AI-driven career guidance within a single platform. By leveraging modern Artificial Intelligence and Large Language Models (LLMs), Hirely empowers users to create stronger job applications, improve their professional profiles, and prepare confidently for career opportunities.
+> **Version:** 0.2.0 (Active Development)<br>
+> **Project Type:** Dual-Sided AI Recruitment & Career Intelligence Platform<br>
+> **Status:** Core Platform & AI Intelligence Implemented<br>
+> [← Back to Main Documentation (README.md)](../README.md) • [View Software Design Document (SDD)](./03_Software_Design_Document.md) • [View Docker Guide](./DOCKER.md)
 
 ---
 
-# Project Description
+# 🚀 Executive Summary & Elevator Pitch
 
-Hirely is an AI-powered career platform developed to assist individuals throughout the job application journey. The platform combines multiple intelligent services into a unified application, enabling users to create professional resumes, evaluate resume quality, generate personalized cover letters, and receive AI-powered career guidance.
+**Hirely** is a startup-grade, dual-sided AI recruitment platform designed to connect **candidates** and **recruiters** through intelligent job discovery, structured application tracking, candidate-facing career assistance, recruiter talent intelligence, and a grounded AI matching engine.
 
-The primary objective of Hirely is to simplify the hiring preparation process by providing smart, accessible, and personalized career assistance. Instead of relying on multiple websites and tools, users can access all essential career services from a single platform.
-
-Hirely leverages the capabilities of Large Language Models (LLMs) to understand user inputs, analyze career-related documents, and generate meaningful, context-aware responses. The platform is designed with a modular architecture, allowing each feature to function independently while seamlessly integrating into a complete AI-powered career ecosystem.
-
-The project emphasizes scalability, maintainability, and user experience by following modern software engineering principles, clean architecture, modular development practices, and comprehensive documentation. Although the initial release focuses on core career assistance features, the architecture is designed to support future enhancements such as interview simulation, ATS optimization, job matching, LinkedIn profile analysis, and personalized career roadmaps.
-
-Ultimately, Hirely aims to become a reliable AI career companion that empowers users to build stronger professional profiles, make informed career decisions, and improve their chances of securing meaningful employment.
+By combining modern software engineering principles with Google Gemini models, Hirely delivers explainable, evidence-grounded AI capabilities while keeping critical business logic, security permissions, and numerical scoring under strict deterministic backend control.
 
 ---
 
-# Problem Statement
+# 💡 Problem Statement
 
-The job application process has become increasingly competitive and time-consuming. Job seekers are expected to prepare high-quality resumes, write personalized cover letters, optimize their profiles for Applicant Tracking Systems (ATS), and perform well in interviews. However, many candidates struggle with these tasks due to limited experience, lack of professional guidance, or the high cost of career coaching services.
+Traditional recruitment workflows are fragmented and introduce substantial friction for both job seekers and hiring teams.
 
-Existing online tools often focus on solving a single problem, such as resume building or cover letter generation, requiring users to switch between multiple platforms to complete the application process. This fragmented experience reduces productivity and makes it difficult for users to receive consistent, personalized career guidance.
+### 👤 Candidate Challenges
+- **Blind Applications:** Candidates submit resumes without knowing whether their skills and experience genuinely align with role expectations.
+- **ATS Black Boxes:** Job seekers struggle to identify why resumes fail automated screening or which specific keywords and qualifications are absent.
+- **Application Fatigue:** Tailoring resumes and writing job-specific cover letters manually for dozens of positions is time-consuming and error-prone.
+- **Lack of Guidance:** Professional career coaching is expensive, leaving applicants without structured feedback on interview readiness or skill gaps.
 
-Additionally, many applicants do not receive meaningful feedback on their resumes before applying for jobs. As a result, resumes may fail ATS screening, miss important job-specific keywords, or fail to effectively highlight relevant skills and experience. This decreases the likelihood of being shortlisted for interviews.
-
-There is a growing need for an intelligent, unified platform that assists users throughout the entire career preparation process. Such a platform should provide personalized feedback, automate repetitive tasks, and offer AI-driven insights that help users make informed career decisions and improve the quality of their job applications.
-
----
-
-# Proposed Solution
-
-Hirely addresses the challenges of modern job seekers by providing a unified AI-powered career platform that streamlines the entire job application process. Instead of relying on multiple independent tools, users can access intelligent career services through a single, integrated application.
-
-The platform leverages the capabilities of Large Language Models (LLMs) to analyze resumes, compare resumes with job descriptions, generate personalized cover letters, and provide interactive career guidance. By combining these services into one ecosystem, Hirely reduces the time and effort required to prepare professional job applications while improving the overall quality of user submissions.
-
-The solution is designed around a modular architecture, allowing each service to operate independently while sharing a common backend infrastructure. This approach improves scalability, maintainability, and future extensibility, enabling new AI-powered career services to be added without significant architectural changes.
-
-Rather than replacing human decision-making, Hirely is intended to function as an intelligent career assistant that helps users make better decisions, improve their professional profiles, and increase their confidence throughout the hiring process.
-
-The initial version of Hirely focuses on four core services:
-
-- Resume Checker
-- Resume Scorer
-- Cover Letter Generator
-- AI Career Coach
-
-The platform is designed to evolve over time by incorporating advanced features such as ATS optimization, interview simulation, LinkedIn profile analysis, job matching, skill gap analysis, and personalized career roadmaps.
+### 🏢 Recruiter Challenges
+- **Application Overload:** Recruiters receive hundreds of resumes per opening, making manual review slow, exhausting, and inconsistent.
+- **Unstructured Screening:** Manually cross-referencing candidate experience against complex job requirements is inefficient.
+- **Hallucinated or Unverified Claims:** Keyword matches often fail to reflect depth of experience or contextual competency.
+- **Inconsistent Decision-Making:** Comparing candidate pools objectively without clear scoring criteria or grounded citations leads to hiring bias and missed talent.
 
 ---
 
-# Project Objectives
+# 💡 The Hirely Solution
 
-The primary objective of Hirely is to develop an intelligent AI-powered career platform that simplifies and enhances the job application process through personalized career assistance and automation.
+Hirely bridges candidates and recruiters within a single unified platform. Instead of operating as disjointed tools, Hirely coordinates the entire recruitment lifecycle through a hybrid deterministic and AI architecture:
 
-The project aims to achieve the following objectives:
-
-- Develop a unified platform that provides multiple AI-powered career services within a single application.
-- Assist users in creating high-quality, ATS-friendly resumes through intelligent analysis and feedback.
-- Evaluate resumes against job descriptions and provide actionable recommendations to improve job compatibility.
-- Generate personalized and professional cover letters based on user profiles and job requirements.
-- Provide AI-driven career guidance that helps users make informed decisions throughout their professional journey.
-- Design a scalable and modular software architecture that supports future feature expansion.
-- Follow modern software engineering principles, including clean architecture, modular development, documentation, testing, and version control.
-- Deliver a user-friendly application that improves productivity, reduces manual effort, and enhances the overall job application experience.
-
-The long-term vision of Hirely is to evolve into a comprehensive AI career ecosystem that supports users from resume creation to interview preparation and continuous professional development.
-
----
-
-# Expected Outcome
-
-Upon successful completion, Hirely is expected to provide an intelligent and reliable AI-powered career platform that simplifies the job application process for its users. The platform will enable individuals to create stronger resumes, generate personalized cover letters, receive AI-powered career guidance, and evaluate their resumes against job descriptions with greater confidence.
-
-The expected outcomes of the project include:
-
-- A unified AI-powered platform that integrates multiple career assistance services.
-- Improved resume quality through intelligent analysis and personalized recommendations.
-- Faster and more effective cover letter creation tailored to specific job opportunities.
-- Enhanced career decision-making through AI-powered guidance and insights.
-- Reduced time and effort required to prepare professional job applications.
-- A scalable and modular software architecture that supports future enhancements and new AI services.
-- A portfolio-quality application demonstrating modern software engineering practices, clean architecture, and Generative AI integration.
-
-Ultimately, Hirely aims to improve the overall job application experience while providing users with practical AI tools that increase their confidence and readiness for career opportunities.
+```
+                            ┌────────────────────────┐
+                            │    HIRELY PLATFORM     │
+                            └───────────┬────────────┘
+                                        │
+                 ┌──────────────────────┴──────────────────────┐
+                 │                                             │
+                 ▼                                             ▼
+       👤 CANDIDATE EXPERIENCE                       🏢 RECRUITER EXPERIENCE
+  ├── Profile & Skills Management               ├── Recruiter & Company Profile
+  ├── Multi-Resume Storage & Docling Parsing    ├── Job Posting & Lifecycle Management
+  ├── Active Resume Selection                   ├── Application Review Pipeline
+  ├── Job Discovery & Direct Applications       ├── AI Job Description Analyzer
+  ├── AI Resume ATS Analyzer (Hybrid)           ├── Recruiter Candidate Matching
+  ├── AI Resume Improvement Assistant           ├── Candidate Intelligence & Search
+  ├── AI Cover Letter Generator                 └── Candidate Evidence Assistant (RAG)
+  └── AI Career Coach
+                 │                                             │
+                 └──────────────────────┬──────────────────────┘
+                                        │
+                                        ▼
+                         🤖 CORE INTELLIGENCE LAYER
+             ├── Deterministic Skill Scoring & Weight Calculations
+             ├── Semantic Embeddings & Cosine Similarity
+             ├── Evidence-Grounded Match Explanations
+             ├── Privacy-Preserving Structured Observability
+             └── AI Security Guardrails & Rate Limiting
+```
 
 ---
 
-# Project Scope
+# 🎯 Current Implementation Status
 
-The initial version of Hirely focuses on delivering a robust and modular AI-powered career platform that addresses the essential needs of modern job seekers. The project emphasizes quality, scalability, and maintainability by implementing core career assistance services through a clean and extensible software architecture.
+Unlike early conceptual drafts, Hirely has implemented its full-stack core across backend services, database migrations, AI pipelines, and frontend interfaces:
 
-## In Scope (Version 1.0)
+### 1. 🔐 Authentication, Authorization & Security
+- Argon2 password hashing and JWT bearer authentication.
+- Strict Role-Based Access Control (RBAC) isolating Candidate and Recruiter domains.
+- In-memory sliding-window rate limiting protecting authentication routes (per IP) and AI endpoints (per user).
+- Multi-layer upload security: magic byte inspection, ZIP-bomb protection, file size capping (10 MB), and uncompressed bounds (50 MB).
 
-The following features are included in the first release of Hirely:
+### 2. 👤 Candidate Platform
+- Profile management (headline, bio, location, contact details).
+- Candidate skill repository with CRUD capabilities.
+- Multi-resume management supporting PDF uploads, Docling structured text extraction, active resume selection, and skill synchronization.
+- Real-time job browsing, filtering, and single-click job applications.
+- **AI ATS Analyzer:** Hybrid scoring evaluating required skill coverage (45%), preferred skill coverage (15%), semantic relevance (30%), and resume completeness (10%).
+- **AI Resume Improvement:** Identifies missing competencies, provides structured bullet rewrite recommendations, and suggests actionable enhancements.
+- **AI Cover Letter Generator:** Drafts targeted, context-aware cover letters grounded strictly in candidate resume experience and target job requirements.
+- **AI Career Coach:** Contextual career mentoring and skill growth guidance.
 
-- Resume Checker
-- Resume Scorer
-- Cover Letter Generator
-- AI Career Coach
-- Modern web-based user interface
-- RESTful API backend
-- PDF resume processing
-- Prompt-engineered AI responses
-- Modular software architecture
-- Comprehensive project documentation
-- Unit testing for core functionalities
-- Git-based version control
-- Cloud-ready deployment architecture
+### 3. 🏢 Recruiter Platform
+- Recruiter profile management linked with dedicated company profiles.
+- Job posting creation, updating, and lifecycle tracking.
+- Application review pipeline with full status lifecycle (`applied` $\to$ `shortlisted` $\to$ `interview` $\to$ `hired` / `rejected`).
+- **AI Job Description Analyzer:** Audits job postings for role clarity, structural completeness, missing expectations, and actionable improvements.
+- **Recruiter Candidate Matching Engine:** Calculates deterministic score breakdowns and semantic relevance to rank applicant pools for specific openings.
+- **Candidate Match Explanation:** Produces grounded qualitative summaries detailing candidate strengths, weaknesses, and hiring recommendations.
+- **Candidate Intelligence:** Semantic search and filtering across applicants.
+- **Candidate Evidence Assistant (RAG):** Interactive Retrieval-Augmented Generation assistant allowing recruiters to ask specific factual questions about a candidate's resume, returning answers supported by direct citations and quote verification.
 
-## Out of Scope (Future Versions)
-
-The following features are planned for future releases and are intentionally excluded from Version 1.0:
-
-- Recruiter and HR dashboard
-- User authentication and profile management
-- Job portal integration
-- LinkedIn profile optimization
-- AI Interview Simulator
-- Skill Gap Analysis
-- Career Roadmap Generator
-- Multi-language support
-- Mobile application
-- Team collaboration features
-- Advanced analytics dashboard
-
-By clearly defining the project scope, Hirely maintains a focused development strategy while ensuring that the software architecture remains flexible enough to support future enhancements.
+### 4. ⚙️ Reliability, Storage & Observability
+- **Dual Resume Storage:** Seamless support for local disk storage (`STORAGE_BACKEND=local`) or Cloudflare R2 / S3-compatible object storage (`STORAGE_BACKEND=r2`).
+- **Privacy-Preserving Observability:** Request tracing via `X-Request-ID`, single-line structured JSON logging, automatic PII scrubbing, token usage and cost accounting, and in-memory latency percentiles ($p50, p90, p95$).
+- **Deterministic AI Evaluation Suite:** Offline benchmark evaluation runner verifying RAG citation fidelity, retrieval precision, and answer correctness against curated datasets.
+- **Containerized Development Stack:** Four-service Docker Compose environment orchestrating PostgreSQL, automatic Alembic migrations, FastAPI backend, and Nginx-served React frontend.
 
 ---
 
-# Vision Statement
+# 🏛️ Architecture & Core Principles
 
-Hirely envisions a future where every individual has access to intelligent, affordable, and personalized career guidance powered by Artificial Intelligence.
+Hirely adheres to strict software engineering standards to avoid common generative AI pitfalls:
 
-Our vision is to evolve beyond a resume optimization tool into a comprehensive AI-powered career platform that supports users throughout every stage of their professional journey—from building their first resume to securing meaningful employment, advancing their careers, and continuously developing their professional skills.
+1. **Deterministic Business Logic:** Security checks, authorization decisions, status transitions, and numerical score weightings are executed purely in backend Python code—never delegated to language models.
+2. **Grounded AI Generation:** AI prompts provide structured, bounded context. Models are strictly instructed to evaluate only provided facts and avoid hallucinating skills, metrics, or candidate experience.
+3. **Structured Outputs:** All LLM completions adhere to strict Pydantic models with automated schema validation before reaching the user interface.
+4. **Privacy First:** Raw resumes, prompt text, user credentials, and PII are never emitted to application logs or external telemetry providers.
+5. **Separation of Concerns:** Independent domain modules encapsulate distinct AI tasks (`ats_analyzer`, `career_coach`, `cover_letter`, `resume_improvement`, `job_description_analyzer`, `candidate_intelligence`, `rag`).
 
-By combining Generative AI, modern software engineering practices, and user-centered design, Hirely aims to become a trusted career companion that empowers individuals to make informed career decisions, improve their employability, and confidently navigate an ever-evolving job market.
+---
 
-As the platform grows, Hirely will expand its ecosystem to support students, professionals, recruiters, universities, career counselors, and organizations, creating an intelligent and connected career development platform for the future.
+# 📜 Evolution & Historical Background
+
+Hirely began in August 2026 as a candidate-focused career suite concept ("AI-Powered Career Suite") aimed at helping applicants build resumes and prepare for interviews. The original planning documentation focused primarily on four initial candidate utilities (Resume Checker, Resume Scorer, Cover Letter Generator, and Career Coach).
+
+During engineering development, the project evolved into a comprehensive, dual-sided recruitment ecosystem based on key architectural insights:
+- Helping candidates optimize resumes without connecting them directly to live job opportunities created half a solution.
+- Recruiters required equivalent intelligence tools to objectively evaluate applications, parse unstructured resumes, and extract factual evidence without human screening fatigue.
+- Hybrid deterministic algorithms (combining exact skill matches with semantic vector similarity) proved far more reliable and reproducible than relying purely on LLM scoring.
+- Adding full recruiter workflows, company entities, application pipelines, and RAG capabilities transformed Hirely into a realistic, production-oriented recruitment intelligence platform.
+
+This evolution preserved the original candidate empowerment vision while expanding the software design into an end-to-end talent acquisition platform.
+
+---
+
+# 🔭 Future Roadmap
+
+While Hirely's core recruitment platform and AI features are fully implemented, future engineering iterations will focus on:
+- **Distributed Caching & Rate Limiting:** Transitioning in-memory rate limiting and embedding caches to a shared Redis cluster for multi-node deployments.
+- **Asynchronous Task Queues:** Moving compute-heavy Docling resume parsing into isolated background worker processes (e.g., Celery / Redis Queue) with OS-level execution timeouts for enhanced denial-of-service resilience.
+- **Dedicated Vector Stores:** Introducing pgvector or dedicated vector databases for cross-tenant candidate discovery across large document corpora.
+- **Conversational Memory:** Enabling persistent multi-turn dialogues for the AI Career Coach and Recruiter Evidence Assistant.
+- **Cloud Infrastructure & Managed Deployment:** Hardened production configurations for managed cloud databases (AWS RDS / Neon) and container orchestration.

@@ -1,51 +1,49 @@
-# 🚀 Hirely — AI-Powered Recruitment Platform
+# 🚀 Hirely — AI-Powered Recruitment & Career Intelligence Platform
 
-> **Hirely is a startup-grade AI recruitment platform that connects candidates and recruiters through intelligent job discovery, application management, AI-assisted career tools, resume analysis, and an evolving AI matching engine.**
+> **Hirely is a startup-grade, dual-sided AI recruitment platform connecting candidates and recruiters through intelligent job discovery, structured application management, candidate-facing career tools, recruiter talent intelligence, and an evidence-grounded AI matching engine.**
 
-[![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql)](https://www.postgresql.org/)
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-D71F00)](https://www.sqlalchemy.org/)
-[![Alembic](https://img.shields.io/badge/Alembic-Migrations-1F2937)](https://alembic.sqlalchemy.org/)
-[![Pydantic](https://img.shields.io/badge/Pydantic-Validation-E92063)](https://docs.pydantic.dev/)
-[![Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?logo=google)](https://ai.google.dev/)
-[![LangChain](https://img.shields.io/badge/LangChain-Core-1C3C3C)](https://www.langchain.com/)
-[![Git](https://img.shields.io/badge/Git-Version_Control-F05032?logo=git)](https://git-scm.com/)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/)
-[![License](https://img.shields.io/badge/License-MIT-green)](#-license)
+[![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)](https://vitejs.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)](https://www.postgresql.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00)](https://www.sqlalchemy.org/)
+[![Alembic](https://img.shields.io/badge/Alembic-1.19-1F2937)](https://alembic.sqlalchemy.org/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-v2.13-E92063)](https://docs.pydantic.dev/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?logo=google)](https://ai.google.dev/)
+[![Docling](https://img.shields.io/badge/Docling-Parser-FF6F00)](https://github.com/DS4SD/docling)
+[![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-Unspecified-lightgrey)](#-license)
 
 ---
 
 ## 📌 Table of Contents
 
 - [🎯 Project Overview](#-project-overview)
-- [💡 Problem Statement](#-problem-statement)
-- [🚀 Vision](#-vision)
-- [👥 Target Users](#-target-users)
-- [✨ Key Features](#-key-features)
-- [🤖 AI Capabilities](#-ai-capabilities)
-- [🧠 AI Architecture](#-ai-architecture)
-- [📊 ATS Analyzer](#-ats-analyzer)
-- [📝 Cover Letter Generator](#-cover-letter-generator)
-- [🎓 AI Career Coach](#-ai-career-coach)
-- [🔐 Authentication & Authorization](#-authentication--authorization)
-- [💼 Recruitment Workflow](#-recruitment-workflow)
-- [🗄️ Database Architecture](#️-database-architecture)
+- [✨ Key Features & Implementation Status](#-key-features--implementation-status)
 - [🏗️ System Architecture](#️-system-architecture)
+- [💼 Recruitment Workflows](#-recruitment-workflows)
+- [🤖 AI Capabilities & Architecture](#-ai-capabilities--architecture)
+  - [📊 Hybrid ATS Analyzer](#-hybrid-ats-analyzer)
+  - [🛠️ AI Resume Improvement](#️-ai-resume-improvement)
+  - [📝 AI Cover Letter Generator](#-ai-cover-letter-generator)
+  - [🎓 AI Career Coach](#-ai-career-coach)
+  - [📋 AI Job Description Analyzer](#-ai-job-description-analyzer)
+  - [🔍 Recruiter Candidate Intelligence & Matching](#-recruiter-candidate-intelligence--matching)
+  - [📑 Candidate Resume Evidence Assistant (RAG)](#-candidate-resume-evidence-assistant-rag)
+- [🔐 Security, Observability & Reliability](#-security-observability--reliability)
+- [🗄️ Database Architecture](#️-database-architecture)
 - [📂 Project Structure](#-project-structure)
 - [🛠️ Technology Stack](#️-technology-stack)
-- [⚙️ Local Setup](#️-local-setup)
+- [🐳 Docker Compose Quickstart](#-docker-compose-quickstart)
+- [⚙️ Local Manual Setup](#️-local-manual-setup)
 - [🔑 Environment Variables](#-environment-variables)
-- [▶️ Running the Application](#️-running-the-application)
-- [🧪 Testing](#-testing)
-- [🔌 API Overview](#-api-overview)
-- [🎨 Frontend](#-frontend)
-- [🧩 Design Principles](#-design-principles)
-- [🗺️ Product Roadmap](#️-product-roadmap)
-- [📈 Engineering Progress](#-engineering-progress)
+- [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
+- [🔌 API Reference](#-api-reference)
+- [🎨 Frontend Overview](#-frontend-overview)
+- [🔒 Security & Production Limitations](#-security--production-limitations)
+- [🗺️ Future Roadmap](#️-future-roadmap)
 - [📚 Documentation](#-documentation)
-- [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [👨‍💻 Author](#-author)
 
@@ -53,1598 +51,664 @@
 
 # 🎯 Project Overview
 
-**Hirely** is a startup-grade AI-powered recruitment platform built to connect candidates and recruiters through a unified recruitment ecosystem.
+**Hirely** is a dual-sided AI-assisted recruitment platform built to bridge candidates and recruiters within a unified, interactive recruitment ecosystem.
 
-The platform combines traditional recruitment workflows with AI-powered assistance, semantic analysis, and intelligent recruitment capabilities while keeping security and business-critical calculations under deterministic backend control.
+Traditional hiring platforms often separate job applications, ATS screening, resume optimization, and recruiter candidate evaluation. Hirely unifies these operations by coupling deterministic business logic and role-based permissions with assistive generative AI, semantic vector embeddings, and Retrieval-Augmented Generation (RAG).
 
-                         ┌─────────────────────┐
-                         │       HIRELY        │
-                         │ AI Recruitment      │
-                         │     Platform        │
-                         └──────────┬──────────┘
-                                    │
-                   ┌────────────────┼────────────────┐
-                   │                │                │
-                   ▼                ▼                ▼
-             👤 Candidate      🏢 Recruiter      🤖 AI Engine
-                   │                │                │
-                   ▼                ▼                ▼
-              Find Jobs        Create Jobs       Intelligence
-              Apply            Manage Jobs       Analysis
-              Track Status     Review Apps       Matching
-              AI Assistance    Candidate Data    Recommendations
+```
+                             ┌─────────────────────┐
+                             │       HIRELY        │
+                             │ AI Recruitment      │
+                             │     Platform        │
+                             └──────────┬──────────┘
+                                        │
+                       ┌────────────────┴────────────────┐
+                       │                                 │
+                       ▼                                 ▼
+                 👤 CANDIDATE                      🏢 RECRUITER
+                       │                                 │
+           ┌───────────┴───────────┐         ┌───────────┴───────────┐
+           ▼                       ▼         ▼                       ▼
+      Find Jobs               AI Career  Post & Manage          AI Talent
+     & Direct App              Tools     Open Roles           Intelligence
+           │                       │         │                       │
+           └───────────┬───────────┘         └───────────┬───────────┘
+                       │                                 │
+                       └────────────────┬────────────────┘
+                                        │
+                                        ▼
+                             🤖 AI & MATCHING ENGINE
+                               Deterministic Scoring
+                               Semantic Embeddings
+                               RAG Evidence Extraction
+                               Grounded Match Explanations
+```
 
-Hirely is being developed as a production-oriented portfolio project with a focus on:
-
-- Clean architecture
-- Modular backend services
-- Secure authentication
-- Role-based access control
-- AI-assisted workflows
-- Explainable AI
-- Deterministic business logic
-- Structured AI outputs
-- Testing
-- Documentation
-- Git/GitHub-based development
-- Future production deployment
-
----
-
-# 💡 Problem Statement
-
-Traditional recruitment platforms often separate job discovery, applications, resume optimization, candidate evaluation, and recruiter workflows.
-
-This creates friction for both candidates and recruiters.
-
-## 👤 Candidate Challenges
-
-Candidates may struggle with:
-
-- Finding relevant job opportunities
-- Understanding whether their resume matches a job
-- Identifying missing skills
-- Improving resume quality
-- Writing job-specific cover letters
-- Understanding career development needs
-- Tracking application progress
-
-## 🏢 Recruiter Challenges
-
-Recruiters may struggle with:
-
-- Creating effective job descriptions
-- Managing large numbers of applications
-- Evaluating candidate-job alignment
-- Identifying relevant candidates efficiently
-- Understanding candidate strengths and gaps
-- Reducing repetitive screening work
-- Making recruitment decisions efficiently
-
-## 💡 Hirely's Approach
-
-Hirely brings these workflows together:
-
-    Candidate
-        │
-        ▼
-    Profile + Skills + Resume
-        │
-        ▼
-    Job Discovery
-        │
-        ├───────────────┐
-        ▼               ▼
-    ATS Analysis    AI Assistance
-        │               │
-        └───────┬───────┘
-                ▼
-             Application
-                │
-                ▼
-        Application Tracking
-                │
-                ▼
-           Recruiter Review
-                │
-                ▼
-       Recruitment Intelligence
+### Core Engineering Principles
+- **Deterministic Critical Logic:** Authorization, security, application state machines, and numerical scoring remain deterministic in backend code. Language models never make authorization or hiring decisions.
+- **Grounded AI Generation:** AI prompts are supplied with bounded, structured context. Models are instructed to evaluate only provided evidence, avoiding hallucinated credentials or experience.
+- **Structured Pydantic Validation:** All LLM outputs are validated against strict Pydantic schemas before reaching the client.
+- **Privacy-Preserving Telemetry:** User resumes, raw prompt text, credentials, and PII are strictly excluded from logging statements.
+- **Defense-in-Depth:** Input validation, sliding-window rate limiting, and multi-layer file upload checks protect service boundaries.
 
 ---
 
-# 🚀 Vision
-
-The long-term vision of Hirely is to evolve from a conventional recruitment platform into an **AI-native recruitment intelligence system**.
-
-                         ┌───────────────┐
-                         │    HIRELY     │
-                         └───────┬───────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              │                  │                  │
-              ▼                  ▼                  ▼
-         👤 Candidate       🏢 Recruiter       🤖 AI Engine
-         Experience         Experience         Intelligence
-              │                  │                  │
-              └──────────────────┼──────────────────┘
-                                 ▼
-                         Intelligent Matching
-                                 │
-                                 ▼
-                         Semantic Analysis
-                                 │
-                                 ▼
-                       Explainable Insights
-                                 │
-                                 ▼
-                      Better Hiring Outcomes
-
-The goal is not to replace candidates or recruiters.
-
-The goal is to **augment human decision-making with useful, grounded, explainable AI capabilities.**
-
----
-
-# 👥 Target Users
-
-## 👤 Candidates
-
-Candidates can:
-
-- Register and authenticate
-- Create and manage professional profiles
-- Manage skills
-- Upload resumes
-- Maintain an active resume
-- Discover active jobs
-- View job details
-- Analyze resume-job alignment
-- Generate job-specific cover letters
-- Receive AI career guidance
-- Apply to jobs
-- Track application progress
-- Improve their resume based on identified gaps
-
-## 🏢 Recruiters
-
-Recruiters can:
-
-- Register and authenticate
-- Create recruiter profiles
-- Create job postings
-- Manage jobs
-- Review applications
-- Update application statuses
-- Evaluate candidates
-- Use future AI-powered recruitment intelligence features
-
----
-
-# ✨ Key Features
-
-## 🔐 Authentication & Security
-
-- Candidate registration
-- Recruiter registration
-- Secure login
-- JWT-based authentication
-- Argon2 password hashing
-- Current-user endpoint
-- Role-based access control
-- Protected API routes
-- Candidate-specific authorization
-- Recruiter-specific authorization
-
-## 👤 Candidate Platform
-
-- Candidate profile management
-- Candidate skills
-- Resume upload
-- Resume parsing
-- Active resume selection
-- Job discovery
-- Job details
-- Job applications
-- Application history
-- Application status tracking
-
-## 🏢 Recruiter Platform
-
-- Recruiter profile
-- Job creation
-- Job management
-- Application management
-- Candidate review
-- Application lifecycle management
-
-## 🤖 AI Features
-
-### ✅ Implemented
-
-- 🧑‍🏫 AI Career Coach
-- ✍️ AI Cover Letter Generator
-- 📊 AI Resume ATS Analyzer
-
-### 🚧 Planned
-
-- 🛠️ AI Resume Improvement
-- 📋 AI Job Description Analyzer
-- 🧠 Advanced Candidate Intelligence
-- 🔎 Retrieval-Augmented Generation (RAG)
-- 🔗 Advanced AI workflows
-- 📈 AI evaluation and observability
-- ☁️ Production deployment
-
----
-
-# 🤖 AI Capabilities
-
-Hirely uses independent AI domain modules instead of placing all AI logic into a single service.
-
-                              Candidate
-                                  │
-                ┌─────────────────┼─────────────────┐
-                │                 │                 │
-                ▼                 ▼                 ▼
-          Career Coach      Cover Letter      ATS Analyzer
-                │                 │                 │
-                ▼                 ▼                 ▼
-        Career Guidance     Job-specific      Resume–Job
-                             Drafting           Analysis
-
-Each AI capability has its own:
-
-- Context construction
-- Prompt design
-- Pydantic schemas
-- Service layer
-- API integration
-
-This keeps the AI architecture modular and maintainable.
-
----
-
-# 🧠 AI Architecture
-
-Hirely follows a hybrid AI architecture.
-
-                         User Request
-                              │
-                              ▼
-                       FastAPI Endpoint
-                              │
-                              ▼
-                       Domain Service
-                              │
-             ┌────────────────┼────────────────┐
-             │                │                │
-             ▼                ▼                ▼
-       Structured Data   Deterministic     AI Context
-                           Logic          Construction
-             │                │                │
-             └────────────────┼────────────────┘
-                              ▼
-                       Gemini AI Services
-                              │
-                              ▼
-                     Structured AI Output
-                              │
-                              ▼
-                       Pydantic Validation
-                              │
-                              ▼
-                           Frontend
-
-## AI Architecture Principles
-
-### Deterministic Business Logic
-
-Business rules, authorization, numerical scoring, and other critical calculations remain in backend code.
-
-### Provider Abstraction
-
-Gemini communication is isolated inside shared AI service infrastructure.
-
-### Context Separation
-
-Context construction is separated from prompt construction.
-
-### Structured Output
-
-AI responses are validated using Pydantic schemas.
-
-### Grounded Generation
-
-AI models are instructed to use only the supplied information and avoid unsupported claims.
-
-### Minimum Necessary Context
-
-Only information required for the specific AI task is provided.
-
-### Controlled Complexity
-
-RAG, vector databases, agents, and advanced orchestration are introduced only when a genuine product requirement exists.
-
----
-
-# 📊 ATS Analyzer
-
-The **AI Resume ATS Analyzer V1** is a candidate-facing feature designed to answer:
-
-> **"How well does my current resume match this job, and what should I improve?"**
-
-The ATS Analyzer combines deterministic evaluation, semantic embeddings, and Gemini-powered qualitative analysis.
-
-                 Candidate Resume
-                        │
-                        ▼
-              ┌──────────────────┐
-              │ Resume Context    │
-              └────────┬─────────┘
-                       │
-                       │
-                 Target Job
-                       │
-                       ▼
-              ┌──────────────────┐
-              │ Job Context       │
-              └────────┬─────────┘
-                       │
-          ┌────────────┼────────────┐
-          │            │            │
-          ▼            ▼            ▼
-      Skill Match  Completeness  Embeddings
-          │            │            │
-          │            │            ▼
-          │            │      Semantic Relevance
-          │            │            │
-          └────────────┼────────────┘
-                       ▼
-                 ATS Score
-                       │
-                       +
-                       ▼
-                 Gemini Analysis
-                       │
-                       ▼
-          Strengths / Improvements
-          Suggestions / Summary
-
-## 📐 ATS Score
-
-The final ATS score uses:
-
-| Component | Weight |
-|---|---:|
-| Required Skill Coverage | 45% |
-| Preferred Skill Coverage | 15% |
-| Semantic Relevance | 30% |
-| Resume Completeness | 10% |
-
-The final score is calculated by backend logic rather than delegated to the language model.
-
-This makes the numerical evaluation deterministic and reproducible.
-
-## 🔎 Deterministic Skill Analysis
-
-The ATS Analyzer evaluates:
-
-- Required skills matched
-- Required skills missing
-- Preferred skills matched
-- Preferred skills missing
-- Resume completeness
-
-Candidate profile skills and active parsed resume skills are combined before skill matching.
-
-## 🧠 Semantic Relevance
-
-Gemini embeddings are used to generate semantic representations for:
-
-    Candidate Resume Representation
-                  ↕
-          Semantic Similarity
-                  ↕
-           Job Representation
-
-Cosine similarity is calculated and normalized into the semantic relevance score.
-
-## ✨ Gemini Qualitative Analysis
-
-Gemini provides:
-
-- Strengths
-- Improvement areas
-- Actionable suggestions
-- Overall summary
-
-The model is instructed to:
-
-- Use only supplied information
-- Avoid inventing experience
-- Avoid inventing skills
-- Avoid unsupported achievements
-- Provide evidence-based insights
-- Avoid keyword stuffing
-- Avoid generating a numerical ATS score
-
-## 📋 Structured Output
-
-The ATS response contains:
-
-- ATS score
-- Score breakdown
-- Required skills matched
-- Required skills missing
-- Preferred skills matched
-- Preferred skills missing
-- Strengths
-- Improvement areas
-- Suggestions
-- Summary
-
-Pydantic schemas validate the structured response.
-
-## 📄 Resume Requirement
-
-ATS analysis operates on the candidate's active parsed resume.
-
-The resume must have completed parsing before ATS analysis can be performed.
-
-## 🔌 ATS API
-
-    POST /candidate/ats-analysis
-
-Request:
-
-    {
-      "job_id": "JOB_UUID"
-    }
-
-## 🧱 ATS V1 Scope
-
-The V1 ATS Analyzer intentionally does not use:
-
-- RAG
-- Vector databases
-- LangGraph
-- Autonomous agents
-- Background workers
-- Resume rewriting
-- PDF generation
-- Persistent ATS history
-
-These capabilities can be introduced later when product requirements justify them.
-
----
-
-# 📝 Cover Letter Generator
-
-The **AI Cover Letter Generator V1** creates a job-specific cover letter using relevant candidate and job context.
-
-    Candidate Profile
-           +
-    Candidate Skills
-           +
-    Active Resume
-           +
-    Target Job
-           │
-           ▼
-         Gemini
-           │
-           ▼
-    Job-specific Cover Letter
-
-The generated letter is grounded in:
-
-- Candidate profile
-- Candidate skills
-- Active resume
-- Job description
-- Job requirements
-- Employment information
-
-## V1 Features
-
-- Candidate-facing generation
-- Job-specific cover letter
-- Structured API response
-- Copy functionality
-- Regenerate functionality
-- Grounded generation
-
-## V1 Exclusions
-
-- Automatic email sending
-- PDF generation
-- Persistent cover-letter history
-- Autonomous agent workflows
-
----
-
-# 🎓 AI Career Coach
-
-The **AI Career Coach** provides contextual career guidance to candidates.
-
-It can assist with areas such as:
-
-- Career direction
-- Skill development
-- Learning paths
-- Interview preparation
-- Professional development
-- Career decisions
-
-The Career Coach uses:
-
-- Dedicated AI domain module
-- Structured request/response schemas
-- Gemini
-- Context-aware prompts
-- Backend API integration
-
-The feature is designed as an assistive career guidance capability rather than a replacement for human career decision-making.
-
----
-
-# 🔐 Authentication & Authorization
-
-Hirely uses JWT-based authentication with role-based authorization.
-
-                         User
-                          │
-                          ▼
-                      Register
-                          │
-                          ▼
-                        Login
-                          │
-                          ▼
-                      JWT Token
-                          │
-              ┌───────────┴───────────┐
-              │                       │
-              ▼                       ▼
-          Candidate                Recruiter
-              │                       │
-              ▼                       ▼
-      Candidate APIs          Recruiter APIs
-
-## Security Components
-
-- JWT authentication
-- Argon2 password hashing
-- Role-based access control
-- Protected API endpoints
-- Active-user validation
-- Candidate-only dependencies
-- Recruiter-only dependencies
-
-AI is not responsible for authentication or authorization decisions.
-
----
-
-# 💼 Recruitment Workflow
-
-## 👤 Candidate Workflow
-
-    Register
-       ↓
-    Login
-       ↓
-    Create Profile
-       ↓
-    Add Skills
-       ↓
-    Upload Resume
-       ↓
-    Resume Parsing
-       ↓
-    Find Jobs
-       ↓
-    View Job
-       ↓
-    ATS Analysis
-       ↓
-    Resume Improvement
-       ↓
-    Generate Cover Letter
-       ↓
-    Apply
-       ↓
-    Track Application
-
-## 🏢 Recruiter Workflow
-
-    Register
-       ↓
-    Login
-       ↓
-    Create Recruiter Profile
-       ↓
-    Create Job
-       ↓
-    Manage Job
-       ↓
-    Receive Applications
-       ↓
-    Review Applications
-       ↓
-    Evaluate Candidates
-       ↓
-    Update Application Status
-
-## 📈 Application Lifecycle
-
-    Applied
-       ↓
-    Shortlisted
-       ↓
-    Interview
-       ↓
-    Hired
-
-Alternative terminal path:
-
-    Applied / Shortlisted / Interview
-                    ↓
-                 Rejected
-
-`Hired` and `Rejected` are terminal application states.
-
----
-
-# 🗄️ Database Architecture
-
-Hirely uses PostgreSQL with SQLAlchemy ORM and Alembic migrations.
-
-## Core Entities
-
-                              User
-                         ┌──────┴──────┐
-                         │             │
-                         ▼             ▼
-                    Candidate      Recruiter
-                         │             │
-             ┌───────────┼───────┐     │
-             │           │       │     ▼
-             ▼           ▼       ▼    Job
-      CandidateSkill   Resume  Application
-             │                   ▲       │
-             ▼                   │       │
-           Skill                 │       ▼
-             ▲                   └── Application
-             │
-          JobSkill
-
-## Main Tables
-
-- `users`
-- `candidates`
-- `recruiters`
-- `jobs`
-- `applications`
-- `skills`
-- `candidate_skills`
-- `job_skills`
-- `resumes`
-
-## Important Relationships
-
-### User → Candidate
-
-    User.id → Candidate.user_id
-
-### User → Recruiter
-
-    User.id → Recruiter.user_id
-
-### Recruiter → Job
-
-    Recruiter.id → Job.recruiter_id
-
-### Candidate → Application
-
-    Candidate.id → Application.candidate_id
-
-### Job → Application
-
-    Job.id → Application.job_id
-
-### Candidate → Skill
-
-    Candidate → CandidateSkill → Skill
-
-### Job → Skill
-
-    Job → JobSkill → Skill
-
-A unique candidate-job application constraint prevents duplicate applications.
+# ✨ Key Features & Implementation Status
+
+### ✅ Implemented & Fully Verified in Source Code
+
+| Domain | Implemented Features | Source Evidence |
+| :--- | :--- | :--- |
+| **Authentication & RBAC** | Argon2 password hashing, JWT bearer tokens, role separation (`candidate`, `recruiter`), sliding-window auth rate limiting per IP. | [`backend/app/api/auth.py`](file:///D:/Hirely/backend/app/api/auth.py), [`backend/app/core/rate_limit.py`](file:///D:/Hirely/backend/app/core/rate_limit.py) |
+| **Candidate Core** | Profile management, skill tags CRUD, PDF resume upload, file validation, Docling text/skill parsing, active resume selection, job discovery, direct application. | [`backend/app/api/candidate.py`](file:///D:/Hirely/backend/app/api/candidate.py), [`backend/app/api/resumes.py`](file:///D:/Hirely/backend/app/api/resumes.py) |
+| **Candidate AI Suite** | **ATS Resume Analyzer V1** (hybrid 45/15/30/10 scoring), **AI Resume Improvement**, **AI Cover Letter Generator**, **AI Career Coach**. | [`backend/app/ai/ats_analyzer`](file:///D:/Hirely/backend/app/ai/ats_analyzer), [`backend/app/ai/resume_improvement`](file:///D:/Hirely/backend/app/ai/resume_improvement) |
+| **Recruiter Core** | Recruiter profile, company association, job creation & management, application pipeline, status transitions (`applied` $\to$ `shortlisted` $\to$ `interview` $\to$ `hired` / `rejected`). | [`backend/app/api/recruiter.py`](file:///D:/Hirely/backend/app/api/recruiter.py), [`backend/app/api/applications.py`](file:///D:/Hirely/backend/app/api/applications.py) |
+| **Recruiter AI Suite** | **AI Job Description Analyzer**, **Candidate Intelligence & Search**, **Two-Sided Matching Engine**, **Match Explanation**, **Candidate Evidence Assistant (RAG)**. | [`backend/app/ai/job_description_analyzer`](file:///D:/Hirely/backend/app/ai/job_description_analyzer), [`backend/app/ai/rag`](file:///D:/Hirely/backend/app/ai/rag) |
+| **Dual Storage** | Local filesystem storage (`STORAGE_BACKEND=local`) or Cloudflare R2 / S3-compatible object storage (`STORAGE_BACKEND=r2`) via `boto3`. | [`backend/app/storage/storage_service.py`](file:///D:/Hirely/backend/app/storage/storage_service.py) |
+| **AI Observability** | Single-line JSON logging, request tracing via `X-Request-ID`, PII regex scrubbing, token usage & cost accounting, in-memory latency percentiles ($p50, p90, p95$). | [`backend/app/core/observability`](file:///D:/Hirely/backend/app/core/observability) |
+| **AI Evaluation** | Offline benchmark evaluation runner assessing RAG retrieval precision and citation correctness against curated test datasets. | [`backend/app/ai/eval/runner.py`](file:///D:/Hirely/backend/app/ai/eval/runner.py) |
+| **Docker Stack** | 4 orchestrated Compose services: `hirely-postgres`, `hirely-migration`, `hirely-backend`, and `hirely-frontend`. | [`docker-compose.yml`](file:///D:/Hirely/docker-compose.yml), [`docs/DOCKER.md`](file:///D:/Hirely/docs/DOCKER.md) |
+| **Frontend UI** | 19 React 19 pages with React Router 7, authentication context, responsive UI cards, and loading/error states. | [`frontend/src/App.jsx`](file:///D:/Hirely/frontend/src/App.jsx) |
+
+### 🟡 Partially Implemented / Architectural Scope Limitations
+- **In-Memory Rate Limiting:** Sliding-window rate limiters are stored in-memory per worker process. Effective for single instances, but requires a Redis backend for distributed multi-instance clusters.
+- **In-Memory AI Metrics Collector:** Telemetry is tracked in process memory and resets on restart. For distributed metrics, logs should be ingested by log collectors or exposed via Prometheus.
+- **In-Process Resume Parsing:** Parsing runs synchronously in-process via Docling. Protected by upload limits (10 MB, 10 pages), but true multi-tenant DoS isolation requires asynchronous workers (e.g. Celery) with OS-level execution timeouts.
+
+### 🗺️ Planned Roadmap Features (Not Yet Implemented)
+- Distributed Redis caching & shared rate limiting.
+- Asynchronous Celery / Redis Queue workers for background document processing.
+- Persistent multi-turn conversational memory for AI Career Coach and RAG Assistant.
+- Dedicated vector database (e.g. pgvector or Pinecone) for cross-tenant resume semantic search.
+- Managed cloud production deployment pipelines (AWS / Render with automated TLS).
 
 ---
 
 # 🏗️ System Architecture
 
-    ┌───────────────────────────────────────────────────────────────┐
-    │                       HIRELY FRONTEND                         │
-    │                         React + Vite                          │
-    │                                                               │
-    │  Candidate UI                       Recruiter UI              │
-    │  ├── Dashboard                      ├── Dashboard              │
-    │  ├── Profile                        ├── Jobs                   │
-    │  ├── Resume                         ├── Applications            │
-    │  ├── Find Jobs                      └── Candidate Review        │
-    │  ├── Applications                                             │
-    │  ├── Career Coach                                             │
-    │  ├── Cover Letter                                             │
-    │  └── ATS Analyzer                                             │
-    └──────────────────────────────┬────────────────────────────────┘
-                                   │
-                                   │ REST API
-                                   ▼
-    ┌───────────────────────────────────────────────────────────────┐
-    │                       FASTAPI BACKEND                         │
-    │                                                               │
-    │  ┌────────────┐  ┌────────────┐  ┌─────────────────────────┐ │
-    │  │ Auth APIs  │  │ Candidate  │  │ Recruiter APIs          │ │
-    │  └────────────┘  └────────────┘  └─────────────────────────┘ │
-    │                                                               │
-    │  ┌───────────────────────────────────────────────────────────┐│
-    │  │                    Domain Services                        ││
-    │  └───────────────────────────────────────────────────────────┘│
-    │                                                               │
-    │  ┌───────────────────────────────────────────────────────────┐│
-    │  │                       AI Layer                             ││
-    │  │ Career Coach │ Cover Letter │ ATS │ Embeddings │ Parsers  ││
-    │  └───────────────────────────────────────────────────────────┘│
-    └──────────────────────────────┬────────────────────────────────┘
-                                   │
-                     ┌─────────────┴──────────────┐
-                     ▼                            ▼
-            ┌─────────────────┐          ┌──────────────────┐
-            │   PostgreSQL    │          │   Google Gemini  │
-            │    Database     │          │ LLM + Embeddings │
-            └─────────────────┘          └──────────────────┘
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              FRONTEND (React 19 + Vite)                     │
+│                                                                             │
+│   Candidate Views                      Recruiter Views                      │
+│   ├── Dashboard & Profile              ├── Dashboard & Company Profile      │
+│   ├── Resume Upload & Parsing          ├── Job Creation & Management        │
+│   ├── Job Search & Application         ├── Application Review Pipeline      │
+│   ├── AI ATS Analyzer                  ├── AI Job Description Analyzer      │
+│   ├── AI Resume Improvement            ├── Recruiter Candidate Matching     │
+│   ├── AI Cover Letter Generator        └── Candidate Evidence Assistant     │
+│   └── AI Career Coach                      (Interactive RAG Q&A)            │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ HTTP / REST (JWT Bearer)
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           BACKEND (FastAPI + Python 3.12)                   │
+│                                                                             │
+│  [Middleware Pipeline]                                                      │
+│  ├── CorrelationIdMiddleware (X-Request-ID tracing)                         │
+│  └── CORSMiddleware (Dynamic origins with wildcard credential protection)   │
+│                                                                             │
+│  [API Routers]                                                              │
+│  ├── /auth          ├── /candidate    ├── /recruiter    ├── /jobs           │
+│  ├── /resumes       ├── /applications ├── /health       └── /skills         │
+│                                                                             │
+│  [Domain & Core Services]                                                   │
+│  ├── Auth & RBAC Security (Argon2 + JWT)                                    │
+│  ├── In-Memory Sliding-Window Rate Limiter (IP auth / User AI limits)       │
+│  ├── File Validation (Magic numbers, ZIP bombs, 10MB upload limit)          │
+│  ├── Structured JSON Logging & In-Memory Latency Metrics ($p50, p90, p95$)  │
+│  └── Dual Storage Provider: Local Filesystem ⟷ Cloudflare R2 (S3 API)      │
+│                                                                             │
+│  [AI Domain Layer]                                                          │
+│  ├── ATS Analyzer          ├── Cover Letter Generator                       │
+│  ├── Career Coach          ├── Resume Improvement Assistant                 │
+│  ├── Job Description AI    ├── Recruiter Matching & Explanation Engine      │
+│  └── Candidate Evidence Assistant (RAG Chunker, Retriever & Citation Verifier)
+└──────────────────────┬───────────────────────────────┬──────────────────────┘
+                       │                               │
+        SQLAlchemy ORM │                               │ Google GenAI SDK
+                       ▼                               ▼
+       ┌───────────────────────────────┐       ┌──────────────────────────────┐
+       │     PostgreSQL Database       │       │        Google Gemini         │
+       │  Users, Candidates, Companies │       │  gemini-2.5-flash            │
+       │  Recruiters, Jobs, Resumes    │       │  gemini-embedding-2          │
+       │  Applications, Skills         │       │  Pydantic Structured Outputs │
+       └───────────────────────────────┘       └──────────────────────────────┘
+```
+
+---
+
+# 💼 Recruitment Workflows
+
+### 👤 Candidate Journey
+```
+Register ➔ Login ➔ Create Profile ➔ Add Skills ➔ Upload Resume ➔ Docling Auto-Parse
+   │
+   ▼
+Browse Jobs ➔ Run ATS Analysis ➔ Review AI Resume Improvements ➔ Generate Cover Letter
+   │
+   ▼
+Apply to Job ➔ Track Application Status (`applied` ➔ `shortlisted` ➔ `interview` ➔ `hired`)
+```
+
+### 🏢 Recruiter Journey
+```
+Register ➔ Login ➔ Setup Company & Profile ➔ Create Job Posting ➔ Run AI JD Analyzer
+   │
+   ▼
+Receive Applications ➔ Run Recruiter Candidate Matching ➔ Read AI Match Explanations
+   │
+   ▼
+Open Candidate Intelligence ➔ Ask Specific Resume Questions (RAG Evidence Assistant)
+   │
+   ▼
+Advance Application Status (`applied` ➔ `shortlisted` ➔ `interview` ➔ `hired` / `rejected`)
+```
+
+---
+
+# 🤖 AI Capabilities & Architecture
+
+Hirely organizes AI into isolated domain modules rather than a monolithic service. Each module maintains its own context assemblers, prompts, and Pydantic schemas:
+
+### 📊 Hybrid ATS Analyzer
+Answers: *"How well does my active resume match this job, and what should I improve?"*
+- **Required Skill Coverage (45%):** Exact string matching against mandatory job skills.
+- **Preferred Skill Coverage (15%):** Exact string matching against nice-to-have skills.
+- **Semantic Relevance (30%):** Cosine similarity between Gemini embeddings of resume experience and job requirements.
+- **Resume Completeness (10%):** Deterministic check verifying contact information, experience depth, and education sections.
+- **Qualitative Summary:** Gemini generates structured strengths, weaknesses, and targeted advice grounded in the analysis.
+
+### 🛠️ AI Resume Improvement
+- Analyzes candidate resume text against target job requirements.
+- Identifies critical missing competencies and weak phrasing.
+- Generates structured before-and-after bullet rewrites with explainable rationales.
+
+### 📝 AI Cover Letter Generator
+- Produces job-specific, professional cover letters.
+- Context is strictly bounded to the candidate's active parsed resume and job description.
+- Enforces grounded generation to prevent fabricating accomplishments or dates.
+
+### 🎓 AI Career Coach
+- Delivers contextual, candidate-specific career guidance.
+- Analyzes candidate profile skills and experience to recommend targeted learning paths, interview preparation strategies, and career milestones.
+
+### 📋 AI Job Description Analyzer
+- Recruiter-facing tool auditing job postings before publication.
+- Checks clarity, structural completeness, missing expectations, and skill precision.
+- Returns actionable recommendations to improve job posting quality.
+
+### 🔍 Recruiter Candidate Intelligence & Matching
+- **Two-Sided Matching Engine:** Ranks candidate pools for a specific job posting using combined skill match scoring and vector similarity.
+- **AI Match Explanation:** Translates raw scores into recruiter-friendly qualitative assessments detailing strengths, risks, and interview questions.
+
+### 📑 Candidate Resume Evidence Assistant (RAG)
+- Interactive Q&A system for recruiters reviewing a specific candidate.
+- Resumes are parsed, sanitized, chunked, and retrieved based on query similarity.
+- Gemini answers the recruiter's inquiry and includes direct quote citations from the resume.
+- Citation verifier checks that quoted excerpts exist verbatim in the source chunks.
+
+---
+
+# 🔐 Security, Observability & Reliability
+
+### 🛡️ Security Guardrails
+- **Argon2 Password Hashing & JWT Authentication:** Secure credential handling with active-user validation.
+- **Role-Based Access Control:** Recruiter endpoints strictly reject candidates; candidate endpoints reject recruiters.
+- **Upload File Validation:** Magic number byte verification, ZIP bomb mitigation, 10 MB upload cap, and 50 MB uncompressed limit.
+- **Sliding-Window Rate Limiting:** In-memory sliding-window limits protect auth endpoints against brute force and AI endpoints against abuse.
+
+### 📊 Privacy-Preserving AI Observability
+- **Request Tracing:** `CorrelationIdMiddleware` assigns or sanitizes incoming `X-Request-ID` headers across all operations.
+- **Structured JSON Logging:** Emits machine-parsable, single-line JSON records formatted for log forwarders (e.g., Datadog, Vector).
+- **Zero PII & Prompt Leakage:** Raw prompts, model completions, candidate resumes, and contact info are regex-scrubbed.
+- **Token & Cost Telemetry:** Automatically extracts token usage from model responses and tracks estimated operational costs.
+- **In-Memory Latency Percentiles:** Tracks rolling $p50, p90, p95$ operational latencies per feature using bounded queues.
+
+### 🧪 Offline AI Evaluation Framework
+- Benchmark runner ([`app.ai.eval.runner`](file:///D:/Hirely/backend/app/ai/eval/runner.py)) tests RAG performance against curated ground-truth datasets ([`candidate_evidence_eval_v1.json`](file:///D:/Hirely/backend/app/ai/eval/datasets/candidate_evidence_eval_v1.json)).
+- Evaluates retrieval precision, citation validity, and hallucination bounds in CI without live API dependency.
+
+---
+
+# 🗄️ Database Architecture
+
+Hirely uses PostgreSQL 15 managed via SQLAlchemy 2.0 ORM and Alembic migrations.
+
+```
+                         ┌──────────────┐
+                         │    users     │
+                         └──────┬───────┘
+                                │ 1:1
+              ┌─────────────────┴─────────────────┐
+              ▼                                   ▼
+       ┌──────────────┐                    ┌──────────────┐
+       │  candidates  │                    │  recruiters  │
+       └──────┬───────┘                    └──────┬───────┘
+              │                                   │ N:1
+              ├─────────────────────┐             ▼
+              │ 1:N                 │ 1:N  ┌──────────────┐
+              ▼                     ▼      │  companies   │
+       ┌──────────────┐      ┌───────────┐ └──────────────┘
+       │   resumes    │      │ candidate │        │
+       └──────────────┘      │  _skills  │        │ 1:N
+              │              └─────┬─────┘        ▼
+              │                    │       ┌──────────────┐
+              │                    │ N:1   │     jobs     │
+              │                    ▼       └──────┬───────┘
+              │             ┌────────────┐        │
+              │             │   skills   │        ├────────────────┐
+              │             └────────────┘        │ 1:N            │ 1:N
+              │                    ▲              ▼                ▼
+              │                    │ N:1   ┌──────────────┐ ┌──────────────┐
+              │             ┌────────────┐ │ applications │ │  job_skills  │
+              │             │ job_skills │ └──────────────┘ └──────────────┘
+              │             └────────────┘
+              ▼
+   (Dual Storage: Local Disk / Cloudflare R2)
+```
+
+### Main Tables
+- `users`: Core account identity, email, role (`candidate` or `recruiter`), password hash.
+- `candidates`: Profile information (first name, last name, headline, bio, location).
+- `companies`: Company metadata associated with recruiters.
+- `recruiters`: Recruiter profile linked to a user account and company.
+- `jobs`: Job postings with title, description, location, job type, active status.
+- `resumes`: Uploaded resumes with file path/key, active status, parsed JSON data.
+- `applications`: Applications linking candidate to job with state lifecycle.
+- `skills`: Canonical skill dictionary.
+- `candidate_skills`: Many-to-many relationship linking candidates to skills.
+- `job_skills`: Many-to-many relationship linking jobs to required/preferred skills.
+
+A unique database constraint on `(candidate_id, job_id)` prevents duplicate applications.
 
 ---
 
 # 📂 Project Structure
 
-    Hirely/
-    │
-    ├── backend/
-    │   │
-    │   ├── app/
-    │   │   │
-    │   │   ├── ai/
-    │   │   │   ├── ats_analyzer/
-    │   │   │   ├── career_coach/
-    │   │   │   ├── cover_letter/
-    │   │   │   ├── embeddings/
-    │   │   │   ├── parsers/
-    │   │   │   ├── services/
-    │   │   │   └── config.py
-    │   │   │
-    │   │   ├── api/
-    │   │   │   ├── auth.py
-    │   │   │   ├── candidate.py
-    │   │   │   ├── recruiter.py
-    │   │   │   └── dependencies.py
-    │   │   │
-    │   │   ├── models/
-    │   │   ├── schemas/
-    │   │   ├── services/
-    │   │   ├── db/
-    │   │   └── main.py
-    │   │
-    │   ├── alembic/
-    │   ├── tests/
-    │   ├── requirements.txt
-    │   └── .env
-    │
-    ├── frontend/
-    │   │
-    │   ├── src/
-    │   │   ├── components/
-    │   │   ├── pages/
-    │   │   │   ├── ATSAnalyzer.jsx
-    │   │   │   ├── CareerCoach.jsx
-    │   │   │   ├── CoverLetter.jsx
-    │   │   │   ├── JobDetail.jsx
-    │   │   │   └── ...
-    │   │   │
-    │   │   ├── services/
-    │   │   │   ├── atsAnalyzer.js
-    │   │   │   ├── candidate.js
-    │   │   │   └── ...
-    │   │   │
-    │   │   ├── App.jsx
-    │   │   └── main.jsx
-    │   │
-    │   ├── package.json
-    │   └── .env
-    │
-    ├── docs/
-    │   ├── 01_...
-    │   ├── 02_...
-    │   ├── 03_Software_Design_Document.md
-    │   └── ...
-    │
-    ├── .gitignore
-    └── README.md
-
-> The exact project structure may evolve as Hirely grows.
+```
+Hirely/
+├── .github/
+│   └── workflows/
+│       └── backend-ci.yml           # CI: PostgreSQL service, Pytest, AI Eval, Frontend Lint & Build
+├── backend/
+│   ├── alembic/                     # Alembic migration environment and versions
+│   │   ├── versions/                # 7 database migrations
+│   │   └── env.py
+│   ├── app/
+│   │   ├── ai/                      # AI domain modules
+│   │   │   ├── ats_analyzer/        # ATS scoring engine, prompts, schemas
+│   │   │   ├── candidate_intelligence/ # Candidate filtering & semantic intelligence
+│   │   │   ├── career_coach/        # Career advice service & prompts
+│   │   │   ├── cover_letter/        # Grounded cover letter generator
+│   │   │   ├── embeddings/          # Vector embedding service
+│   │   │   ├── eval/                # Deterministic AI eval runner & datasets
+│   │   │   ├── job_description_analyzer/ # JD structural analysis service
+│   │   │   ├── matching/            # Two-sided matching orchestrator & ranker
+│   │   │   ├── parsers/             # Docling resume parser & structured extraction
+│   │   │   ├── rag/                 # RAG candidate evidence assistant
+│   │   │   ├── resume_improvement/  # Bullet rewrite & gap analysis service
+│   │   │   └── services/            # Gemini client & provider abstraction
+│   │   ├── api/                     # FastAPI route controllers
+│   │   │   ├── applications.py      # Candidate & recruiter application endpoints
+│   │   │   ├── auth.py              # Register, login, me endpoints
+│   │   │   ├── candidate.py         # Profile & candidate AI endpoints
+│   │   │   ├── candidate_skills.py  # Candidate skill management
+│   │   │   ├── dependencies.py      # Auth & RBAC FastAPI dependencies
+│   │   │   ├── health.py            # API & DB health checks
+│   │   │   ├── jobs.py              # Jobs CRUD & matching endpoints
+│   │   │   ├── job_skills.py        # Job skill requirements
+│   │   │   ├── recruiter.py         # Recruiter profile & AI endpoints
+│   │   │   └── resumes.py           # Resume upload, parse, activate, delete
+│   │   ├── core/                    # Core configuration, security, rate limiting, observability
+│   │   │   ├── observability/       # Correlation ID, structured JSON logging, metrics
+│   │   │   ├── config.py            # Pydantic BaseSettings configuration
+│   │   │   ├── rate_limit.py        # In-memory sliding-window rate limiter
+│   │   │   └── security.py          # Argon2 hashing & JWT creation/verification
+│   │   ├── db/                      # SQLAlchemy session & Base model
+│   │   ├── models/                  # 10 SQLAlchemy ORM models
+│   │   ├── schemas/                 # Pydantic request & response models
+│   │   ├── services/                # Business logic services
+│   │   ├── storage/                 # File validation & Dual Storage (Local / Cloudflare R2)
+│   │   └── main.py                  # FastAPI application entry point
+│   ├── tests/                       # Complete Pytest test suite (50+ test files)
+│   ├── alembic.ini                  # Alembic configuration
+│   ├── Dockerfile                   # Python 3.12-slim backend container
+│   └── pytest.ini                   # Pytest configuration with pythonpath and markers
+├── frontend/
+│   ├── src/
+│   │   ├── components/              # Shared UI cards, layout shell, navbar, protected route
+│   │   ├── context/                 # AuthContext & token management
+│   │   ├── pages/                   # 19 React view pages
+│   │   ├── services/                # Axios API client & endpoint bindings
+│   │   ├── App.jsx                  # React Router 7 route definitions
+│   │   └── main.jsx                 # Application mount
+│   ├── Dockerfile                   # Multi-stage Node 20 builder + Nginx runner
+│   ├── nginx.conf                   # Nginx reverse proxy, static caching & SPA fallback
+│   └── package.json                 # React 19, Vite 8, React Router 7
+├── docs/
+│   ├── 01_Project_Overview.md       # High-level architecture & project evolution
+│   ├── 02_Research_and_Analysis.md  # Detailed technical research log
+│   ├── 03_Software_Design_Document.md # Exhaustive software design document (Days 1–34)
+│   └── DOCKER.md                    # Detailed Docker Compose operations guide
+├── .dockerignore
+├── .env.example                     # Environment template with sensible defaults
+├── .gitignore
+├── docker-compose.yml               # Multi-container orchestration (db, migration, backend, frontend)
+├── LICENSE                          # License file
+├── README.md                        # Primary project documentation
+└── requirements.txt                 # Backend Python dependencies (at repository root)
+```
 
 ---
 
 # 🛠️ Technology Stack
 
-## 🐍 Backend
-
-| Technology | Purpose |
-|---|---|
-| Python | Core backend language |
-| FastAPI | REST API framework |
-| Pydantic | Request/response validation |
-| SQLAlchemy | ORM |
-| PostgreSQL | Relational database |
-| Alembic | Database migrations |
-| JWT | Authentication |
-| Argon2 | Password hashing |
-
-## 🤖 AI / ML
-
-| Technology | Purpose |
-|---|---|
-| Google Gemini | LLM-powered generation and analysis |
-| Gemini Embeddings | Semantic representations |
-| LangChain Core | AI workflow primitives |
-| Docling | Resume/document parsing |
-| Scikit-learn | Machine learning utilities |
-| NumPy | Numerical operations |
-
-## ⚛️ Frontend
-
-| Technology | Purpose |
-|---|---|
-| React | UI framework |
-| Vite | Frontend build tool |
-| React Router | Client-side routing |
-| CSS | UI styling |
-
-## 🔧 Development Tools
-
-| Tool | Purpose |
-|---|---|
-| Git | Version control |
-| GitHub | Source control |
-| Pytest | Backend testing |
-| Jupyter | Experimentation and documentation |
-| VS Code | Development environment |
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend Framework** | Python 3.12, FastAPI, Uvicorn, Pydantic v2, Pydantic-Settings |
+| **Database & ORM** | PostgreSQL 15, SQLAlchemy 2.0, Alembic, Psycopg 3 |
+| **Authentication & Security** | Argon2-cffi, PyJWT, In-memory Sliding-Window Rate Limiting |
+| **AI / Machine Learning** | Google Gemini (`gemini-2.5-flash`), Gemini Embeddings, Google GenAI SDK |
+| **Document Processing** | Docling (`langchain-docling`, `docling-parse`) |
+| **Cloud Storage** | Cloudflare R2 (S3-compatible) via `boto3` / Local disk fallback |
+| **Frontend Framework** | React 19, Vite 8, React Router 7, Axios, CSS3 Modules |
+| **Observability** | Structured JSON Logging, `contextvars`, Correlation IDs (`X-Request-ID`) |
+| **Testing & CI** | Pytest, Pytest-cov, Node Test Runner, GitHub Actions |
+| **Containerization** | Docker, Docker Compose, Nginx Alpine |
 
 ---
 
-# ⚙️ Local Setup
+# 🐳 Docker Compose Quickstart
 
-## 1️⃣ Clone the Repository
+Hirely includes a full multi-container development environment configured in [`docker-compose.yml`](file:///D:/Hirely/docker-compose.yml). For detailed operational instructions, consult the [Hirely Docker Desktop & Compose Guide](docs/DOCKER.md).
 
-    git clone https://github.com/Musharraf-Bubere/Hirely.git
-    cd Hirely
+### Orchestrated Services
+1. **`db` (`hirely-postgres`)**: PostgreSQL 15 on host port `5433` (mapped to internal `5432` to avoid host conflicts).
+2. **`migration` (`hirely-migration`)**: Runs `alembic upgrade head` automatically on container launch, then exits cleanly.
+3. **`backend` (`hirely-backend`)**: FastAPI application on host port `8000`, starts after migrations succeed.
+4. **`frontend` (`hirely-frontend`)**: Production React SPA served via Nginx on host port `3000`, starts once backend is healthy.
 
-## 2️⃣ Backend Setup
+### Run the Stack
 
-Navigate to the backend:
+```bash
+# 1. Start all services in the background (builds images on first run)
+docker compose up --build -d
 
-    cd backend
+# 2. Verify container statuses (db, backend, and frontend should show healthy)
+docker compose ps
 
-Create a virtual environment:
+# 3. View live logs
+docker compose logs -f backend
 
-    python -m venv venv
+# 4. Stop all services (preserving database volume)
+docker compose down
+```
 
-Activate it on Windows:
+- **Web Application:** [http://localhost:3000](http://localhost:3000)
+- **Interactive Swagger Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Backend Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
 
-    venv\Scripts\activate
+---
 
-Install dependencies:
+# ⚙️ Local Manual Setup
 
-    pip install -r requirements.txt
+If running without Docker, follow these steps:
 
-## 3️⃣ PostgreSQL Setup
+### Prerequisites
+- Python 3.12
+- Node.js 20+ & npm
+- PostgreSQL 15 running locally
 
-Create a PostgreSQL database for Hirely.
+### 1. Clone & Setup Environment
+```bash
+git clone https://github.com/Musharraf-Bubere/Hirely.git
+cd Hirely
 
-Example:
+# Create and activate Python virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
-    Database: hirely
+# Install backend dependencies from ROOT-LEVEL requirements.txt
+pip install -r requirements.txt
+```
 
-Configure the connection using backend environment variables.
+### 2. Configure Environment Variables
+```bash
+# Copy template from repository root
+cp .env.example .env
+```
+Open `.env` and configure your database credentials, `JWT_SECRET_KEY`, and `GEMINI_API_KEY`.
 
-## 4️⃣ Database Migration
+### 3. Run Database Migrations
+Migrations must be executed from the `backend/` directory where `alembic.ini` is located:
+```bash
+cd backend
+alembic upgrade head
+```
 
-Run:
+### 4. Start the FastAPI Backend
+From the `backend/` directory:
+```bash
+uvicorn app.main:app --reload --port 8000
+```
 
-    alembic upgrade head
+### 5. Start the React Frontend
+In a new terminal:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Access the application at [http://localhost:5173](http://localhost:5173).
 
 ---
 
 # 🔑 Environment Variables
 
-Create a `.env` file inside the backend directory (or root directory).
+Configuration is driven by Pydantic settings from `.env`. See [`.env.example`](.env.example) for placeholder values:
 
-Hirely supports two storage backends:
-- **`local` (default)**: Resumes are stored on the local filesystem (ideal for development and Docker volumes).
-- **`r2`**: Resumes are stored in Cloudflare R2 (S3-compatible object storage, required for stateless cloud deployments like Render).
-
-Example `.env`:
-
-```env
-DATABASE_URL=postgresql+psycopg://username:password@localhost:5432/hirely
-JWT_SECRET_KEY=your_jwt_secret_key
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
-GEMINI_API_KEY=your_gemini_api_key
-
-# Resume Storage Backend ('local' or 'r2')
-STORAGE_BACKEND=local
-RESUME_STORAGE_DIR=app/storage/resumes
-
-# Cloudflare R2 (Required only when STORAGE_BACKEND=r2)
-R2_ACCOUNT_ID=your_cloudflare_account_id
-R2_ACCESS_KEY_ID=your_r2_access_key_id
-R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
-R2_BUCKET_NAME=hirely-resumes
-# R2_ENDPOINT_URL is optional; auto-constructed as https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com
-```
-
-> ⚠️ **Never commit `.env` files, passwords, API keys, JWT secrets, or R2 credentials to GitHub.**
-
-For public repositories, refer to [`.env.example`](.env.example) for placeholder values.
+| Variable | Default / Example | Purpose |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | `postgresql+psycopg://...` | PostgreSQL connection string |
+| `JWT_SECRET_KEY` | *(Required in prod)* | Secret key for signing JWT tokens ($\ge 32$ chars) |
+| `JWT_ALGORITHM` | `HS256` | JWT signature algorithm |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access token lifespan |
+| `GEMINI_API_KEY` | *(Required for AI)* | Google AI Gemini API Key |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Primary Gemini model for generation and analysis |
+| `GEMINI_FALLBACK_MODEL` | `gemini-2.0-flash` | Fallback model activated during upstream 503 errors |
+| `STORAGE_BACKEND` | `local` | Resume storage mode: `local` or `r2` |
+| `RESUME_STORAGE_DIR` | `app/storage/resumes` | Filesystem upload directory (when `STORAGE_BACKEND=local`) |
+| `R2_ACCOUNT_ID` | *(Optional)* | Cloudflare R2 Account ID (when `STORAGE_BACKEND=r2`) |
+| `R2_ACCESS_KEY_ID` | *(Optional)* | Cloudflare R2 S3 Access Key |
+| `R2_SECRET_ACCESS_KEY` | *(Optional)* | Cloudflare R2 S3 Secret Access Key |
+| `R2_BUCKET_NAME` | `hirely-resumes` | Cloudflare R2 Bucket Name |
+| `DB_POOL_SIZE` | `5` | SQLAlchemy base connection pool size per worker |
+| `DB_MAX_OVERFLOW` | `10` | SQLAlchemy maximum overflow connections |
+| `CORS_ORIGINS` | `http://localhost:3000,...` | Allowed CORS origins list |
 
 ---
 
-# ▶️ Running the Application
+# 🧪 Testing & Quality Assurance
 
-## 🖥️ Backend
+Hirely maintains an extensive automated testing suite across backend services, AI pipelines, and frontend components.
 
-From the `backend` directory:
-
-    uvicorn app.main:app --reload
-
-FastAPI interactive documentation:
-
-    http://127.0.0.1:8000/docs
-
-ReDoc:
-
-    http://127.0.0.1:8000/redoc
-
-## 🐳 Docker Compose (Development Setup)
-
-Hirely provides a containerized development environment with PostgreSQL and the FastAPI backend:
-
+### Run Backend Unit & Service Tests
+Backend tests must be run from the `backend/` directory to ensure `pytest.ini` properly resolves the Python path:
 ```bash
-# Build and launch PostgreSQL and backend services
-docker compose up -d --build
+cd backend
 
-# Run database migrations inside the backend container
-docker compose exec backend alembic upgrade head
+# Run all deterministic tests (excluding live external API calls)
+pytest -m "not integration and not eval_live" -v
 
-# View service logs
-docker compose logs -f backend
-
-# Stop services
-docker compose down
+# Run full test suite
+pytest
 ```
 
-> **Storage Architecture & Cloudflare R2 Integration**:
-> Hirely provides dual storage backend capabilities:
-> - **Local Disk (`STORAGE_BACKEND=local`)**: Resumes are stored in the local filesystem / Docker volume `resume_uploads` mounted at `/app/backend/uploads` (configured via `RESUME_STORAGE_DIR`). This persists files across container recreation for single-node development without cloud dependencies.
-> - **Cloudflare R2 (`STORAGE_BACKEND=r2`)**: Resumes are stored in Cloudflare R2 object storage (S3-compatible API). On serverless or ephemeral container hosts (such as Render's free tier), local disk changes are discarded on container spin-down. With R2 configured, resume uploads are streamed directly to object storage with UUID keys (`resumes/<uuid>.pdf`), parsed via bounded temporary streaming with guaranteed unlinking, and permanently retained across container lifecycles.
->
-> **Database Connection Pool Budgeting**:
-> Connection pools are configured per worker process. The maximum database connections across the deployment follow the formula:
-> `maximum connections = (pool_size + max_overflow) * worker processes`
-> Default settings (`DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=10`) across 4 Uvicorn workers consume at most `(5 + 10) * 4 = 60` connections. This fits comfortably within PostgreSQL's default `max_connections = 100`, leaving 40 connections reserved for superuser administration (`superuser_reserved_connections = 3`), Alembic schema migrations, and operational headroom.
->
-> **Document Processing & In-Process Parser Limitations**:
-> In-process resume parsing relies on Docling's native C/C++ parser (`docling-parse`). In CPython, synchronous native routines cannot be forcibly killed via Python thread or signal timeouts in-process. While pre-parse checks (10 MB upload limit, magic bytes, ZIP structure, 50 MB uncompressed limit, 1,000 entry bounds) and Docling's `max_num_pages=10` constrain memory and token usage, true deterministic execution timeouts and hard denial-of-service resilience require process isolation (e.g. running parser jobs in dedicated Celery worker subprocesses with OS-level SIGKILL timeouts) before accepting untrusted documents at production scale.
+### Run Offline AI Evaluation Suite
+Evaluates RAG evidence retrieval precision and citation adherence without calling live external APIs:
+```bash
+cd backend
+python -m app.ai.eval.runner --dataset app/ai/eval/datasets/candidate_evidence_eval_v1.json
+```
 
-## 🌐 Frontend
+### Run Frontend Automated Tests
+```bash
+cd frontend
 
-Navigate to the frontend:
+# Run Node test runner for API clients
+npm test
 
-    cd frontend
+# Run ESLint
+npm run lint
 
-Install dependencies:
+# Verify production Vite build
+npm run build
+```
 
-    npm install
-
-Start development server:
-
-    npm run dev
-
-Build production frontend:
-
-    npm run build
+### Continuous Integration (CI)
+GitHub Actions workflow ([`.github/workflows/backend-ci.yml`](.github/workflows/backend-ci.yml)) automatically executes on push and pull requests to `main`:
+1. Spawns a PostgreSQL 15 service container.
+2. Applies Alembic schema migrations.
+3. Runs all deterministic Pytest suites.
+4. Executes the AI Evaluation benchmark runner.
+5. Runs frontend linting, tests, and production build.
 
 ---
 
-# 🧪 Testing
+# 🔌 API Reference
 
-Hirely uses Pytest for backend testing.
+### 🏥 Health Checks
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Lightweight service liveness check |
+| `GET` | `/health/db` | Database connectivity check (`SELECT 1`) |
 
-## Run Complete Backend Tests
+### 🔐 Authentication (`/auth`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/auth/register` | Register new user as `candidate` or `recruiter` |
+| `POST` | `/auth/login` | Authenticate and obtain JWT bearer access token |
+| `GET` | `/auth/me` | Fetch currently authenticated user profile |
 
-    pytest
+### 👤 Candidate (`/candidate`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/candidate/profile` | Create candidate profile |
+| `GET` | `/candidate/profile` | Retrieve candidate profile |
+| `PATCH` | `/candidate/profile` | Update candidate profile details |
+| `POST` | `/candidate/skills` | Add skill to candidate profile |
+| `GET` | `/candidate/skills` | List skills on candidate profile |
+| `DELETE` | `/candidate/skills/{skill_id}` | Remove skill from candidate profile |
+| `POST` | `/candidate/career-coach` | Get AI career guidance and recommendations |
+| `POST` | `/candidate/cover-letter` | Generate targeted cover letter for a job |
+| `POST` | `/candidate/ats-analysis` | Run hybrid deterministic & semantic ATS analysis |
+| `POST` | `/candidate/resume-improvement` | Generate bullet rewrite & skill gap suggestions |
 
-## Run Non-Integration Tests
+### 📄 Resume Management (`/resumes`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/resumes` | Upload resume file (PDF) |
+| `GET` | `/resumes` | List uploaded resumes for current candidate |
+| `PATCH` | `/resumes/{resume_id}/activate` | Set resume as active for job applications |
+| `POST` | `/resumes/{resume_id}/parse` | Parse resume with Docling & sync skills |
+| `DELETE` | `/resumes/{resume_id}` | Delete resume record and associated file |
 
-    pytest -m "not integration and not eval_live"
+### 💼 Jobs & Applications (`/jobs` & `/applications`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/jobs` | List active job postings |
+| `GET` | `/jobs/{job_id}` | Get specific job details |
+| `POST` | `/jobs` | Create new job posting *(Recruiter only)* |
+| `POST` | `/jobs/{job_id}/apply` | Apply to job using active resume *(Candidate only)* |
+| `POST` | `/jobs/{job_id}/skills` | Add required/preferred skill to job *(Recruiter only)* |
+| `GET` | `/jobs/{job_id}/skills` | List skills associated with job |
+| `DELETE` | `/jobs/{job_id}/skills/{skill_id}` | Remove skill from job *(Recruiter only)* |
+| `POST` | `/jobs/{job_id}/match` | Evaluate candidate match against job *(Candidate only)* |
+| `POST` | `/jobs/{job_id}/candidates/match` | Rank applicant pool for job *(Recruiter only)* |
+| `POST` | `/jobs/{job_id}/candidates/match/explain` | Generate AI match explanation *(Recruiter only)* |
+| `GET` | `/applications/me` | List candidate's submitted applications |
+| `GET` | `/applications/recruiter` | List applications received by recruiter |
+| `PATCH` | `/applications/{app_id}/status` | Update application status *(Recruiter only)* |
 
-## Run Deterministic AI Evaluation Suite
-
-    python -m app.ai.eval.runner --dataset app/ai/eval/datasets/candidate_evidence_eval_v1.json
-
-## Run ATS Tests
-
-    pytest tests/test_ats_analyzer.py
-    pytest tests/test_ats_analyzer_api.py
-    pytest tests/test_ats_analyzer_service.py
-
-## Frontend Automated Tests
-
-    cd frontend
-    npm test
-
-## Frontend Lint & Production Build
-
-    npm run lint
-    npm run build
-
-Testing focuses on:
-
-- Authentication
-- Authorization
-- Candidate workflows
-- Recruiter workflows
-- Job management
-- Applications
-- AI services
-- ATS analysis
-- API behavior
-- Regression safety
-
----
-
-# 🔌 API Overview
-
-## 🔐 Authentication
-
-    POST /auth/register
-    POST /auth/login
-    GET  /auth/me
-
-## 👤 Candidate
-
-    POST  /candidate/profile
-    GET   /candidate/profile
-    PATCH /candidate/profile
-
-    POST /candidate/career-coach
-    POST /candidate/cover-letter
-    POST /candidate/ats-analysis
-
-## 💼 Jobs
-
-    GET  /jobs
-    GET  /jobs/{job_id}
-    POST /jobs
-
-## 📄 Applications
-
-    POST /applications
-    GET  /applications
-
-## 🏢 Recruiter
-
-Recruiter APIs support:
-
-- Recruiter profile management
-- Job management
-- Application review
-- Candidate evaluation
-- Application status updates
-
-> API routes may evolve as the platform continues development.
+### 🏢 Recruiter AI & Operations (`/recruiter`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/recruiter/profile` | Retrieve recruiter profile and company details |
+| `GET` | `/recruiter/jobs` | List jobs posted by current recruiter |
+| `POST` | `/recruiter/jobs/{job_id}/description-analysis` | Run AI audit on job description |
+| `POST` | `/recruiter/jobs/{job_id}/candidate-intelligence` | Semantic search & filter across candidates |
+| `POST` | `/recruiter/jobs/{job_id}/candidates/{id}/ask-evidence` | Ask candidate resume questions via RAG |
 
 ---
 
-# 🎨 Frontend
+# 🎨 Frontend Overview
 
-Hirely's frontend is designed around a polished recruitment experience.
+The Hirely frontend is built with **React 19**, **Vite 8**, and **React Router 7**, featuring dedicated, role-protected portals:
 
-## Candidate Experience
-
-    Candidate Dashboard
-            │
-            ├── 👤 Profile
-            ├── 📄 Resume
-            ├── 🔎 Find Jobs
-            ├── 📋 Applications
-            ├── 🧑‍🏫 Career Coach
-            ├── ✍️ Cover Letter
-            └── 📊 ATS Analyzer
-
-## Frontend Design Goals
-
-- Clean UI
-- Responsive layouts
-- Consistent visual language
-- Clear user flows
-- Action-oriented interfaces
-- Useful loading states
-- Useful error states
-- Protected routes
-- Minimal friction between recruitment actions
+- **Public Experience:** Landing page, user registration, user login, and public job board.
+- **Candidate Portal:**
+  - **Dashboard:** Career health summary, active resume status, and quick action cards.
+  - **Profile & Skills:** Headline, bio, location, and interactive skill tag management.
+  - **Resume Center:** Upload, activate, inspect Docling parse outputs, and delete resumes.
+  - **ATS Analyzer:** Detailed breakdown of skill coverage, semantic similarity, and improvement tips.
+  - **Resume Improvement:** Interactive before/after bullet rewrites and gap analysis.
+  - **Cover Letter Studio:** One-click job-grounded cover letter generation with copy/regenerate.
+  - **Career Coach:** Context-aware career advice interface.
+- **Recruiter Portal:**
+  - **Dashboard:** Job metrics, active applicants, and recent activity.
+  - **Job Studio:** Job creation and requirement definition.
+  - **Job Description Analyzer:** Real-time AI recommendations on job posting clarity.
+  - **Candidate Matching & Intelligence:** Ranked candidate pools with score breakdowns.
+  - **Evidence Assistant:** Interactive RAG interface to query candidate resumes with verified quote citations.
 
 ---
 
-# 🧩 Design Principles
+# 🔒 Security & Production Limitations
 
-## 1. 🏗️ Modular Architecture
+Hirely is engineered with production-minded patterns, but operating in a live multi-tenant production environment requires acknowledging current architectural boundaries:
 
-Features are separated into domain modules.
-
-For example:
-
-    ai/
-    ├── career_coach/
-    ├── cover_letter/
-    └── ats_analyzer/
-
-This keeps AI capabilities independently maintainable.
-
-## 2. 🔒 Security First
-
-Authentication and authorization are handled by deterministic backend mechanisms.
-
-AI is never responsible for deciding whether a user is authorized to perform an action.
-
-## 3. 🎯 Grounded AI
-
-AI systems should use only relevant information supplied through structured context.
-
-The model should not invent:
-
-- Skills
-- Experience
-- Qualifications
-- Achievements
-- Candidate history
-
-## 4. 📊 Deterministic Where Possible
-
-Numerical and business-critical calculations should remain deterministic.
-
-For example, ATS scoring is calculated using backend-controlled weights.
-
-## 5. 🧠 Structured AI Output
-
-AI responses are validated using Pydantic schemas wherever structured output is required.
-
-    LLM
-     ↓
-    Structured Response
-     ↓
-    Pydantic Validation
-     ↓
-    Application
-
-## 6. 🧹 Minimum Necessary Context
-
-Only information relevant to the current AI task should be provided to the model.
-
-This improves:
-
-- Relevance
-- Reliability
-- Privacy
-- Maintainability
-- Cost control
-
-## 7. 🚫 No Premature Complexity
-
-Hirely does not introduce advanced AI infrastructure simply because it is available.
-
-RAG, vector databases, agents, orchestration frameworks, and other infrastructure should be introduced only when they solve a genuine product or engineering problem.
-
-## 8. 👨‍💼 Human Review
-
-AI-generated content and recommendations are assistive.
-
-They should support candidates and recruiters rather than being treated as unquestionable sources of truth.
+1. **Process-Local Rate Limiting:** The sliding-window rate limiters ([`app/core/rate_limit.py`](file:///D:/Hirely/backend/app/core/rate_limit.py)) and candidate embedding cache reside in process memory. In multi-worker or clustered deployments, rate limit states are not shared across workers. Clustered deployments require a shared Redis backplane.
+2. **Synchronous Document Parsing:** Docling C++ document parsing runs synchronously within the application worker. While bounded by file size limits (10 MB) and page limits (10 pages), true multi-tenant DoS immunity requires offloading parsing to isolated worker processes (e.g. Celery) with OS-level execution timeouts.
+3. **Process-Local Observability Metrics:** In-memory operational metrics reset on process restarts. Production telemetry should ingest the emitted single-line structured JSON logs via log collectors (e.g. FluentBit, Promtail) into centralized APM systems.
+4. **Secret Hygiene:** Never commit `.env` files or API credentials to source control. In production environments, credentials should be injected via secret managers (e.g. AWS Secrets Manager, HashiCorp Vault).
+5. **Production Readiness Caution:** Healthy Docker containers and passing test suites represent a robust development foundation, but true production readiness requires a managed PostgreSQL cluster, object storage (Cloudflare R2), an external Redis cache, and TLS termination behind an ingress reverse proxy.
 
 ---
 
-# 🗺️ Product Roadmap
+# 🗺️ Future Roadmap
 
-Hirely is being developed incrementally.
-
-## Phase 1 — Core Platform
-
-- Authentication
-- Authorization
-- Candidate profiles
-- Recruiter profiles
-- Skills
-- Jobs
-- Applications
-- Application lifecycle
-- Resume management
-
-## Phase 2 — Candidate AI
-
-- ✅ AI Career Coach
-- ✅ AI Cover Letter Generator
-- ✅ AI Resume ATS Analyzer
-- 🚧 AI Resume Improvement
-
-## Phase 3 — Recruiter AI
-
-- 📋 AI Job Description Analyzer
-- 🧠 Candidate intelligence
-- 📊 Advanced candidate insights
-- 🔎 Semantic candidate discovery
-
-## Phase 4 — RAG & Advanced AI
-
-RAG will be introduced where it provides genuine value.
-
-Potential architecture:
-
-    Knowledge Sources
-            │
-            ▼
-       Document Processing
-            │
-            ▼
-         Chunking
-            │
-            ▼
-        Embeddings
-            │
-            ▼
-       Vector Store
-            │
-            ▼
-        Retrieval
-            │
-            ▼
-     Relevant Context
-            │
-            ▼
-          Gemini
-            │
-            ▼
-    Grounded AI Response
-
-Potential RAG use cases may include:
-
-- Recruitment knowledge
-- Company hiring guidelines
-- Job-related knowledge
-- Career resources
-- Internal recruitment documentation
-- Candidate intelligence context
-
-RAG will not be added merely for technology demonstration. It will be introduced when the application requires retrieval from a growing knowledge base.
-
-## Phase 5 — Advanced AI Engineering
-
-Potential future capabilities:
-
-- Hybrid search
-- Reranking
-- Agentic workflows
-- Advanced orchestration
-- AI evaluation
-- Guardrails
-- Observability
-- Prompt/version management
-- AI quality monitoring
-
-## Phase 6 — Production Engineering
-
-- Docker
-- Production configuration
-- CI/CD
-- Cloud deployment
-- AWS infrastructure
-- Database production setup
-- Logging
-- Monitoring
-- Security hardening
-- Performance optimization
-- Production testing
-
----
-
-# 📈 Engineering Progress
-
-Hirely is being developed incrementally with every feature following a structured engineering workflow.
-
-    Research
-        ↓
-    Understand
-        ↓
-    Design
-        ↓
-    Implement
-        ↓
-    Test
-        ↓
-    Debug
-        ↓
-    Refactor
-        ↓
-    Document
-        ↓
-    Git
-        ↓
-    GitHub
-        ↓
-    LinkedIn
-        ↓
-    Next Feature
-
-## Completed Milestones
-
-### 🔐 Foundation
-
-- Authentication
-- JWT security
-- Argon2 password hashing
-- Role-based authorization
-- Candidate and recruiter separation
-
-### 💼 Recruitment Core
-
-- Candidate profiles
-- Recruiter profiles
-- Job creation
-- Job discovery
-- Applications
-- Application history
-- Application status lifecycle
-
-### 📄 Resume Infrastructure
-
-- Resume management
-- Resume parsing
-- Structured resume data
-- Active resume support
-
-### 🤖 Candidate AI
-
-- AI Career Coach
-- AI Cover Letter Generator
-- AI Resume ATS Analyzer
-
-### 📊 ATS Analyzer Validation
-
-The ATS Analyzer has been tested through:
-
-- Unit tests
-- Service tests
-- API tests
-- Backend regression testing
-- Frontend production build
-- Real Gemini browser integration
-- Re-analysis flow
+- [ ] **Distributed Infrastructure:** Replace in-memory rate limiting and embedding caches with Redis.
+- [ ] **Asynchronous Task Queue:** Move Docling document parsing to Celery / RabbitMQ background workers.
+- [ ] **Dedicated Vector Database:** Integrate pgvector or Pinecone for cross-tenant resume indexing and search.
+- [ ] **Conversational Memory:** Add multi-turn dialogue persistence for Career Coach and Recruiter RAG.
+- [ ] **Cloud CI/CD & Infrastructure as Code:** Terraform / CloudFormation templates for AWS ECS or Render cloud deployment.
 
 ---
 
 # 📚 Documentation
 
-Detailed engineering documentation is maintained inside the `docs/` directory.
+Detailed architectural and operational documentation is maintained in the [`docs/`](docs/) directory:
 
-Documentation covers areas such as:
-
-- Project requirements
-- Software architecture
-- Software design
-- Database design
-- API design
-- AI architecture
-- Feature design
-- Development decisions
-- Testing
-- Future architecture
-
-The primary software design documentation includes:
-
-    docs/03_Software_Design_Document.md
-
----
-
-# 🧪 Quality & Engineering Standards
-
-Hirely follows several engineering practices:
-
-- Modular architecture
-- Separation of concerns
-- Strong request/response validation
-- Automated testing
-- Regression testing
-- Database migrations
-- Secure credential handling
-- Git-based version control
-- Documentation alongside implementation
-- Incremental feature development
-- Deterministic business logic
-- Grounded AI generation
-- Structured AI outputs
-
-The objective is to build Hirely as a **realistic production-oriented system**, not simply a collection of AI demos.
-
----
-
-# 🔭 Future Architecture
-
-The long-term Hirely architecture is expected to evolve toward:
-
-    ┌─────────────────────────────────────────────┐
-    │                 Hirely Platform             │
-    └──────────────────────┬──────────────────────┘
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-              ▼            ▼            ▼
-         Candidate     Recruiter      AI Engine
-         Experience    Experience     Platform
-              │            │            │
-              └────────────┼────────────┘
-                           ▼
-                  Matching Intelligence
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-              ▼            ▼            ▼
-          Embeddings     RAG       AI Agents
-              │            │            │
-              └────────────┼────────────┘
-                           ▼
-                  Grounded Intelligence
-                           │
-                           ▼
-                    Human-in-the-loop
-                           │
-                           ▼
-                   Better Recruitment
-
-Advanced components will be introduced incrementally rather than all at once.
-
----
-
-# 🔒 Security Considerations
-
-Hirely treats security as a backend responsibility.
-
-Security considerations include:
-
-- Secure password hashing
-- JWT authentication
-- Role-based access control
-- Protected routes
-- Input validation
-- Database constraints
-- Environment-based secrets
-- No credentials in source control
-- Controlled AI context
-- Grounded AI prompts
-- Human review for AI-assisted outputs
-
-AI-generated content should never be treated as a security authorization mechanism.
-
----
-
-# ⚠️ Current Project Status
-
-Hirely is an actively developed portfolio project.
-
-The platform already contains a functional recruitment foundation and multiple candidate-facing AI capabilities.
-
-Current status:
-
-    Core Recruitment Platform       ✅
-    Authentication                  ✅
-    Candidate Workflow               ✅
-    Recruiter Workflow               ✅
-    Resume Infrastructure            ✅
-    AI Career Coach                  ✅
-    AI Cover Letter Generator        ✅
-    AI Resume ATS Analyzer           ✅
-    AI Resume Improvement            🚧
-    Recruiter AI                     🚧
-    RAG                              🗺️ Planned
-    Advanced Candidate Intelligence  🗺️ Planned
-    Production Deployment             🗺️ Planned
-
----
-
-# 🤝 Contributing
-
-Hirely is primarily a personal portfolio project, but suggestions and discussions are welcome.
-
-If you would like to contribute:
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Implement the change.
-4. Add or update tests.
-5. Verify the application.
-6. Commit your changes.
-7. Open a pull request.
-
-Example:
-
-    git checkout -b feature/your-feature
-    git add .
-    git commit -m "feat: add your feature"
-    git push origin feature/your-feature
+- [01_Project_Overview.md](docs/01_Project_Overview.md): High-level system overview, dual-sided platform design, and historical evolution.
+- [DOCKER.md](docs/DOCKER.md): Complete guide for multi-container Docker Compose setup, networking, volumes, and troubleshooting.
+- [03_Software_Design_Document.md](docs/03_Software_Design_Document.md): Detailed software design specifications covering system architecture, domain models, RAG implementation, security guardrails, and observability.
+- [02_Research_and_Analysis.md](docs/02_Research_and_Analysis.md): Comprehensive 25,000+ line technical research log covering ATS behavior, career coaching, and design tradeoffs.
 
 ---
 
 # 📄 License
 
-This project is currently maintained as a personal portfolio and learning project.
-
-If a formal open-source license is added, this section will be updated accordingly.
+This repository is maintained as a personal software engineering portfolio project. A formal open-source license has not yet been specified.
 
 ---
 
 # 👨‍💻 Author
 
-## Musharraf Bubère
+**Musharraf Bubère**<br>
+*Data Science & AI Developer*
 
-Data Science & AI Developer focused on:
-
-- Python
-- SQL
-- Machine Learning
-- Deep Learning
-- NLP
-- Generative AI
-- LLM Applications
-- RAG
-- Agentic AI
-- FastAPI
-- Data Analytics
-- AI Engineering
-
-### 🔗 Project Repository
-
-GitHub:
-
-https://github.com/Musharraf-Bubere/Hirely
-
----
-
-# ⭐ Support
-
-If you find this project interesting:
-
-- ⭐ Star the repository
-- 🍴 Fork the project
-- 💡 Share feedback
-- 🐛 Report issues
-- 🤝 Contribute ideas
-
----
-
-# 🚀 Hirely
-
-> **From job discovery to intelligent recruitment — building a smarter hiring ecosystem with AI.**
-
-**Built with Python, FastAPI, React, PostgreSQL, Gemini, and a production-oriented engineering mindset.**
+- **Repository:** [https://github.com/Musharraf-Bubere/Hirely](https://github.com/Musharraf-Bubere/Hirely)
