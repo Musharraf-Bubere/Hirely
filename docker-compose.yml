@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-hirely_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirely_dev_password}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +16,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  migration:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: hirely-migration
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hirely_user}:${POSTGRES_PASSWORD:-hirely_dev_password}@db:5432/${POSTGRES_DB:-hirely_dev}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-docker-jwt-secret-key-min-32-chars}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-dev-dummy-gemini-key}
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
 
   backend:
     build:
@@ -29,7 +45,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-dev-dummy-gemini-key}
       ENVIRONMENT: development
       DEBUG: "true"
-      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      CORS_ORIGINS: '["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"]'
       DB_POOL_SIZE: 5
       DB_MAX_OVERFLOW: 10
       DB_POOL_TIMEOUT: 30
@@ -37,15 +53,43 @@ services:
       DB_POOL_PRE_PING: "true"
       RESUME_STORAGE_DIR: /app/backend/uploads
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     depends_on:
       db:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     volumes:
       # Local volume for uploads during development.
       # Note: Local volume storage is suitable for single-node development only.
-      # Multi-instance production deployments require persistent shared object storage (e.g., S3/GCS).
+      # Multi-instance production deployments require persistent shared object storage (e.g., S3/GCS/R2).
       - resume_uploads:/app/backend/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    container_name: hirely-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/frontend-health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

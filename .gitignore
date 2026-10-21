@@ -35,3 +35,7 @@ backend/app/storage/resumes/
 /app/
 backend/uploads/
 uploads/
+
+# Graphify knowledge graph artifacts
+graphify-out/
+.graphify/
