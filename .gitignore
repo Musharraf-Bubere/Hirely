@@ -39,3 +39,6 @@ uploads/
 # Graphify knowledge graph artifacts
 graphify-out/
 .graphify/
+
+# Private study notes and interview materials (never commit)
+private-notes/
