@@ -1,0 +1,68 @@
+# Graphify Ignore File - Hirely AI Recruitment Platform
+# Excludes sensitive data, candidate personal information, environments, build outputs, and generated caches.
+
+# Secrets, environment variables, credentials, and keys
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Uploaded resumes, documents, and candidate personal data (PII)
+backend/app/storage/resumes/
+backend/app/storage/resumes/**
+backend/uploads/
+backend/uploads/**
+uploads/
+uploads/**
+storage/resumes/
+storage/resumes/**
+*.pdf
+*.docx
+*.doc
+
+# Virtual environments and dependencies
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+node_modules/
+frontend/node_modules/
+site-packages/
+
+# Build outputs, bundler artifacts, and coverage
+dist/
+frontend/dist/
+dist-ssr/
+build/
+htmlcov/
+.coverage
+.coverage.*
+
+# Python, IDE, and test caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
+
+# AI evaluation run reports and benchmark outputs
+backend/app/ai/eval/reports/*.json
+backend/app/ai/eval/reports/**
+
+# Logs and temporary scratch files
+*.log
+day27_staged_diff.txt
+
+# Graphify output and cache directories (prevents self-indexing)
+graphify-out/
+graphify-out/**
+.graphify/
+.graphify/**
